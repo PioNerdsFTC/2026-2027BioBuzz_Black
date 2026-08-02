@@ -2,6 +2,8 @@ package org.pionerds.ftc.teamcode.Scheduler;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -11,7 +13,15 @@ import java.util.function.Consumer;
  */
 public class Scheduler {
 
-    private static final ElapsedTime runtime = new ElapsedTime();
+    private static final ElapsedTime time = new ElapsedTime();
+
+    private static Telemetry telemetry;
+
+//    static {
+//        Scheduler.addTask(new Scheduler.Task((obj) -> {
+//            telemetry = (Telemetry) obj;
+//        }, "init"));
+//    }
 
     /**
      * CONTINUOUS - ran each tick <br/>
@@ -27,7 +37,7 @@ public class Scheduler {
     public static class Task<T> {
         Consumer<T> consumer;
         ExecutionType type;
-        Long timestamp;
+        Double timestamp;
         String event;
 
         /**
@@ -39,14 +49,14 @@ public class Scheduler {
         }
 
         /**
-         * Run a Task once after <b>duration</b> ms
+         * Run a Task once after <b>duration</b> ms, currently seems to be broken
          */
         public Task(Consumer<T> consumer, Integer duration) {
             this.consumer = consumer;
             this.type = ExecutionType.TIMED;
 
-            long now = runtime.now(TimeUnit.MILLISECONDS);
-            this.timestamp = now + (long) duration;
+            double now = time.milliseconds();
+            this.timestamp = now + duration;
         }
 
         /**
@@ -85,24 +95,21 @@ public class Scheduler {
      * Runs per-tick
      */
     public static void tickHook() {
-        Task task;
-
         // Calculating the time now, instead of in the loop.
         // Not sure whether this is necessary or counterproductive.
-        long now = runtime.now(TimeUnit.MILLISECONDS);
 
-        for (int i = 0; i < tasks.size(); i++) {
-            task = tasks.get(i);
+        double now = time.milliseconds();
 
+        for (Task task : tasks) {
             if (task.type == ExecutionType.CONTINUOUS) {
                 task.consumer.accept(null);
+                continue;
             }
 
-            if (task.type == ExecutionType.TIMED && task.timestamp >= now) {
+            if (task.type == ExecutionType.TIMED && task.timestamp <= now) {
                 task.consumer.accept(null);
-
                 tasks.remove(task);
             }
-        }
+        };
     }
 }
