@@ -1,28 +1,21 @@
 package org.pionerds.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Scheduler.Scheduler;
+import org.pionerds.ftc.teamcode.Vision.Vision;
 
-public class DemoOpMode extends LinearOpMode {
+@TeleOp(name="VisionOpMode")
+public class VisionOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
-        Scheduler.addTask(new Scheduler.Task((obj) -> {
-            Telemetry telemetry = (Telemetry) obj;
 
-            telemetry.addLine("sadf");
-            telemetry.update();
-        }, "init"));
+        Vision.init(hardwareMap);
 
         waitForStart();
 
-        Scheduler.trigger("init:telemetry", telemetry);
-        Scheduler.trigger("init", telemetry);
-
-        while (opModeIsActive()) {
-            Scheduler.tickHook();
-        }
     }
 }
