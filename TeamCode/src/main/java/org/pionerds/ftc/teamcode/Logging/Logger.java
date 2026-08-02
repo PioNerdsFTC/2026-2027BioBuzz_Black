@@ -25,7 +25,7 @@ public class Logger {
     /**
      * Log a debug message
      */
-    public void debug(LogType type, String log) {
+    public static void debug(LogType type, String log) {
         Logger.logs.add(log);
         Logger.level.add(LogType.DEBUG);
     }
@@ -33,7 +33,7 @@ public class Logger {
     /**
      * Log a simple log message
      */
-    public void log(LogType type, String log) {
+    public static void log(String log) {
         Logger.logs.add(log);
         Logger.level.add(LogType.INFO);
     }
@@ -41,7 +41,7 @@ public class Logger {
     /**
      * Log a warning message
      */
-    public void warn(LogType type, String log) {
+    public static void warn(String log) {
         Logger.logs.add(log);
         Logger.level.add(LogType.WARNING);
     }
@@ -49,9 +49,8 @@ public class Logger {
     /**
      * Log an error
      */
-    public void error(String log) {
+    public static void error(String log) {
         Logger.logs.add(log);
         Logger.level.add(LogType.ERROR);
     }
-
 }
