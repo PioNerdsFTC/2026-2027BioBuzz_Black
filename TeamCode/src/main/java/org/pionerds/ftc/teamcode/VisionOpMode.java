@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.pionerds.ftc.teamcode.Scheduler.Scheduler;
 import org.pionerds.ftc.teamcode.Vision.Vision;
 
 @TeleOp(name="VisionOpMode")
@@ -16,6 +15,5 @@ public class VisionOpMode extends LinearOpMode {
         Vision.init(hardwareMap);
 
         waitForStart();
-
     }
 }

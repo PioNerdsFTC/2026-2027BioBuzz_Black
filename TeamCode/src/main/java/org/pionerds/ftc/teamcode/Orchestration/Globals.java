@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Globals {
 
-    private static final ArrayList<Global<?>> globals = new ArrayList();
+    private static final ArrayList<Global<?>> globals = new ArrayList<>();
 
     public static class Global<T> {
         public T object;
@@ -16,18 +16,21 @@ public class Globals {
         }
     }
 
-    public static void add(Global global) {
-        globals.add(global);
+    public static <T> void add(String name, T object) {
+        globals.add(new Global<>(name, object));
     }
 
     public static <T> T depend(String name) {
-        Global<?> global;
+        Global<?> global = null;
+
         for (int i = 0; i < globals.size(); i++) {
             global = globals.get(i);
 
-            if (global.name.equals(name)) return (T) global.object;
+            if (global.name.equals(name)) break;
         }
 
-        return null;
+        assert global != null;
+
+        return (T) global;
     }
 }

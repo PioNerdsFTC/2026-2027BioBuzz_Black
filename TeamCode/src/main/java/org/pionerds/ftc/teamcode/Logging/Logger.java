@@ -17,11 +17,18 @@ public class Logger {
     private static Telemetry telemetry;
 
     static {
-//        Scheduler.addTask("init:telemetry", (telemetry) -> {
-//            Logger.telemetry = (Telemetry) telemetry;
-//        });
+        Logger.telemetry = Globals.depend("telemetry");
 
-       Telemetry telemetry1 = Globals.depend("telemetry");
+        Logger.log("test from logger");
+
+//        Scheduler.addTask("init", (obj) -> {
+            telemetry.addLine("hello from Logger");
+//            for (int i = Logger.logs.size(); i >= Logger.logs.size() - 3; i++) {
+//                telemetry.addData(Logger.level.get(i).name(), Logger.logs.get(i));
+//            }
+
+            telemetry.update();
+//        });
     }
 
     public static enum LogType {
