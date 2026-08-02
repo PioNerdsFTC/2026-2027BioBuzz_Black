@@ -34,7 +34,7 @@ public class Scheduler {
         /**
          * Create a Task which is ran every tick.
          */
-        Task(Runnable runnable) {
+        public Task(Runnable runnable) {
             this.runnable = runnable;
             this.type = ExecutionType.CONTINUOUS;
         }
@@ -53,7 +53,7 @@ public class Scheduler {
         /**
          * Run a task after an event is called.
          */
-        Task(Runnable runnable, String event) {
+        public Task(Runnable runnable, String event) {
             this.runnable = runnable;
             this.type = ExecutionType.CONDITIONAL;
             this.event = event;
