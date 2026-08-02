@@ -24,9 +24,8 @@ public class Scheduler {
         TIMED
     }
 
-    //  For now (and testing purposes), only CONTINUOUS is going to be ran
-    public static class Task {
-        Runnable runnable;
+    public static class Task<T> {
+        Consumer<T> consumer;
         ExecutionType type;
         Long timestamp;
         String event;
@@ -34,16 +33,16 @@ public class Scheduler {
         /**
          * Create a Task which is ran every tick.
          */
-        public Task(Runnable runnable) {
-            this.runnable = runnable;
+        public Task(Consumer<T> consumer) {
+            this.consumer = consumer;
             this.type = ExecutionType.CONTINUOUS;
         }
 
         /**
          * Run a Task once after <b>duration</b> ms
          */
-        public Task(Runnable runnable, Integer duration) {
-            this.runnable = runnable;
+        public Task(Consumer<T> consumer, Integer duration) {
+            this.consumer = consumer;
             this.type = ExecutionType.TIMED;
 
             long now = runtime.now(TimeUnit.MILLISECONDS);
@@ -53,14 +52,10 @@ public class Scheduler {
         /**
          * Run a task after an event is called.
          */
-        public Task(Runnable runnable, String event) {
-            this.runnable = runnable;
+        public Task(Consumer<T> consumer, String event) {
+            this.consumer = consumer;
             this.type = ExecutionType.CONDITIONAL;
             this.event = event;
-        }
-
-        public void lambda(String s) {
-            runnable.run();
         }
     }
 
@@ -73,13 +68,13 @@ public class Scheduler {
     /*
      *
      */
-    public static void trigger(String event) {
+    public static void trigger(String event, Object object) {
         Task task;
         for (int i = 0; i < tasks.size(); i++) {
             task = tasks.get(i);
 
             if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
-                task.runnable.run();
+                task.consumer.accept(object);
 
                 tasks.remove(task);
             }
@@ -100,11 +95,11 @@ public class Scheduler {
             task = tasks.get(i);
 
             if (task.type == ExecutionType.CONTINUOUS) {
-                task.runnable.run();
+                task.consumer.accept(null);
             }
 
             if (task.type == ExecutionType.TIMED && task.timestamp >= now) {
-                task.runnable.run();
+                task.consumer.accept(null);
 
                 tasks.remove(task);
             }

@@ -1,6 +1,9 @@
 
 package org.pionerds.ftc.teamcode.Logging;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.pionerds.ftc.teamcode.Scheduler.Scheduler;
+
 import java.util.ArrayList;
 
 /**
@@ -9,6 +12,14 @@ import java.util.ArrayList;
  * Eventually we should be able to configure different levels of reporting (and maybe some way to export logs?)
  */
 public class Logger {
+
+    static Telemetry telemetry;
+
+    static {
+        Scheduler.addTask(new Scheduler.Task((telemetry) -> {
+            Logger.telemetry = (Telemetry) telemetry;
+        }, "init:telemetry"));
+    }
 
     public static enum LogType {
         DEBUG,
