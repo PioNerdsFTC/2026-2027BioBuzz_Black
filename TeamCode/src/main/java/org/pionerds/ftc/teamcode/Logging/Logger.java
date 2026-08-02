@@ -2,7 +2,8 @@
 package org.pionerds.ftc.teamcode.Logging;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.pionerds.ftc.teamcode.Scheduler.Scheduler;
+import org.pionerds.ftc.teamcode.Orchestration.Globals;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
 
@@ -13,12 +14,14 @@ import java.util.ArrayList;
  */
 public class Logger {
 
-    static Telemetry telemetry;
+    private static Telemetry telemetry;
 
     static {
-        Scheduler.addTask("init:telemetry", (telemetry) -> {
-            Logger.telemetry = (Telemetry) telemetry;
-        });
+//        Scheduler.addTask("init:telemetry", (telemetry) -> {
+//            Logger.telemetry = (Telemetry) telemetry;
+//        });
+
+       Telemetry telemetry1 = Globals.depend("telemetry");
     }
 
     public static enum LogType {
