@@ -44,7 +44,7 @@ public class Scheduler {
         /**
          * Run a Task once after <b>duration</b> ms, currently seems to be broken
          */
-        public Task(Consumer<T> consumer, Integer duration) {
+        public Task(Integer duration, Consumer<T> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.TIMED;
 
@@ -55,7 +55,7 @@ public class Scheduler {
         /**
          * Run a task after an event is called.
          */
-        public Task(Consumer<T> consumer, String event) {
+        public Task(String event, Consumer<T> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.CONDITIONAL;
             this.event = event;
