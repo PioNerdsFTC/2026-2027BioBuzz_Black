@@ -10,17 +10,11 @@ import org.pionerds.ftc.teamcode.Scheduler.Scheduler;
 public class DemoOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
-        Scheduler.addTask(new Scheduler.Task((obj) -> {
-            Telemetry telemetry = (Telemetry) obj;
-
-            telemetry.addLine("sadf");
-            telemetry.update();
-        }, "init"));
 
         waitForStart();
 
-//        Scheduler.trigger("init:telemetry", telemetry);
-        Scheduler.trigger("init", telemetry);
+        Scheduler.trigger("init:telemetry", telemetry);
+        Scheduler.trigger("init:hardware-map", hardwareMap);
 
         while (opModeIsActive()) {
             Scheduler.tickHook();

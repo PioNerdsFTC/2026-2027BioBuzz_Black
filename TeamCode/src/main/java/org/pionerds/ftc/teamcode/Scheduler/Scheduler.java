@@ -15,24 +15,17 @@ public class Scheduler {
 
     private static final ElapsedTime time = new ElapsedTime();
 
-    private static Telemetry telemetry;
-
-//    static {
-//        Scheduler.addTask(new Scheduler.Task((obj) -> {
-//            telemetry = (Telemetry) obj;
-//        }, "init"));
-//    }
-
     /**
      * CONTINUOUS - ran each tick <br/>
      * CONDITIONAL - ran when an event is triggered <br/>
      * TIMED - ran after the designated milliseconds have occurred. <br/>
      */
-    public static enum ExecutionType {
+    public enum ExecutionType {
         CONTINUOUS,
         CONDITIONAL,
         TIMED
     }
+
 
     public static class Task<T> {
         Consumer<T> consumer;
@@ -71,12 +64,15 @@ public class Scheduler {
 
     public static ArrayList<Task> tasks = new ArrayList<>();
 
+    /**
+     * Add a task into the task queue.
+     */
     public static void addTask(Task task) {
         Scheduler.tasks.add(task);
     }
 
     /*
-     *
+     * Triggers an <b>event</b> and passes in the selected <b>object</b> to each task.
      */
     public static void trigger(String event, Object object) {
         Task task;
