@@ -67,8 +67,16 @@ public class Scheduler {
     /**
      * Add a task into the task queue.
      */
-    public static void addTask(Task task) {
-        Scheduler.tasks.add(task);
+    public static void addTask(Integer duration, Consumer consumer) {
+        Scheduler.tasks.add(new Task(duration, consumer));
+    }
+
+    public static void addTask(String event, Consumer consumer) {
+        Scheduler.tasks.add(new Task(event, consumer));
+    }
+
+    public static void addTask(Consumer consumer) {
+        Scheduler.tasks.add(new Task(consumer));
     }
 
     /*

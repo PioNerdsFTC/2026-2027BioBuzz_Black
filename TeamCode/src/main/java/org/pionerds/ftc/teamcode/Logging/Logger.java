@@ -16,9 +16,9 @@ public class Logger {
     static Telemetry telemetry;
 
     static {
-        Scheduler.addTask(new Scheduler.Task("init:telemetry", (telemetry) -> {
+        Scheduler.addTask("init:telemetry", (telemetry) -> {
             Logger.telemetry = (Telemetry) telemetry;
-        }));
+        });
     }
 
     public static enum LogType {
