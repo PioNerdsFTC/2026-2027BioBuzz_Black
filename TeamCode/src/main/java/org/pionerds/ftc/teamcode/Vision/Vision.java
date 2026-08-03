@@ -8,24 +8,26 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.apriltag.AprilTagPose;
-import org.pionerds.ftc.teamcode.Scheduler.Scheduler;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
+import org.pionerds.ftc.teamcode.Orchestration.Globals;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Vision {
-    private static final boolean USE_WEBCAM = true;
+    //private static final boolean USE_WEBCAM = true;
     private static AprilTagProcessor aprilTagProcessor;
     private static VisionPortal visionPortal;
 
     // static final int VENDOR_ID_SUNPLUS_INNOVATION_TECHNOLOGY = 0x046d;
     // static final int PRODUCT_ID_ARDUCAM_OV5648 = 0x08e5;
 
-    private HardwareMap hardwareMap;
+    private static HardwareMap hardwareMap;
 
     public static void init(HardwareMap hardwareMap){
-        aprilTag = new AprilTagProcessor.Builder()
+        Vision.hardwareMap = hardwareMap;
+        aprilTagProcessor = new AprilTagProcessor.Builder()
 
                 //.setDrawAxes(false)
                 //.setDrawCubeProjection(false)
@@ -38,26 +40,47 @@ public class Vision {
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
         builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        builder.addProcessor(aprilTag);
+        builder.addProcessor(aprilTagProcessor);
         visionPortal = builder.build();
 
 
 
     }
 
-    ArrayList<DecoratedTag> currentDetections = new ArrayList<DecoratedTag>();
+    ArrayList<DecoratedTag> currentDetections = new ArrayList<>();
+    ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
 
     public AprilTagPoseFtc getTagPosition(int id){
-
+        return currentDetections.get(currentDetectionIDs.indexOf(id)).getPosition();
     }
+
+    // offsets for all April Tags to map them to our coordinate field are below as
+    // x, y, z, yaw, pitch, roll, range, bearing, elevation
+    private double[] tagOffsets = {0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00};
+    private double[] tagScalars = {0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00};
+
 
     public void collectData(){
         ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getFreshDetections();
         if(freshDetections != null){
             for(AprilTagDetection detection : freshDetections){
-                currentDetections.add(new DecoratedTag(detection));
+
+                AprilTagPoseFtc unmodPos = detection.ftcPose;
+
+                AprilTagPoseFtc modifiedPos = new AprilTagPoseFtc(
+                        unmodPos.x * tagScalars[0] + tagOffsets[0],
+                        unmodPos.y * tagScalars[1] + tagOffsets[1],
+                        unmodPos.z * tagScalars[2] + tagOffsets[2],
+                        unmodPos.yaw * tagScalars[3] + tagOffsets[3],
+                        unmodPos.pitch * tagScalars[4] + tagOffsets[4],
+                        unmodPos.roll * tagScalars[5] + tagOffsets[5],
+                        unmodPos.range * tagScalars[6] + tagOffsets[6],
+                        unmodPos.bearing * tagScalars[7] + tagOffsets[7],
+                        unmodPos.elevation * tagScalars[8] + tagOffsets[8]
+                );
+                currentDetections.add(new DecoratedTag(detection,modifiedPos));
+                currentDetectionIDs.add(detection.id);
             }
         }
-        for(aprilTagProcessor.get)
     }
 }
