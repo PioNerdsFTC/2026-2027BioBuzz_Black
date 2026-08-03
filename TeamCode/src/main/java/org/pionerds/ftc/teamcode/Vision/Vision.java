@@ -8,6 +8,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.apriltag.AprilTagPose;
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 
@@ -81,6 +82,9 @@ public class Vision {
                 currentDetections.add(new DecoratedTag(detection,modifiedPos));
                 currentDetectionIDs.add(detection.id);
             }
+            Logger.warn("Cached new Tags!");
+        } else {
+            Logger.debug(Logger.LogType.DEBUG,"Did not cache.");
         }
     }
 }
