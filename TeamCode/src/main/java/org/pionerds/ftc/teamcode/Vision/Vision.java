@@ -48,20 +48,24 @@ public class Vision {
 
     }
 
-    ArrayList<DecoratedTag> currentDetections = new ArrayList<>();
-    ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
+    private static ArrayList<DecoratedTag> currentDetections = new ArrayList<>();
+    private static ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
 
-    public AprilTagPoseFtc getTagPosition(int id){
+    public static AprilTagPoseFtc getTagDisplacement(int id){
         return currentDetections.get(currentDetectionIDs.indexOf(id)).getPosition();
+    }
+
+    public static DecoratedTag[] getCurrentDetections(){
+        return currentDetections.toArray(new DecoratedTag[0]);
     }
 
     // offsets for all April Tags to map them to our coordinate field are below as
     // x, y, z, yaw, pitch, roll, range, bearing, elevation
-    private double[] tagOffsets = {0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00};
-    private double[] tagScalars = {0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00};
+    private static double[] tagOffsets = {0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00};
+    private static double[] tagScalars = {0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00};
 
 
-    public void collectData(){
+    public static void collectData(){
         ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getFreshDetections();
         if(freshDetections != null){
             for(AprilTagDetection detection : freshDetections){
