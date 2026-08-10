@@ -2,7 +2,10 @@ package org.pionerds.ftc.teamcode.Vision;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
@@ -26,16 +29,19 @@ public class Vision {
 
     private static HardwareMap hardwareMap;
 
+    private static Telemetry telemetry;
+    public static void addTelemetry(Telemetry telemetry){Vision.telemetry = telemetry;}
+
     public static void init(HardwareMap hardwareMap){
         Vision.hardwareMap = hardwareMap;
         aprilTagProcessor = new AprilTagProcessor.Builder()
 
-                //.setDrawAxes(false)
-                //.setDrawCubeProjection(false)
-                //.setDrawTagOutline(true)
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagOutline(true)
                 //.setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 //.setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
-                //.setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
 
                 .build();
 
@@ -48,15 +54,16 @@ public class Vision {
 
     }
 
-    private static ArrayList<DecoratedTag> currentDetections = new ArrayList<>();
+    private static ArrayList<AprilTagDetection> currentDetections = new ArrayList<>();
     private static ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
 
-    public static AprilTagPoseFtc getTagDisplacement(int id){
-        return currentDetections.get(currentDetectionIDs.indexOf(id)).getPosition();
+    public static AprilTagPoseFtc getTagFTCPose(int id){
+        if(currentDetectionIDs.indexOf(id) != -1) {return currentDetections.get(currentDetectionIDs.indexOf(id)).ftcPose;}
+        return null;
     }
 
-    public static DecoratedTag[] getCurrentDetections(){
-        return currentDetections.toArray(new DecoratedTag[0]);
+    public static AprilTagDetection[] getCurrentDetections(){
+        return currentDetections.toArray(new AprilTagDetection[0]);
     }
 
     // offsets for all April Tags to map them to our coordinate field are below as
@@ -66,29 +73,23 @@ public class Vision {
 
 
     public static void collectData(){
-        ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getFreshDetections();
-        if(freshDetections != null){
+        ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getDetections();
+        if(aprilTagProcessor.getDetections().size() > 0){
+
+            currentDetections = new ArrayList<>();
+            currentDetectionIDs = new ArrayList<>();
+
             for(AprilTagDetection detection : freshDetections){
+                if(detection.metadata == null) telemetry.addLine("metadata is null");
 
-                AprilTagPoseFtc unmodPos = detection.ftcPose;
-
-                AprilTagPoseFtc modifiedPos = new AprilTagPoseFtc(
-                        unmodPos.x * tagScalars[0] + tagOffsets[0],
-                        unmodPos.y * tagScalars[1] + tagOffsets[1],
-                        unmodPos.z * tagScalars[2] + tagOffsets[2],
-                        unmodPos.yaw * tagScalars[3] + tagOffsets[3],
-                        unmodPos.pitch * tagScalars[4] + tagOffsets[4],
-                        unmodPos.roll * tagScalars[5] + tagOffsets[5],
-                        unmodPos.range * tagScalars[6] + tagOffsets[6],
-                        unmodPos.bearing * tagScalars[7] + tagOffsets[7],
-                        unmodPos.elevation * tagScalars[8] + tagOffsets[8]
-                );
-                currentDetections.add(new DecoratedTag(detection,modifiedPos));
+                currentDetections.add(detection);
                 currentDetectionIDs.add(detection.id);
             }
-            Logger.warn("Cached new Tags!");
+            telemetry.addLine("Cached new Tags!");
+            //Logger.warn("Cached new Tags!");
         } else {
-            Logger.debug(Logger.LogType.DEBUG,"Did not cache.");
+            telemetry.addLine("DID NOT CACHE!");
+            //Logger.debug(Logger.LogType.DEBUG,"Did not cache.");
         }
     }
 }

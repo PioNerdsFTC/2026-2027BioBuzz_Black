@@ -1,5 +1,7 @@
 package org.pionerds.ftc.teamcode.Coordination;
 
+import androidx.annotation.Nullable;
+
 public class PioNerdPosition {
 
     private double x;
@@ -38,26 +40,32 @@ public class PioNerdPosition {
 
     // Setters and Getters ======================
 
+    @Nullable
     public double getX() {
         return x;
     }
 
+    @Nullable
     public double getY() {
         return y;
     }
 
+    @Nullable
     public double getZ() {
         return z;
     }
 
+    @Nullable
     public void setX(double x) {
         this.x = x;
     }
 
+    @Nullable
     public void setY(double y) {
         this.y = y;
     }
 
+    @Nullable
     public void setZ(double z) {
         this.z = z;
     }
