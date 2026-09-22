@@ -9,22 +9,18 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Input.BulkReading;
 
+import java.util.EmptyStackException;
+
 @TeleOp(name="TeleOp")
 public class DemoOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
-
         Globals.add("telemetry", telemetry);
         Globals.add("hardware-map", hardwareMap);
 
+        Scheduler.trigger("init", new Object());
+
         waitForStart();
-
-//        Scheduler.addTask("init", (obj) -> {
-//            telemetry.addLine("");
-//            telemetry.update();
-//        });
-
-//        Scheduler.trigger("init", null);
 
         while (opModeIsActive()) {
             Scheduler.tickHook();

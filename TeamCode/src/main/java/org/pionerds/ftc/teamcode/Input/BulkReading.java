@@ -11,7 +11,7 @@ import java.util.List;
 public class BulkReading {
     private static HardwareMap hardwareMap;
 
-    static {
+    BulkReading() {
         BulkReading.hardwareMap = Globals.depend("hardware-map");
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);

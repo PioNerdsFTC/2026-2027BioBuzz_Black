@@ -14,12 +14,12 @@ public class VisionOpMode extends LinearOpMode {
     public void runOpMode() {
 
         Vision.init(hardwareMap);
-        Vision.addTelemetry(telemetry);
+//        Vision.addTelemetry(telemetry);
         Coordination.addTelemetry(telemetry);
 
         waitForStart();
         while(opModeIsActive()){
-            Vision.collectData();
+//            Vision.collectData();
             double disp = -10000;
 
             /*

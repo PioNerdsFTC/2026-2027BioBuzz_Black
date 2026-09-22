@@ -2,11 +2,18 @@ package org.pionerds.ftc.teamcode.Orchestration;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Logging.Logger;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 /**
     Seems to be popular these days. This is just an attempt at a state machine.
+
+    EVENTS:
+        - prior to init, NOTHING should be done functionally and no IO should ever be called. Only basic classing is valid.
  */
 public class Scheduler {
 
@@ -25,7 +32,7 @@ public class Scheduler {
 
 
     public static class Task<T> {
-        Consumer<T> consumer;
+        Consumer<Object> consumer;
         ExecutionType type;
         Double timestamp;
         String event;
@@ -33,7 +40,7 @@ public class Scheduler {
         /**
          * Create a Task which is ran every tick.
          */
-        public Task(Consumer<T> consumer) {
+        public Task(Consumer<Object> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.CONTINUOUS;
         }
@@ -41,7 +48,7 @@ public class Scheduler {
         /**
          * Run a Task once after <b>duration</b> ms, currently seems to be broken
          */
-        public Task(Integer duration, Consumer<T> consumer) {
+        public Task(Integer duration, Consumer<Object> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.TIMED;
 
@@ -52,42 +59,41 @@ public class Scheduler {
         /**
          * Run a task after an event is called.
          */
-        public Task(String event, Consumer<T> consumer) {
+        public Task(String event, Consumer<Object> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.CONDITIONAL;
             this.event = event;
         }
     }
 
-    public static ArrayList<Task> tasks = new ArrayList<>();
+    public static ArrayList<Task<Object>> tasks = new ArrayList<>();
 
     /**
      * Add a task into the task queue.
      */
-    public static void addTask(Integer duration, Consumer consumer) {
-        Scheduler.tasks.add(new Task(duration, consumer));
+    public static void addTask(Integer duration, Consumer<Object> consumer) {
+        Scheduler.tasks.add(new Task<Object>(duration, consumer));
     }
 
-    public static void addTask(String event, Consumer consumer) {
-        Scheduler.tasks.add(new Task(event, consumer));
+    public static void addTask(String event, Consumer<Object> consumer) {
+        Scheduler.tasks.add(new Task<Object>(event, consumer));
     }
 
-    public static void addTask(Consumer consumer) {
-        Scheduler.tasks.add(new Task(consumer));
+    public static void addTask(Consumer<Object> consumer) {
+        Scheduler.tasks.add(new Task<Object>(consumer));
     }
 
     /*
      * Triggers an <b>event</b> and passes in the selected <b>object</b> to each task.
      */
     public static void trigger(String event, Object object) {
-        Task task;
-        for (int i = 0; i < tasks.size(); i++) {
-            task = tasks.get(i);
+        Iterator<Task<Object>> iterator = tasks.iterator();
+
+        while (iterator.hasNext()) {
+            Task<Object> task = iterator.next();
 
             if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
                 task.consumer.accept(object);
-
-                tasks.remove(task);
             }
         }
     }
@@ -101,7 +107,12 @@ public class Scheduler {
 
         double now = time.milliseconds();
 
-        for (Task task : tasks) {
+        Iterator<Task<Object>> iterator = tasks.iterator();
+
+        while (iterator.hasNext()) {
+
+            Task<Object> task = iterator.next();
+
             if (task.type == ExecutionType.CONTINUOUS) {
                 task.consumer.accept(null);
                 continue;
@@ -109,8 +120,12 @@ public class Scheduler {
 
             if (task.type == ExecutionType.TIMED && task.timestamp <= now) {
                 task.consumer.accept(null);
-                tasks.remove(task);
+                iterator.remove();
             }
         };
     }
+
+    static Logger logger = new Logger();
+    static Globals globals = new Globals();
+    static Hardware hardware = new Hardware();
 }

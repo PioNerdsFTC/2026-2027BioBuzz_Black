@@ -1,6 +1,8 @@
 
 package org.pionerds.ftc.teamcode.Logging;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -14,24 +16,39 @@ import java.util.ArrayList;
  */
 public class Logger {
 
-    private static Telemetry telemetry;
+    private Telemetry telemetry;
 
-    static {
-        Logger.telemetry = Globals.depend("telemetry");
+    public Logger() {
+        Globals.add("logger", this);
 
-        Logger.log("test from logger");
+        Scheduler.addTask("init", (obj) -> {
+            telemetry = Globals.depend("telemetry");
 
-//        Scheduler.addTask("init", (obj) -> {
-            telemetry.addLine("hello from Logger");
-//            for (int i = Logger.logs.size(); i >= Logger.logs.size() - 3; i++) {
-//                telemetry.addData(Logger.level.get(i).name(), Logger.logs.get(i));
+//            telemetry.addLine("adding 1");
+//            telemetry.update();
+
+//            telemetry.addLine("hello from init");
+//            telemetry.update();
+//
+//            for (int i = this.logs.size(); i > 0; i++) {
+//                telemetry.addData(this.level.get(i).name(), this.logs.get(i));
 //            }
+//
+//            telemetry.update();
+        });
 
-            telemetry.update();
-//        });
+        Scheduler.addTask(5000, (obj) -> {
+//            telemetry.addLine("hello from 1 second in the future");
+//            telemetry.update();
+//            for (int i = this.logs.size(); i > 0; i++) {
+//                telemetry.addData(this.level.get(i).name(), this.logs.get(i));
+//            }
+//
+//            telemetry.update();
+        });
     }
 
-    public static enum LogType {
+    public enum LogType {
         DEBUG,
         INFO,
         WARNING,
@@ -40,38 +57,38 @@ public class Logger {
 
     // Unless we have a way to get a tuple type, this is *a* solution.
     // Each index should correspond to the same log in both Arraylists.
-    public static ArrayList<String> logs = new ArrayList<String>();
-    public static ArrayList<LogType> level = new ArrayList<LogType>();
+    public ArrayList<String> logs = new ArrayList<String>();
+    public ArrayList<LogType> level = new ArrayList<LogType>();
 
     /**
      * Log a debug message
      */
-    public static void debug(LogType type, String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.DEBUG);
+    public void debug(LogType type, String log) {
+        logs.add(log);
+        level.add(LogType.DEBUG);
     }
 
     /**
      * Log a simple log message
      */
-    public static void log(String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.INFO);
+    public void log(String log) {
+        logs.add(log);
+        level.add(LogType.INFO);
     }
 
     /**
      * Log a warning message
      */
-    public static void warn(String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.WARNING);
+    public void warn(String log) {
+        logs.add(log);
+        level.add(LogType.WARNING);
     }
 
     /**
      * Log an error
      */
-    public static void error(String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.ERROR);
+    public void error(String log) {
+        logs.add(log);
+        level.add(LogType.ERROR);
     }
 }
