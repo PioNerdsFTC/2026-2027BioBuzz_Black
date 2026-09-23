@@ -7,54 +7,58 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Drivetrain {
+    private int servoCount = 4;
     private DcMotorEx[] motors;
     private CRServoImplEx[] servos;
+    private double[] servoAngles;
 
 
     public Drivetrain() {
-        motors = new DcMotorEx[4];
-        servos = new CRServoImplEx[4];
-        for (CRServoImplEx servo : servos){
-            servo.setDirection(DcMotorSimple.Direction.FORWARD);
+        motors = new DcMotorEx[servoCount];
+        servos = new CRServoImplEx[servoCount];
+        for (int i = 0; i<servoCount; i++){
+            servos[i].setDirection(DcMotorSimple.Direction.FORWARD);
+            servoAngles[i] = 0.00;
         }
     }
 
-    public void driveSwerve(double theta, double magnitude){
+    // Needs implementation once the IMUs are added to the robot
+    private void fetchServoAngles(){
+
+    }
+
+    // Will be called every tick in the op-mode loop
+    public void driveSwerve(double thetaT, double magnitude){
 
 
 
     }
 
-    private void rotateDriveWheelsAbs(){
+    // Physically checks the current rotation of the swervo and moves it accordingly
+    private void rotateSwervoTheta(int servoIndex, double thetaAbs, DcMotorSimple.Direction direction){
+        double tolerance1 = Math.PI/8.00;
+        double tolerance2 = Math.PI/24.00;
 
-    }
-    public void rotateDriveWheelsOffset(double theta){
-        for (CRServoImplEx servo : servos){
-            // update direction
-            if(isForwardFaster(getWheelRotation(),theta))
+        double thetaS = servoAngles[servoIndex];
+        double deltaTheta = thetaAbs-thetaS;
 
-            // check distance
-            if( Math.abs(getWheelRotation()-theta) > 10.00 ) servo.setPower(1.00);
-            if( Math.abs(getWheelRotation()-theta) > 3.00 ) servo.setPower(0.20);
-            if( Math.abs(getWheelRotation()-theta) > 0.50 ) servo.setPower(0.00);
-        }
+        //if(deltaTheta)
     }
 
-    private boolean isForwardFaster(double current, double target) {
-        if (Math.abs(target - current) > Math.abs(180 - target - current)) return false;
-        else return true;
-    }
-    // Not yet implemented. No idea how we're going to accomplish this..
-    private double getWheelRotation(){
-        return 0.00;
-    }
+    private boolean isForwardFaster(double thetaTarget, double thetaServo) {
+        thetaTarget = normalizeAngle(thetaTarget);
+        double thetaOppositeServo = normalizeAngle(thetaServo + Math.PI); // KEEP ABOVE NORMALIZE OVERRIDE OF THETA SERVO ANGLE
+        thetaServo = normalizeAngle(thetaServo);
 
-    private void updateServoDirection(DcMotorSimple.Direction direction){
-        for (CRServoImplEx servo : servos){
-            servo.setDirection(direction);
-        }
+        return ((
+                Math.abs( thetaServo - thetaTarget)
+        ) <= (
+                Math.abs( thetaOppositeServo - thetaTarget)
+        ));
     }
 
-
+    private double normalizeAngle(double theta){
+        return ((theta + (2 * Math.PI)) % (2 * Math.PI));
+    }
 
 }
