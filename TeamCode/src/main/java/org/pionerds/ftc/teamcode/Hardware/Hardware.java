@@ -20,7 +20,7 @@ public final class Hardware {
 //    public Drivetrain drivetrain = new Drivetrain();
 //    public Vision vision = new Vision();
 
-//    public Mapping mapping = new Mapping();
+    public Mapping mapping = new Mapping();
     public Gyro gyro = new Gyro();
 
     public static Telemetry telemetry = null;
@@ -31,16 +31,10 @@ public final class Hardware {
     public boolean continueRunning = true;
 
      public Hardware() {
-         Scheduler.addTask("init", o -> {
+         Scheduler.addTask("init", (o) -> {
              try {
-//                 telemetry = Globals.depend("telemetry");
-//                 HardwareMap hardwareMap = Globals.depend("hardware-map");
-//                 telemetry.addLine("test");
-//                 telemetry.update();
-
-//                 mapping.init(hardwareMap);
-//                 gyro.init(this);
-
+                 HardwareMap hardwareMap = Globals.depend("hardware-map");
+                 mapping.init(hardwareMap);
              } catch (Exception e) {
 //                 telemetry.addLine(e.getMessage());
 //                 telemetry.update();

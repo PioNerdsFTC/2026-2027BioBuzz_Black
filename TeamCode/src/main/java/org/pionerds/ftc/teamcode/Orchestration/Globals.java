@@ -29,12 +29,19 @@ public class Globals {
 
             if (global == null) continue;
 
-            break;
-
+            if (global.name.equals(name)) {
+                break;
+            }
         }
 
         assert global != null;
 
         return global.object;
+    }
+
+    static {
+        Scheduler.addTask("exit", (obj) -> {
+            while (!globals.isEmpty()) globals.remove(0);
+        });
     }
 }

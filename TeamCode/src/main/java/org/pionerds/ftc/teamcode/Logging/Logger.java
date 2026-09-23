@@ -1,8 +1,6 @@
 
 package org.pionerds.ftc.teamcode.Logging;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -19,10 +17,12 @@ public class Logger {
     private Telemetry telemetry;
 
     public Logger() {
-        Globals.add("logger", this);
-
         Scheduler.addTask("init", (obj) -> {
             telemetry = Globals.depend("telemetry");
+            telemetry.setAutoClear(false);
+
+            telemetry.addLine("Starting...");
+            telemetry.update();
 
 //            telemetry.addLine("adding 1");
 //            telemetry.update();
@@ -35,17 +35,28 @@ public class Logger {
 //            }
 //
 //            telemetry.update();
-        });
-
-        Scheduler.addTask(5000, (obj) -> {
-//            telemetry.addLine("hello from 1 second in the future");
-//            telemetry.update();
+            Scheduler.addTask(5000, (obj2) -> {
+                telemetry.addLine("hello from 5 second in the future");
+                telemetry.update();
 //            for (int i = this.logs.size(); i > 0; i++) {
 //                telemetry.addData(this.level.get(i).name(), this.logs.get(i));
 //            }
 //
 //            telemetry.update();
+            });
+
+            Scheduler.addTask("log:new:info", (info) -> {
+                logs.add((String) info);
+                level.add(LogType.INFO);
+
+                telemetry.update();
+            });
         });
+
+        Scheduler.addTask("exit", (obj) -> {
+            telemetry.clear();
+        });
+
     }
 
     public enum LogType {
@@ -71,9 +82,8 @@ public class Logger {
     /**
      * Log a simple log message
      */
-    public void log(String log) {
-        logs.add(log);
-        level.add(LogType.INFO);
+    public static void log(String log) {
+        Scheduler.trigger("log:new:info", log);
     }
 
     /**
