@@ -24,30 +24,28 @@ public class Logger {
             telemetry.addLine("Starting...");
             telemetry.update();
 
-//            telemetry.addLine("adding 1");
-//            telemetry.update();
-
-//            telemetry.addLine("hello from init");
-//            telemetry.update();
-//
-//            for (int i = this.logs.size(); i > 0; i++) {
-//                telemetry.addData(this.level.get(i).name(), this.logs.get(i));
-//            }
-//
-//            telemetry.update();
             Scheduler.addTask(5000, (obj2) -> {
                 telemetry.addLine("hello from 5 second in the future");
                 telemetry.update();
-//            for (int i = this.logs.size(); i > 0; i++) {
-//                telemetry.addData(this.level.get(i).name(), this.logs.get(i));
-//            }
-//
-//            telemetry.update();
             });
 
             Scheduler.addTask("log:new:info", (info) -> {
                 logs.add((String) info);
                 level.add(LogType.INFO);
+
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:new:warn", (info) -> {
+                logs.add((String) info);
+                level.add(LogType.WARNING);
+
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:new:error", (info) -> {
+                logs.add((String) info);
+                level.add(LogType.ERROR);
 
                 telemetry.update();
             });
@@ -68,8 +66,8 @@ public class Logger {
 
     // Unless we have a way to get a tuple type, this is *a* solution.
     // Each index should correspond to the same log in both Arraylists.
-    public ArrayList<String> logs = new ArrayList<String>();
-    public ArrayList<LogType> level = new ArrayList<LogType>();
+    public ArrayList<String> logs = new ArrayList<>();
+    public ArrayList<LogType> level = new ArrayList<>();
 
     /**
      * Log a debug message
@@ -89,16 +87,14 @@ public class Logger {
     /**
      * Log a warning message
      */
-    public void warn(String log) {
-        logs.add(log);
-        level.add(LogType.WARNING);
+    public static void warn(String log) {
+        Scheduler.trigger("log:new:warn", log);
     }
 
     /**
      * Log an error
      */
-    public void error(String log) {
-        logs.add(log);
-        level.add(LogType.ERROR);
+    public static void error(String log) {
+        Scheduler.trigger("log:new:error", log);
     }
 }
