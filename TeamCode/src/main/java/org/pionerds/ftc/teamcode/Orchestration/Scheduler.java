@@ -13,14 +13,38 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
-    Seems to be popular these days. This is just an attempt at a state machine.
+    This is the core Scheduler of the Pionerds BioBuzz Robot.
+    It governs the running of events, timers, and continuous functions in a central location.
 
-    EVENTS:
-        - prior to init, NOTHING should be done functionally and no IO should ever be called. Only basic classing is valid.
+    <h2>Events</h2>
+    <ul>
+        <li> Prior to init, NOTHING should be done functionally and no IO should ever be called. Only basic classing is valid. </li>
+        <li> TIMED events are cleared after they are called. They additionally are removed prior to a start. This is to prevent any weird race-conditions when the time resets</li>
+        <li> CONTINUOUS and CONDITIONAL are not cleared as they are useful in resurrecting state after a stop (harnessing static)</li>
+    </ul>
+
+    <h2>Resurrecting state: Guidelines</h2>
+    <p>
+        <ul>
+            <li> Use the init function to begin proper initialization: Globals and other core initialization is done prior to this event being triggered </li>
+            <li> Attempt to avoid any work done outside a Scheduler init function, as static blocks will silently crash unless manually dealt with </li>
+            <li> If your Subsystem requires teardown prior to a stop, you can implement this in an 'exit' event </li>
+            <li> <b>Use a static block. </b> Any work done in a constructor will be recreated after a restart. As such, an 'init' event may duplicate causing mayhem</li>
+        </ul>
+    </p>
+
+    <h2>Potential Issues</h2>
+    <p>
+        <ul>
+            <li>Be wary of typing. We don't manually check type information (as Java strips types after compilation)</li>
+        </ul>
+    </p>
  */
+
 public class Scheduler {
 
     public static final ElapsedTime time = new ElapsedTime();
+    private static boolean iterating = false;
 
     /**
      * CONTINUOUS - ran each tick <br/>
@@ -33,9 +57,8 @@ public class Scheduler {
         TIMED
     }
 
-
     public static class Task<T> {
-        Consumer<Object> consumer;
+        Consumer<T> consumer;
         ExecutionType type;
         Double timestamp;
         String event;
@@ -45,15 +68,15 @@ public class Scheduler {
         /**
          * Create a Task which is ran every tick.
          */
-        public Task(Consumer<Object> consumer) {
+        public Task(Consumer<T> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.CONTINUOUS;
         }
 
         /**
-         * Run a Task once after <b>duration</b> ms, currently seems to be broken
+         * Run a Task once after <b>duration</b> ms
          */
-        public Task(Integer duration, Consumer<Object> consumer) {
+        public Task(Integer duration, Consumer<T> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.TIMED;
 
@@ -64,83 +87,136 @@ public class Scheduler {
         /**
          * Run a task after an event is called.
          */
-        public Task(String event, Consumer<Object> consumer) {
+        public Task(String event, Consumer<T> consumer) {
             this.consumer = consumer;
             this.type = ExecutionType.CONDITIONAL;
             this.event = event;
         }
     }
 
-    public static ArrayList<Task<Object>> tasks = new ArrayList<>();
+    public static ArrayList<Task<?>> tasks = new ArrayList<>();
+    public static ArrayList<Task<?>> iteratingTasks = new ArrayList<>();
+    public static ArrayList<UUID> removedTasks = new ArrayList<>();
 
     /**
-     * Add a task into the task queue.
+     * Add a timed task. Executes after the specified duration
      */
-    public static void addTask(Integer duration, Consumer<Object> consumer) {
-        Scheduler.tasks.add(new Task<Object>(duration, consumer));
+    public static <T> void addTask(Integer duration, Consumer<T> consumer) {
+        if (iterating) {
+            Scheduler.iteratingTasks.add(new Task<>(duration, consumer));
+            return;
+        }
+        Scheduler.tasks.add(new Task<>(duration, consumer));
     }
 
-    public static void addTask(String event, Consumer<Object> consumer) {
-        Scheduler.tasks.add(new Task<Object>(event, consumer));
+    /**
+     * Add a conditional task. Executes when an event trigger is called by the same event name
+     */
+    public static <T> void addTask(String event, Consumer<T> consumer) {
+        if (iterating) {
+            Scheduler.iteratingTasks.add(new Task<>(event, consumer));
+            return;
+        }
+        Scheduler.tasks.add(new Task<>(event, consumer));
     }
 
     /**
      * Run a task for every tick of the Scheduler
-     * @param consumer lambda to run
      */
-    public static void addTask(Consumer<Object> consumer) {
-        Scheduler.tasks.add(new Task<Object>(consumer));
+    public static <T> void addTask(Consumer<T> consumer) {
+        if (iterating) {
+            Scheduler.iteratingTasks.add(new Task<>(consumer));
+            return;
+        }
+        Scheduler.tasks.add(new Task<>(consumer));
     }
 
-    public static void removeTask(UUID id) {
+    /**
+     * Implementation note: on the chance of a nested removeTask in a Scheduler event, this will return true, even if a task has not yet been removed. (Which will occur once all the events have been triggered)
+     * @param id
+     * @return boolean
+     */
+    public static boolean removeTask(UUID id) {
+        if (iterating) {
+            removedTasks.add(id);
+            return true;
+        }
+
         int len = tasks.size();
 
         for (int i = 0; i < len; i++) {
-            Task<Object> current = tasks.get(i);
+            Task<?> current = tasks.get(i);
 
             if (current.id.equals(id)) {
                 tasks.remove(current);
-                return;
+                return true;
             }
         }
+
+        for (int i = 0; i < iteratingTasks.size(); i++) {
+            Task<?> current = iteratingTasks.get(i);
+
+            if (current.id.equals(id)) {
+                iteratingTasks.remove(current);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /*
-     * Triggers an <b>event</b> and passes in the selected <b>object</b> to each task.
+     * Triggers an <b>event</b> and passes in the selected <b>value</b> to each task.
      */
-    public static void trigger(String event, Object object) {
-        for (int i = 0; i < tasks.size(); i++) {
-            Task<Object> task = tasks.get(i);
+    public static <T> void trigger(String event, T val) {
+        iterating = true;
 
-            if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
-                try {
-                    task.consumer.accept(object);
-                } catch(Exception e) {
-                    Logger.error(e.getMessage());
-                }
-            }
+        for (int i = 0; i < tasks.size(); i++) {
+           Task<T> task = (Task<T>) tasks.get(i);
+
+           if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
+               try {
+                   task.consumer.accept(val);
+               } catch(Exception e) {
+                   Logger.error(Log.getStackTraceString(e));
+               }
+           }
+
+           iterating = true;
+        }
+
+        iterating = false;
+
+        flushQueues();
+    }
+
+    public static void flushQueues() {
+        Scheduler.tasks.addAll(Scheduler.iteratingTasks);
+        Scheduler.iteratingTasks.clear();
+
+        while (!Scheduler.removedTasks.isEmpty()) {
+            removeTask(Scheduler.removedTasks.remove(0));
         }
     }
 
     /**
-     * Runs per-tick
+     * Triggered per-tick in the OpModes
      */
     public static void tickHook() {
-        // Calculating the time now, instead of in the loop.
-        // Not sure whether this is necessary or counterproductive.
-
         double now = time.milliseconds();
 
-        Iterator<Task<Object>> iterator = tasks.iterator();
+        Iterator<Task<?>> iterator = tasks.iterator();
+
+        iterating = true;
 
         while (iterator.hasNext()) {
-            Task<Object> task = iterator.next();
+            Task<?> task = iterator.next();
 
             if (task.type == ExecutionType.CONTINUOUS) {
                 try {
                     task.consumer.accept(null);
                 } catch(Exception e) {
-                    Logger.error(e.getMessage());
+                    Logger.error(Log.getStackTraceString(e));
                 }
                 continue;
             }
@@ -149,12 +225,30 @@ public class Scheduler {
                 try {
                     task.consumer.accept(null);
                 } catch(Exception e) {
-                    Logger.error(e.getMessage());
+                    Logger.error(Log.getStackTraceString(e));
                 }
                 iterator.remove();
             }
-        };
+
+            iterating = true;
+        }
+
+        iterating = false;
+
+        flushQueues();
     }
+
+    // --- DO NOT DELETE UNLESS YOU HAVE A VERY VALID REASON --- //
+
+    /*
+        ===
+        These initialize every subsystem of the robot.
+
+        You should begin executing code in a static block
+        HOWEVER, make sure to begin real init after the init event is triggered
+
+        ===
+     */
 
     static Logger logger = new Logger();
     static Globals globals = new Globals();
@@ -162,6 +256,7 @@ public class Scheduler {
 
     static {
         Scheduler.addTask("pre-init", (obj) -> {
+            tasks.removeIf(task -> task.type == ExecutionType.TIMED);
             time.reset();
         });
     }
