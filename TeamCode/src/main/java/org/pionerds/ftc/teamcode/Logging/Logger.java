@@ -14,48 +14,7 @@ import java.util.ArrayList;
  */
 public class Logger {
 
-    private Telemetry telemetry;
-
-    public Logger() {
-        Scheduler.addTask("init", (obj) -> {
-            telemetry = Globals.depend("telemetry");
-            telemetry.setAutoClear(false);
-
-            telemetry.addLine("Starting...");
-            telemetry.update();
-
-            Scheduler.addTask(5000, (obj2) -> {
-                telemetry.addLine("hello from 5 second in the future");
-                telemetry.update();
-            });
-
-            Scheduler.addTask("log:new:info", (info) -> {
-                logs.add((String) info);
-                level.add(LogType.INFO);
-
-                telemetry.update();
-            });
-
-            Scheduler.addTask("log:new:warn", (info) -> {
-                logs.add((String) info);
-                level.add(LogType.WARNING);
-
-                telemetry.update();
-            });
-
-            Scheduler.addTask("log:new:error", (info) -> {
-                logs.add((String) info);
-                level.add(LogType.ERROR);
-
-                telemetry.update();
-            });
-        });
-
-        Scheduler.addTask("exit", (obj) -> {
-            telemetry.clear();
-        });
-
-    }
+    private static Telemetry telemetry;
 
     public enum LogType {
         DEBUG,
@@ -66,8 +25,8 @@ public class Logger {
 
     // Unless we have a way to get a tuple type, this is *a* solution.
     // Each index should correspond to the same log in both Arraylists.
-    public ArrayList<String> logs = new ArrayList<>();
-    public ArrayList<LogType> level = new ArrayList<>();
+    public static ArrayList<String> logs = new ArrayList<>();
+    public static ArrayList<LogType> level = new ArrayList<>();
 
     /**
      * Log a debug message
@@ -96,5 +55,57 @@ public class Logger {
      */
     public static void error(String log) {
         Scheduler.trigger("log:new:error", log);
+    }
+
+    public static void clear() {
+        Scheduler.trigger("log:clear", null);
+    }
+
+
+
+    static {
+        Scheduler.addTask("init", (obj) -> {
+            telemetry = Globals.depend("telemetry");
+            telemetry.setAutoClear(false);
+
+            telemetry.addLine("Initialized");
+            telemetry.update();
+
+            Scheduler.addTask("log:new:info", (info) -> {
+                Logger.logs.add((String) info);
+                Logger.level.add(LogType.INFO);
+
+                telemetry.addLine((String) info);
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:new:warn", (info) -> {
+                logs.add((String) info);
+                level.add(LogType.WARNING);
+
+                telemetry.addLine((String) info);
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:new:error", (info) -> {
+                logs.add((String) info);
+                level.add(LogType.ERROR);
+
+                telemetry.addLine((String) info);
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:clear", (info) -> {
+                while (!logs.isEmpty()) logs.remove(0);
+
+                telemetry.clear();
+                telemetry.update();
+            });
+        });
+
+        Scheduler.addTask("exit", (obj) -> {
+            telemetry.clear();
+        });
+
     }
 }

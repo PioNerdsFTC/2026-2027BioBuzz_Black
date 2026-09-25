@@ -1,20 +1,19 @@
 package org.pionerds.ftc.teamcode;
 
-import android.util.Log;
-
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
+import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
-import org.pionerds.ftc.teamcode.Logging.Logger;
-import org.pionerds.ftc.teamcode.Input.BulkReading;
-
-@TeleOp(name="TeleOp")
-public class DemoOpMode extends LinearOpMode {
+@Autonomous(name="Auto")
+public class Auto extends LinearOpMode {
     @Override
     public void runOpMode() {
+        Parameters.currentOperatingEnvironment = "AUTO";
+        Parameters.running = false;
+
         Scheduler.trigger("pre-init", null);
 
         Globals.add("telemetry", telemetry);
@@ -27,10 +26,13 @@ public class DemoOpMode extends LinearOpMode {
             idle();
         }
 
+        Parameters.running = true;
+
         while (opModeIsActive()) {
             Scheduler.tickHook();
         }
 
+        Parameters.running = false;
         Scheduler.trigger("exit", null);
     }
 }

@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 
 /**
@@ -23,7 +24,6 @@ public class Mapping {
     /**
      * The hardware object.
      */
-    private Hardware hardware;
     private HardwareMap map = null;
 
     /**
@@ -33,9 +33,6 @@ public class Mapping {
 
     public void init(HardwareMap map) {
         this.map = map;
-        this.hardware = Globals.depend("hardware");
-
-//        Globals.add("map", this);
     }
 
     /**
@@ -101,9 +98,7 @@ public class Mapping {
         try {
             imu = this.map.get(IMU.class, "imu");
         } catch (Exception e) {
-            Log.e("Error", "Cannot map IMU, is it named 'imu'?");
-
-//            if (!Environment.competing) hardware.continueRunning = false;
+            Logger.error("Cannot map IMU, is it named 'imu'?");
         }
 
         return imu;

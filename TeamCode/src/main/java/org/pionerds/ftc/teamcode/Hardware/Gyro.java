@@ -15,7 +15,9 @@ public class Gyro {
     public void init(Hardware hardware) {
         this.hardware = hardware;
 
-//        gyro = this.hardware.mapping.getIMU();
+        gyro = Hardware.mapping.getIMU();
+
+
         params = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
@@ -46,8 +48,10 @@ public class Gyro {
      * @return double array containing [yaw, pitch, roll]
      */
     public double[] getAngles() {
+        double[] result = { 0.0, 0.0, 0.0 };
 
-        double[] result = {0.0, 0.0, 0.0};
+        if (gyro == null) return result;
+
         YawPitchRollAngles newGyroData = gyro.getRobotYawPitchRollAngles();
 //        double[] oldGyroData = DataStorage.getAllStoredAngles();
 

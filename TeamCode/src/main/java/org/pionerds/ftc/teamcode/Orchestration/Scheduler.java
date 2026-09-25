@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  */
 public class Scheduler {
 
-    private static final ElapsedTime time = new ElapsedTime();
+    public static final ElapsedTime time = new ElapsedTime();
 
     /**
      * CONTINUOUS - ran each tick <br/>
@@ -84,6 +84,10 @@ public class Scheduler {
         Scheduler.tasks.add(new Task<Object>(event, consumer));
     }
 
+    /**
+     * Run a task for every tick of the Scheduler
+     * @param consumer lambda to run
+     */
     public static void addTask(Consumer<Object> consumer) {
         Scheduler.tasks.add(new Task<Object>(consumer));
     }
@@ -109,7 +113,11 @@ public class Scheduler {
             Task<Object> task = tasks.get(i);
 
             if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
-                task.consumer.accept(object);
+                try {
+                    task.consumer.accept(object);
+                } catch(Exception e) {
+                    Logger.error(e.getMessage());
+                }
             }
         }
     }
@@ -129,12 +137,20 @@ public class Scheduler {
             Task<Object> task = iterator.next();
 
             if (task.type == ExecutionType.CONTINUOUS) {
-                task.consumer.accept(null);
+                try {
+                    task.consumer.accept(null);
+                } catch(Exception e) {
+                    Logger.error(e.getMessage());
+                }
                 continue;
             }
 
             if (task.type == ExecutionType.TIMED && task.timestamp <= now) {
-                task.consumer.accept(null);
+                try {
+                    task.consumer.accept(null);
+                } catch(Exception e) {
+                    Logger.error(e.getMessage());
+                }
                 iterator.remove();
             }
         };
