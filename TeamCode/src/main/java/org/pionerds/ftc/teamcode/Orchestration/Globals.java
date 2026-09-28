@@ -1,6 +1,7 @@
 package org.pionerds.ftc.teamcode.Orchestration;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Globals {
 
@@ -34,9 +35,7 @@ public class Globals {
             }
         }
 
-        assert global != null;
-
-        return global.object;
+        return Objects.requireNonNull(global).object;
     }
 
     static {

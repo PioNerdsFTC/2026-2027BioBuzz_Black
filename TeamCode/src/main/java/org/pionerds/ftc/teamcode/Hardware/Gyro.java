@@ -7,16 +7,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 public class Gyro {
 
-    Hardware hardware = null;
-
     private IMU gyro = null;
     private IMU.Parameters params;
 
-    public void init(Hardware hardware) {
-        this.hardware = hardware;
-
+    public void init() {
         gyro = Hardware.mapping.getIMU();
-
 
         params = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -55,9 +50,9 @@ public class Gyro {
         YawPitchRollAngles newGyroData = gyro.getRobotYawPitchRollAngles();
 //        double[] oldGyroData = DataStorage.getAllStoredAngles();
 
-        result[0] = /* oldGyroData[0] */ + newGyroData.getYaw();
-        result[1] = /* oldGyroData[1] */ + newGyroData.getPitch();
-        result[2] = /* oldGyroData[2] */ + newGyroData.getRoll();
+        result[0] = /* oldGyroData[0] + */ newGyroData.getYaw();
+        result[1] = /* oldGyroData[1] + */ newGyroData.getPitch();
+        result[2] = /* oldGyroData[2] + */ newGyroData.getRoll();
 
         return result;
     }

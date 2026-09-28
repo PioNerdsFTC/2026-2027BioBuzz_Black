@@ -28,7 +28,7 @@ public class Tele extends LinearOpMode {
 
         Parameters.running = true;
 
-        while (opModeIsActive()) {
+        while (opModeIsActive() && Parameters.running) {
             Scheduler.tickHook();
         }
 

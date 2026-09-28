@@ -1,8 +1,11 @@
 
 package org.pionerds.ftc.teamcode.Logging;
 
+import android.util.Log;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
+import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
@@ -57,6 +60,10 @@ public class Logger {
         Scheduler.trigger("log:new:error", log);
     }
 
+    public static void error(Exception e) {
+        Scheduler.trigger("log:new:error", Log.getStackTraceString(e));
+    }
+
     public static void clear() {
         Scheduler.trigger("log:clear", null);
     }
@@ -75,6 +82,8 @@ public class Logger {
                 Logger.logs.add((String) info);
                 Logger.level.add(LogType.INFO);
 
+                Log.e("PioNerds-runtime", (String) info);
+
                 telemetry.addLine((String) info);
                 telemetry.update();
             });
@@ -83,6 +92,8 @@ public class Logger {
                 logs.add((String) info);
                 level.add(LogType.WARNING);
 
+                Log.w("PioNerds-runtime", (String) info);
+
                 telemetry.addLine((String) info);
                 telemetry.update();
             });
@@ -90,6 +101,12 @@ public class Logger {
             Scheduler.addTask("log:new:error", (info) -> {
                 logs.add((String) info);
                 level.add(LogType.ERROR);
+
+                if (Parameters.exitOnError) {
+                    Parameters.running = false;
+                }
+
+                Log.e("Error", (String) info);
 
                 telemetry.addLine((String) info);
                 telemetry.update();

@@ -56,9 +56,7 @@ public class Mapping {
             motor.setZeroPowerBehavior(motorZeroPowerBehavior);
             motor.getMotorType().setGearing(gearRatio);
         } catch (Exception e) {
-            Log.e("Error", "Cannot map motor: " + motorName);
-
-//            if (!Environment.competing) hardware.continueRunning = false;
+            Logger.error("Cannot map motor: " + motorName);
         }
 
         return motor;
@@ -76,14 +74,14 @@ public class Mapping {
             CRServoImplEx.Direction servoDirection
     ) {
         CRServoImplEx continuousServo = null;
+
         try {
             continuousServo = this.map.get(CRServoImplEx.class, servoName);
             continuousServo.setDirection(servoDirection);
         } catch (Exception e) {
-            Log.e("Error", "Cannot map continuous servo: " + servoName);
-
-//            if (!Environment.competing) hardware.continueRunning = false;
+            Logger.error("Cannot map continuous servo: " + servoName);
         }
+
         return continuousServo;
     }
 
@@ -116,12 +114,7 @@ public class Mapping {
         try {
             servoMotor = this.map.get(Servo.class, servoMotorName);
         } catch (Exception e) {
-            Log.e(
-                    "Error",
-                    "Cannot map servo motor with name " + servoMotorName
-            );
-
-//            if (!Environment.competing) hardware.continueRunning = false;
+            Logger.error("Cannot map servo motor with name " + servoMotorName);
         }
 
         return servoMotor;
@@ -139,9 +132,7 @@ public class Mapping {
         try {
             webcam = this.map.get(WebcamName.class, webcamName);
         } catch (Exception e) {
-            Log.e("Error", "Cannot map servo motor with name " + webcam);
-
-//            if (!Environment.competing) hardware.continueRunning = false;
+            Logger.error("Cannot map servo motor with name " + webcamName);
         }
 
         return webcam;
