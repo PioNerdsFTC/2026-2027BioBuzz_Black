@@ -126,7 +126,7 @@ public class Mapping {
      * @param webcamName The name of the webcam
      * @return The webcam
      */
-    CameraName getWebcam(String webcamName) {
+    public CameraName getWebcam(String webcamName) {
         CameraName webcam = null;
 
         try {

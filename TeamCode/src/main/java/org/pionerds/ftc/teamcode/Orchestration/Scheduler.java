@@ -4,8 +4,10 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Vision.Vision;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,7 +46,7 @@ import java.util.function.Consumer;
 public class Scheduler {
 
     public static final ElapsedTime time = new ElapsedTime();
-    private static boolean iterating = false;
+    private static int iterateDepth = 0;
 
     /**
      * CONTINUOUS - ran each tick <br/>
@@ -102,7 +104,7 @@ public class Scheduler {
      * Add a timed task. Executes after the specified duration
      */
     public static <T> void addTask(Integer duration, Consumer<T> consumer) {
-        if (iterating) {
+        if (iterateDepth > 0) {
             Scheduler.iteratingTasks.add(new Task<>(duration, consumer));
             return;
         }
@@ -113,7 +115,7 @@ public class Scheduler {
      * Add a conditional task. Executes when an event trigger is called by the same event name
      */
     public static <T> void addTask(String event, Consumer<T> consumer) {
-        if (iterating) {
+        if (iterateDepth > 0) {
             Scheduler.iteratingTasks.add(new Task<>(event, consumer));
             return;
         }
@@ -124,7 +126,7 @@ public class Scheduler {
      * Run a task for every tick of the Scheduler
      */
     public static <T> void addTask(Consumer<T> consumer) {
-        if (iterating) {
+        if (iterateDepth > 0) {
             Scheduler.iteratingTasks.add(new Task<>(consumer));
             return;
         }
@@ -137,7 +139,7 @@ public class Scheduler {
      * @return boolean
      */
     public static boolean removeTask(UUID id) {
-        if (iterating) {
+        if (iterateDepth > 0) {
             removedTasks.add(id);
             return true;
         }
@@ -169,25 +171,24 @@ public class Scheduler {
      * Triggers an <b>event</b> and passes in the selected <b>value</b> to each task.
      */
     public static <T> void trigger(String event, T val) {
-        iterating = true;
+        iterateDepth++;
 
-        for (int i = 0; i < tasks.size(); i++) {
-           Task<T> task = (Task<T>) tasks.get(i);
+        try {
+            for (int i = 0; i < tasks.size(); i++) {
+                Task<T> task = (Task<T>) tasks.get(i);
 
-           if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
-               try {
-                   task.consumer.accept(val);
-               } catch(Exception e) {
-                   Logger.error(Log.getStackTraceString(e));
-               }
-           }
-
-           iterating = true;
+                if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
+                    try {
+                        task.consumer.accept(val);
+                    } catch (Exception e) {
+                        Logger.error(Log.getStackTraceString(e));
+                    }
+                }
+            }
+        } finally {
+            iterateDepth--;
+            if (iterateDepth == 0) flushQueues();
         }
-
-        iterating = false;
-
-        flushQueues();
     }
 
     public static void flushQueues() {
@@ -207,35 +208,35 @@ public class Scheduler {
 
         Iterator<Task<?>> iterator = tasks.iterator();
 
-        iterating = true;
+        iterateDepth++;
 
-        while (iterator.hasNext()) {
-            Task<?> task = iterator.next();
+        try {
+            while (iterator.hasNext()) {
+                Task<?> task = iterator.next();
 
-            if (task.type == ExecutionType.CONTINUOUS) {
-                try {
-                    task.consumer.accept(null);
-                } catch(Exception e) {
-                    Logger.error(Log.getStackTraceString(e));
+                if (task.type == ExecutionType.CONTINUOUS) {
+                    try {
+                        task.consumer.accept(null);
+                    } catch (Exception e) {
+                        Logger.error(Log.getStackTraceString(e));
+                    }
+                    continue;
                 }
-                continue;
-            }
 
-            if (task.type == ExecutionType.TIMED && task.timestamp <= now) {
-                try {
-                    task.consumer.accept(null);
-                } catch(Exception e) {
-                    Logger.error(Log.getStackTraceString(e));
+                if (task.type == ExecutionType.TIMED && task.timestamp <= now) {
+                    try {
+                        task.consumer.accept(null);
+                    } catch (Exception e) {
+                        Logger.error(Log.getStackTraceString(e));
+                    }
+                    iterator.remove();
                 }
-                iterator.remove();
             }
+        } finally {
+            iterateDepth--;
 
-            iterating = true;
+            if (iterateDepth == 0) flushQueues();
         }
-
-        iterating = false;
-
-        flushQueues();
     }
 
     // --- DO NOT DELETE UNLESS YOU HAVE A VERY VALID REASON --- //
@@ -253,6 +254,8 @@ public class Scheduler {
     static Logger logger = new Logger();
     static Globals globals = new Globals();
     static Hardware hardware = new Hardware();
+    static Vision vision = new Vision();
+    static Coordination coordination = new Coordination();
 
     static {
         Scheduler.addTask("pre-init", (obj) -> {

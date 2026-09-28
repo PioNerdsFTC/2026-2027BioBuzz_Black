@@ -82,7 +82,7 @@ public class Logger {
                 Logger.logs.add((String) info);
                 Logger.level.add(LogType.INFO);
 
-                Log.e("PioNerds-runtime", (String) info);
+                Log.i("PioNerds-runtime", (String) info);
 
                 telemetry.addLine((String) info);
                 telemetry.update();
@@ -104,9 +104,11 @@ public class Logger {
 
                 if (Parameters.exitOnError) {
                     Parameters.running = false;
+
+                    Log.e("STOPPING EXECUTION DUE TO ERROR", (String) info);
                 }
 
-                Log.e("Error", (String) info);
+                Log.e("PioNerds-runtime (Error)", (String) info);
 
                 telemetry.addLine((String) info);
                 telemetry.update();
