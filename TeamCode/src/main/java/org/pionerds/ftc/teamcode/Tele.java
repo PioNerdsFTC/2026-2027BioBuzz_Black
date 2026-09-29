@@ -11,8 +11,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 public class Tele extends LinearOpMode {
     @Override
     public void runOpMode() {
-        Parameters.currentOperatingEnvironment = "TELE";
-        Parameters.running = false;
+        Parameters.currentOperatingEnvironment = "AUTO";
 
         Scheduler.trigger("pre-init", null);
 
@@ -21,18 +20,17 @@ public class Tele extends LinearOpMode {
 
         Scheduler.trigger("init", null);
 
-        while (!isStarted()) {
+        while (!isStarted() && !Scheduler.continueRunning) {
             Scheduler.tickHook();
             idle();
         }
 
-        Parameters.running = true;
+        Scheduler.trigger("pre-run", null);
 
-        while (opModeIsActive() && Parameters.running) {
+        while (opModeIsActive() && !Scheduler.continueRunning) {
             Scheduler.tickHook();
         }
 
-        Parameters.running = false;
         Scheduler.trigger("exit", null);
     }
 }

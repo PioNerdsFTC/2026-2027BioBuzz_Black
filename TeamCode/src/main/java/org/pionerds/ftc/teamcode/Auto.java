@@ -1,5 +1,7 @@
 package org.pionerds.ftc.teamcode;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -12,7 +14,6 @@ public class Auto extends LinearOpMode {
     @Override
     public void runOpMode() {
         Parameters.currentOperatingEnvironment = "AUTO";
-        Parameters.running = false;
 
         Scheduler.trigger("pre-init", null);
 
@@ -21,18 +22,17 @@ public class Auto extends LinearOpMode {
 
         Scheduler.trigger("init", null);
 
-        while (!isStarted()) {
+        while (!isStarted() && !Scheduler.continueRunning) {
             Scheduler.tickHook();
             idle();
         }
 
-        Parameters.running = true;
+        Scheduler.trigger("pre-run", null);
 
-        while (opModeIsActive() && Parameters.running) {
+        while (opModeIsActive() && !Scheduler.continueRunning) {
             Scheduler.tickHook();
         }
 
-        Parameters.running = false;
         Scheduler.trigger("exit", null);
     }
 }

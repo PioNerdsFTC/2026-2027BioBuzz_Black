@@ -103,9 +103,9 @@ public class Logger {
                 level.add(LogType.ERROR);
 
                 if (Parameters.exitOnError) {
-                    Parameters.running = false;
+                    Scheduler.stopExecution();
 
-                    Log.e("STOPPING EXECUTION DUE TO ERROR", (String) info);
+                    Log.e("", "STOPPING EXECUTION DUE TO ERROR");
                 }
 
                 Log.e("PioNerds-runtime (Error)", (String) info);

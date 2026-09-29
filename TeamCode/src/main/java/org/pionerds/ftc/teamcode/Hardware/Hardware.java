@@ -48,7 +48,7 @@ public final class Hardware {
     }
 
     public static void tick() {
-        if (!Parameters.running) return;
+        if (!Scheduler.running) return;
 
         double[] angles = Hardware.gyro.getAngles();
 

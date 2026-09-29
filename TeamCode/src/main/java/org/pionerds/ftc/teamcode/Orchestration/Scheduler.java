@@ -45,8 +45,15 @@ import java.util.function.Consumer;
 
 public class Scheduler {
 
-    public static final ElapsedTime time = new ElapsedTime();
+    private static final ElapsedTime time = new ElapsedTime();
     private static int iterateDepth = 0;
+
+    public static boolean continueRunning = true;
+
+    /**
+     * Whether the Robot is properly done with init and should be fully functional
+     */
+    public static boolean running = true;
 
     /**
      * CONTINUOUS - ran each tick <br/>
@@ -96,9 +103,9 @@ public class Scheduler {
         }
     }
 
-    public static ArrayList<Task<?>> tasks = new ArrayList<>();
-    public static ArrayList<Task<?>> iteratingTasks = new ArrayList<>();
-    public static ArrayList<UUID> removedTasks = new ArrayList<>();
+    private static final ArrayList<Task<?>> tasks = new ArrayList<>();
+    private static final ArrayList<Task<?>> iteratingTasks = new ArrayList<>();
+    private static final ArrayList<UUID> removedTasks = new ArrayList<>();
 
     /**
      * Add a timed task. Executes after the specified duration
@@ -173,9 +180,11 @@ public class Scheduler {
     public static <T> void trigger(String event, T val) {
         iterateDepth++;
 
+        Iterator<Task<?>> iterator = tasks.iterator();
+
         try {
-            for (int i = 0; i < tasks.size(); i++) {
-                Task<T> task = (Task<T>) tasks.get(i);
+            while (iterator.hasNext()) {
+                Task<T> task = (Task<T>) iterator.next();
 
                 if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
                     try {
@@ -239,6 +248,10 @@ public class Scheduler {
         }
     }
 
+    public static void stopExecution() {
+        Scheduler.continueRunning = false;
+    }
+
     // --- DO NOT DELETE UNLESS YOU HAVE A VERY VALID REASON --- //
 
     /*
@@ -261,6 +274,16 @@ public class Scheduler {
         Scheduler.addTask("pre-init", (obj) -> {
             tasks.removeIf(task -> task.type == ExecutionType.TIMED);
             time.reset();
+
+            Scheduler.running = false;
+        });
+
+        Scheduler.addTask("pre-run", (obj) -> {
+            Scheduler.running = true;
+        });
+
+        Scheduler.addTask("exit", (obj) -> {
+            Scheduler.running = false;
         });
     }
 }
