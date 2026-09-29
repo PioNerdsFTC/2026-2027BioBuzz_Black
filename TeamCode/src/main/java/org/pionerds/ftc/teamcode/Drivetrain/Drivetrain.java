@@ -29,20 +29,24 @@ public class Drivetrain {
 
     // Will be called every tick in the op-mode loop
     public void driveSwerve(double thetaT, double magnitude){
-
+        for (int i = 0; i<servoCount; i++) {
+            rotateSwervoThetaTick(i,);
+        }
 
 
     }
 
     // Physically checks the current rotation of the swervo and moves it accordingly
-    private void rotateSwervoTheta(int servoIndex, double thetaAbs, DcMotorSimple.Direction direction){
+    private void rotateSwervoThetaTick(int servoIndex, double thetaAbs, DcMotorSimple.Direction direction){
+        servos[servoIndex].setDirection(direction);
+
         double tolerance1 = Math.PI/8.00;
         double tolerance2 = Math.PI/24.00;
 
         double thetaS = servoAngles[servoIndex];
         double deltaTheta = thetaAbs-thetaS;
 
-        //if(deltaTheta)
+        if(deltaTheta > tolerance1) servos[servoIndex].setPower(1.00);
     }
 
     private boolean isForwardFaster(double thetaTarget, double thetaServo) {
@@ -59,6 +63,10 @@ public class Drivetrain {
 
     private double normalizeAngle(double theta){
         return ((theta + (2 * Math.PI)) % (2 * Math.PI));
+    }
+
+    private int getRevolutions(int servoIndex){
+        return (int) (servoAngles[servoIndex] / 2 * Math.PI);
     }
 
 }
