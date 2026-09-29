@@ -1,19 +1,17 @@
 package org.pionerds.ftc.teamcode.Drivetrain;
 
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
-public class Drivetrain {
+public class DeprecatedSwerveDrivetrain {
     private int servoCount = 4;
     private DcMotorEx[] motors;
     private CRServoImplEx[] servos;
     private double[] servoAngles;
 
 
-    public Drivetrain() {
+    public DeprecatedSwerveDrivetrain() {
         motors = new DcMotorEx[servoCount];
         servos = new CRServoImplEx[servoCount];
         for (int i = 0; i<servoCount; i++){
