@@ -1,9 +1,11 @@
 package org.pionerds.ftc.teamcode.Orchestration;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Globals {
 
+    // Guys I think I generic-ed too close to the sun
     private static final ArrayList<Global<?>> globals = new ArrayList<>();
 
     public static class Global<T> {
@@ -17,20 +19,28 @@ public class Globals {
     }
 
     public static <T> void add(String name, T object) {
-        globals.add(new Global<>(name, object));
+        globals.add(new Global<T>(name, object));
     }
 
     public static <T> T depend(String name) {
-        Global<?> global = null;
+        Global<T> global = null;
 
         for (int i = 0; i < globals.size(); i++) {
-            global = globals.get(i);
+            global = (Global<T>) globals.get(i);
 
-            if (global.name.equals(name)) break;
+            if (global == null) continue;
+
+            if (global.name.equals(name)) {
+                break;
+            }
         }
 
-        assert global != null;
+        return Objects.requireNonNull(global).object;
+    }
 
-        return (T) global;
+    static {
+        Scheduler.addTask("exit", (obj) -> {
+            while (!globals.isEmpty()) globals.remove(0);
+        });
     }
 }

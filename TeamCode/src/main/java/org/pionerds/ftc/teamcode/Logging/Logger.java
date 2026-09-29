@@ -1,8 +1,11 @@
 
 package org.pionerds.ftc.teamcode.Logging;
 
+import android.util.Log;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
+import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
@@ -16,22 +19,7 @@ public class Logger {
 
     private static Telemetry telemetry;
 
-    static {
-        Logger.telemetry = Globals.depend("telemetry");
-
-        Logger.log("test from logger");
-
-//        Scheduler.addTask("init", (obj) -> {
-            telemetry.addLine("hello from Logger");
-//            for (int i = Logger.logs.size(); i >= Logger.logs.size() - 3; i++) {
-//                telemetry.addData(Logger.level.get(i).name(), Logger.logs.get(i));
-//            }
-
-            telemetry.update();
-//        });
-    }
-
-    public static enum LogType {
+    public enum LogType {
         DEBUG,
         INFO,
         WARNING,
@@ -40,38 +28,103 @@ public class Logger {
 
     // Unless we have a way to get a tuple type, this is *a* solution.
     // Each index should correspond to the same log in both Arraylists.
-    public static ArrayList<String> logs = new ArrayList<String>();
-    public static ArrayList<LogType> level = new ArrayList<LogType>();
+    public static ArrayList<String> logs = new ArrayList<>();
+    public static ArrayList<LogType> level = new ArrayList<>();
 
     /**
      * Log a debug message
      */
-    public static void debug(LogType type, String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.DEBUG);
+    public void debug(LogType type, String log) {
+        logs.add(log);
+        level.add(LogType.DEBUG);
     }
 
     /**
      * Log a simple log message
      */
     public static void log(String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.INFO);
+        Scheduler.trigger("log:new:info", log);
     }
 
     /**
      * Log a warning message
      */
     public static void warn(String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.WARNING);
+        Scheduler.trigger("log:new:warn", log);
     }
 
     /**
      * Log an error
      */
     public static void error(String log) {
-        Logger.logs.add(log);
-        Logger.level.add(LogType.ERROR);
+        Scheduler.trigger("log:new:error", log);
+    }
+
+    public static void error(Exception e) {
+        Scheduler.trigger("log:new:error", Log.getStackTraceString(e));
+    }
+
+    public static void clear() {
+        Scheduler.trigger("log:clear", null);
+    }
+
+
+
+    static {
+        Scheduler.addTask("init", (obj) -> {
+            telemetry = Globals.depend("telemetry");
+            telemetry.setAutoClear(false);
+
+            telemetry.addLine("Initialized");
+            telemetry.update();
+
+            Scheduler.addTask("log:new:info", (info) -> {
+                Logger.logs.add((String) info);
+                Logger.level.add(LogType.INFO);
+
+                Log.i("PioNerds-runtime", (String) info);
+
+                telemetry.addLine((String) info);
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:new:warn", (info) -> {
+                logs.add((String) info);
+                level.add(LogType.WARNING);
+
+                Log.w("PioNerds-runtime", (String) info);
+
+                telemetry.addLine((String) info);
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:new:error", (info) -> {
+                logs.add((String) info);
+                level.add(LogType.ERROR);
+
+                if (Parameters.exitOnError) {
+                    Scheduler.stopExecution();
+
+                    Log.e("", "STOPPING EXECUTION DUE TO ERROR");
+                }
+
+                Log.e("PioNerds-runtime (Error)", (String) info);
+
+                telemetry.addLine((String) info);
+                telemetry.update();
+            });
+
+            Scheduler.addTask("log:clear", (info) -> {
+                while (!logs.isEmpty()) logs.remove(0);
+
+                telemetry.clear();
+                telemetry.update();
+            });
+        });
+
+        Scheduler.addTask("exit", (obj) -> {
+            telemetry.clear();
+        });
+
     }
 }

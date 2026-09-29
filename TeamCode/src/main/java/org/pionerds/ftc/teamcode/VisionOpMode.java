@@ -13,13 +13,14 @@ public class VisionOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        Vision.init(hardwareMap);
-        Vision.addTelemetry(telemetry);
-        Coordination.addTelemetry(telemetry);
+//        Vision.init();
+//        Vision.addTelemetry(telemetry);
+//        Coordination.addTelemetry(telemetry);
 
         waitForStart();
+
         while(opModeIsActive()){
-            Vision.collectData();
+//            Vision.collectData();
             double disp = -10000;
 
             /*
@@ -30,7 +31,7 @@ public class VisionOpMode extends LinearOpMode {
 
             Coordination.cacheCoordinates(false, false);
 
-            if(Coordination.getRobotPosition() != null){
+            if (Coordination.getRobotPosition() != null) {
                 telemetry.addLine("robotCoordsX: "+ Coordination.getRobotPosition().getX());
             } else {
                 telemetry.addLine("robot position is null.");
@@ -38,9 +39,6 @@ public class VisionOpMode extends LinearOpMode {
 
             //telemetry.addLine("displace:" + disp);
             telemetry.update();
-
-
-
         }
     }
 }
