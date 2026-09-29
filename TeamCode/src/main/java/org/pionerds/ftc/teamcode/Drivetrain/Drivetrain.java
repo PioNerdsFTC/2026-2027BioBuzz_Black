@@ -30,7 +30,7 @@ public class Drivetrain {
     // Will be called every tick in the op-mode loop
     public void driveSwerve(double thetaT, double magnitude){
         for (int i = 0; i<servoCount; i++) {
-            rotateSwervoThetaTick(i,);
+            rotateSwervoThetaTick(i, thetaT*getRevolutions(i), (isForwardFaster(thetaT,servoAngles[i]) ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE)); // PLEASE CHECK THIS
         }
 
 
