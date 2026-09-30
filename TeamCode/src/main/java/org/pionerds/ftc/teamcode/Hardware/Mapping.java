@@ -1,5 +1,6 @@
 package org.pionerds.ftc.teamcode.Hardware;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -136,5 +137,9 @@ public class Mapping {
         }
 
         return webcam;
+    }
+
+    public Context getAppContext() {
+        return this.map.appContext;
     }
 }

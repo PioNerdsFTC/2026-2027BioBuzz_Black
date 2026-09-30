@@ -20,14 +20,14 @@ public class Tele extends LinearOpMode {
 
         Scheduler.trigger("init", null);
 
-        while (!isStarted() && !Scheduler.continueRunning) {
+        while (!isStarted() && Scheduler.continueRunning) {
             Scheduler.tickHook();
             idle();
         }
 
         Scheduler.trigger("pre-run", null);
 
-        while (opModeIsActive() && !Scheduler.continueRunning) {
+        while (opModeIsActive() && Scheduler.continueRunning) {
             Scheduler.tickHook();
         }
 

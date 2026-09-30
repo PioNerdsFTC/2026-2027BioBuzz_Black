@@ -30,31 +30,6 @@ public class Vision {
     private static Telemetry telemetry;
     public static void addTelemetry(Telemetry telemetry){Vision.telemetry = telemetry;}
 
-    static {
-        Scheduler.addTask("init", (obj) -> {
-            aprilTagProcessor = new AprilTagProcessor.Builder()
-                    .setDrawAxes(true)
-                    .setDrawCubeProjection(true)
-                    .setDrawTagOutline(true)
-                    //.setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                    //.setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
-                    .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-
-                    .build();
-
-            VisionPortal.Builder builder = new VisionPortal.Builder();
-
-            builder.setCamera(Hardware.mapping.getWebcam("Webcam 1"));
-            builder.addProcessor(aprilTagProcessor);
-
-            visionPortal = builder.build();
-
-            Scheduler.addTask((obj2) -> {
-                Vision.collectData();
-            });
-        });
-    }
-
     private static ArrayList<AprilTagDetection> currentDetections = new ArrayList<>();
     private static ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
 

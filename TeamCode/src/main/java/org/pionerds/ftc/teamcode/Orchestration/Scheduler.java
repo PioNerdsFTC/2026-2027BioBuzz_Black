@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Server.Server;
 import org.pionerds.ftc.teamcode.Vision.Vision;
 
 import java.util.ArrayList;
@@ -110,34 +111,48 @@ public class Scheduler {
     /**
      * Add a timed task. Executes after the specified duration
      */
-    public static <T> void addTask(Integer duration, Consumer<T> consumer) {
+    public static <T> UUID addTask(Integer duration, Consumer<T> consumer) {
+        Task<T> task = new Task<>(duration, consumer);
+
         if (iterateDepth > 0) {
-            Scheduler.iteratingTasks.add(new Task<>(duration, consumer));
-            return;
+            Scheduler.iteratingTasks.add(task);
+            return task.id;
         }
-        Scheduler.tasks.add(new Task<>(duration, consumer));
+
+        Scheduler.tasks.add(task);
+
+        return task.id;
     }
 
     /**
      * Add a conditional task. Executes when an event trigger is called by the same event name
      */
-    public static <T> void addTask(String event, Consumer<T> consumer) {
+    public static <T> UUID addTask(String event, Consumer<T> consumer) {
+        Task<T> task = new Task<>(event, consumer);
+
         if (iterateDepth > 0) {
-            Scheduler.iteratingTasks.add(new Task<>(event, consumer));
-            return;
+            Scheduler.iteratingTasks.add(task);
+            return task.id;
         }
-        Scheduler.tasks.add(new Task<>(event, consumer));
+        Scheduler.tasks.add(task);
+
+        return task.id;
     }
 
     /**
      * Run a task for every tick of the Scheduler
      */
-    public static <T> void addTask(Consumer<T> consumer) {
+    public static <T> UUID addTask(Consumer<T> consumer) {
+        Task<T> task = new Task<>(consumer);
+
         if (iterateDepth > 0) {
-            Scheduler.iteratingTasks.add(new Task<>(consumer));
-            return;
+            Scheduler.iteratingTasks.add(task);
+            return task.id;
         }
-        Scheduler.tasks.add(new Task<>(consumer));
+
+        Scheduler.tasks.add(task);
+
+        return task.id;
     }
 
     /**
@@ -249,7 +264,7 @@ public class Scheduler {
     }
 
     public static void stopExecution() {
-        Scheduler.continueRunning = false;
+//        Scheduler.continueRunning = false;
     }
 
     // --- DO NOT DELETE UNLESS YOU HAVE A VERY VALID REASON --- //
@@ -269,21 +284,27 @@ public class Scheduler {
     static Hardware hardware = new Hardware();
     static Vision vision = new Vision();
     static Coordination coordination = new Coordination();
+    static Server server = new Server();
 
     static {
-        Scheduler.addTask("pre-init", (obj) -> {
+         Scheduler.addTask("pre-init", (obj) -> {
             tasks.removeIf(task -> task.type == ExecutionType.TIMED);
             time.reset();
 
             Scheduler.running = false;
         });
 
-        Scheduler.addTask("pre-run", (obj) -> {
+         Scheduler.addTask("pre-run", (obj) -> {
             Scheduler.running = true;
+
+            for (Task<?> task : tasks) {
+                if (task.event == null) continue;
+            }
         });
 
         Scheduler.addTask("exit", (obj) -> {
             Scheduler.running = false;
         });
+
     }
 }

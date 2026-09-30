@@ -1,12 +1,8 @@
 package org.pionerds.ftc.teamcode.Coordination;
 
-import androidx.annotation.Nullable;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.pionerds.ftc.teamcode.Logging.Logger;
-import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
-import org.pionerds.ftc.teamcode.Vision.DecoratedTag;
 import org.pionerds.ftc.teamcode.Vision.Vision;
 
 import java.util.HashMap;
@@ -53,27 +49,6 @@ public class Coordination {
 
     // Store an absolute field position for each April Tag ID
     private static HashMap<Integer, PioNerdPosition> tagFieldPositions = new HashMap<>();
-
-    static {
-        Scheduler.addTask("init", (obj) -> {
-            // K, V ==> ID, Position
-            tagFieldPositions.put(21, new PioNerdPosition(20.00,10.00,0.00));
-            tagFieldPositions.put(22, new PioNerdPosition(37.00,10.00,0.00));
-
-            Scheduler.addTask((obj2) -> {
-                Coordination.cacheCoordinates(false, false);
-
-                Logger.clear();
-
-                if (Coordination.getRobotPosition() == null) {
-                    Logger.log("robot position is null.");
-                    return;
-                }
-
-                Logger.log("robotCordsX: " + Coordination.getRobotPosition().getX());
-            });
-        });
-    }
 
     private static double getAbsoluteX(int id) {
         if (tagFieldPositions.get(id) != null) return tagFieldPositions.get(id).getX();

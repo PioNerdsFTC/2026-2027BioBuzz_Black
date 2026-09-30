@@ -1,16 +1,15 @@
 package org.pionerds.ftc.teamcode.Hardware;
 
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
-import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Manages reading & writing for servos, motors and sensors.
@@ -24,6 +23,8 @@ public final class Hardware {
     public static double roll = 0;
 
     static {
+        AtomicReference<UUID> tick = new AtomicReference<>();
+
          Scheduler.addTask("init", (o) -> {
              try {
                  HardwareMap hardwareMap = Globals.depend("hardware-map");
@@ -40,11 +41,14 @@ public final class Hardware {
                  Logger.error(e.getMessage());
              }
 
-             Scheduler.addTask((obj) -> {
+             tick.set(Scheduler.addTask((obj) -> {
                  Hardware.tick();
-             });
+             }));
         });
 
+        Scheduler.addTask("exit", (obj) -> {
+            if (tick.get() != null) Scheduler.removeTask(tick.get());
+        });
     }
 
     public static void tick() {

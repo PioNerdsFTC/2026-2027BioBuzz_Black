@@ -19,6 +19,10 @@ apply from: '../build.dependencies.gradle'
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
+    androidResources {
+        ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+
     packagingOptions {
         jniLibs {
             pickFirsts += ['**/*.so']
@@ -29,4 +33,47 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
+}
+
+def webProjectDir = rootProject.file('Web')
+def webBuildDir = new File(webProjectDir, 'build')
+def webAssetsDir = file('src/main/assets/web')
+
+tasks.register('webInstall', Exec) {
+    group = 'web'
+    description = 'Installs SvelteKit dependencies (npm ci).'
+    workingDir webProjectDir
+    commandLine 'cp', "-r", webBuildDir, webAssetsDir
+    doFirst {
+        if (!webProjectDir.isDirectory()) {
+            throw new GradleException("SvelteKit project not found at ${webProjectDir}")
+        }
+    }
+}
+
+tasks.register('buildWeb', Exec) {
+    group = 'web'
+    description = 'Builds the SvelteKit dashboard (npm run build).'
+    dependsOn 'webInstall'
+    workingDir webProjectDir
+    commandLine 'bun', 'run', 'build'
+}
+
+tasks.register('syncWebAssets', Sync) {
+    group = 'web'
+    description = 'Copies the built SvelteKit dashboard into Android assets.'
+    onlyIf { webBuildDir.isDirectory() }
+    from webBuildDir
+    into webAssetsDir
+}
+
+tasks.named('preBuild') {
+    dependsOn 'syncWebAssets'
+    if (gradle.startParameter.projectProperties.containsKey('buildWeb')) {
+        dependsOn 'buildWeb'
+    }
+}
+
+tasks.named('syncWebAssets') {
+    mustRunAfter 'buildWeb'
 }

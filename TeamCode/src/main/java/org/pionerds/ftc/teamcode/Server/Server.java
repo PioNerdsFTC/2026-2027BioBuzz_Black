@@ -1,19 +1,30 @@
 package org.pionerds.ftc.teamcode.Server;
+
+import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Orchestration.Parameters;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
+
 import java.io.*;
 import java.net.*;
+import java.util.UUID;
 
 public class Server {
-    private ServerSocket socket;
+    private static Http http;
 
-    Server() {
-        try {
-            socket = new ServerSocket(8080); // Port number
-        } catch (IOException e) {
-            e.printStackTrace();
+    static {
+        if (!Parameters.competing) {
+            UUID init = Scheduler.addTask("init", (obj) -> {
+                try {
+                    Server.http = new Http();
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            Scheduler.addTask("exit", (obj) -> {
+                Scheduler.removeTask(init);
+            });
         }
-    }
-
-    public void hook() {
-
     }
 }

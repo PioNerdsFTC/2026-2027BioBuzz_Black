@@ -9,10 +9,12 @@ import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Goal of this is to make a unified interface for writing errors and logs cleanly.
- * Right now we really don't have a solution for proper logs outside of actually writing to the screen.
+ * Right now we really don't have a solution for proper logs outside actually writing to the screen.
  * Eventually we should be able to configure different levels of reporting (and maybe some way to export logs?)
  */
 public class Logger {
@@ -68,9 +70,12 @@ public class Logger {
         Scheduler.trigger("log:clear", null);
     }
 
-
-
     static {
+        AtomicReference<UUID> logNewInfo = new AtomicReference<>();
+        AtomicReference<UUID> logNewWarn = new AtomicReference<>();
+        AtomicReference<UUID> logNewError = new AtomicReference<>();
+        AtomicReference<UUID> logClear = new AtomicReference<>();
+
         Scheduler.addTask("init", (obj) -> {
             telemetry = Globals.depend("telemetry");
             telemetry.setAutoClear(false);
@@ -78,7 +83,7 @@ public class Logger {
             telemetry.addLine("Initialized");
             telemetry.update();
 
-            Scheduler.addTask("log:new:info", (info) -> {
+            logNewInfo.set(Scheduler.addTask("log:new:info", (info) -> {
                 Logger.logs.add((String) info);
                 Logger.level.add(LogType.INFO);
 
@@ -86,9 +91,9 @@ public class Logger {
 
                 telemetry.addLine((String) info);
                 telemetry.update();
-            });
+            }));
 
-            Scheduler.addTask("log:new:warn", (info) -> {
+            logNewWarn.set(Scheduler.addTask("log:new:warn", (info) -> {
                 logs.add((String) info);
                 level.add(LogType.WARNING);
 
@@ -96,9 +101,9 @@ public class Logger {
 
                 telemetry.addLine((String) info);
                 telemetry.update();
-            });
+            }));
 
-            Scheduler.addTask("log:new:error", (info) -> {
+            logNewError.set(Scheduler.addTask("log:new:error", (info) -> {
                 logs.add((String) info);
                 level.add(LogType.ERROR);
 
@@ -112,19 +117,22 @@ public class Logger {
 
                 telemetry.addLine((String) info);
                 telemetry.update();
-            });
+            }));
 
-            Scheduler.addTask("log:clear", (info) -> {
+            logClear.set(Scheduler.addTask("log:clear", (info) -> {
                 while (!logs.isEmpty()) logs.remove(0);
 
                 telemetry.clear();
                 telemetry.update();
-            });
+            }));
         });
 
         Scheduler.addTask("exit", (obj) -> {
             telemetry.clear();
-        });
 
+            if (logNewInfo.get() != null) Scheduler.removeTask(logNewInfo.get());
+            if (logNewWarn.get() != null) Scheduler.removeTask(logNewWarn.get());
+            if (logNewError.get() != null) Scheduler.removeTask(logNewError.get());
+        });
     }
 }
