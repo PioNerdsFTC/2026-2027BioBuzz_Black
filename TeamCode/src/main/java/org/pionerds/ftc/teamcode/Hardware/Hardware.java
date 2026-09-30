@@ -1,6 +1,7 @@
 package org.pionerds.ftc.teamcode.Hardware;
 
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -18,7 +19,6 @@ import java.util.List;
 public final class Hardware {
     public static Mapping mapping = new Mapping();
     public static Gyro gyro = new Gyro();
-
     public static double yaw = 0;
     public static double pitch = 0;
     public static double roll = 0;
