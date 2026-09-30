@@ -1,19 +1,17 @@
 package org.pionerds.ftc.teamcode.Drivetrain;
 
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
-public class Drivetrain {
+public class DeprecatedSwerveDrivetrain {
     private int servoCount = 4;
     private DcMotorEx[] motors;
     private CRServoImplEx[] servos;
     private double[] servoAngles;
 
 
-    public Drivetrain() {
+    public DeprecatedSwerveDrivetrain() {
         motors = new DcMotorEx[servoCount];
         servos = new CRServoImplEx[servoCount];
         for (int i = 0; i<servoCount; i++){
@@ -30,7 +28,11 @@ public class Drivetrain {
     // Will be called every tick in the op-mode loop
     public void driveSwerve(double thetaT, double magnitude){
         for (int i = 0; i<servoCount; i++) {
+<<<<<<< HEAD:TeamCode/src/main/java/org/pionerds/ftc/teamcode/Drivetrain/Drivetrain.java
 //            rotateSwervoThetaTick(i,);
+=======
+            rotateSwervoThetaTick(i, thetaT*getRevolutions(i), (isForwardFaster(thetaT,servoAngles[i]) ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE)); // PLEASE CHECK THIS
+>>>>>>> 6ae085b4a9f95184c6d040f32d9848d49772ead5:TeamCode/src/main/java/org/pionerds/ftc/teamcode/Drivetrain/DeprecatedSwerveDrivetrain.java
         }
 
 

@@ -3,6 +3,7 @@ package org.pionerds.ftc.teamcode.Hardware;
 import android.content.Context;
 import android.util.Log;
 
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -141,5 +142,9 @@ public class Mapping {
 
     public Context getAppContext() {
         return this.map.appContext;
+    }
+
+    public SparkFunOTOS getOtos(String name) {
+        return map.get(SparkFunOTOS.class, name);
     }
 }
