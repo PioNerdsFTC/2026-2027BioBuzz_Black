@@ -60,10 +60,10 @@ public class Vision {
         currentDetectionIDs = new ArrayList<>();
 
         for (AprilTagDetection detection : freshDetections) {
-            if(detection.metadata == null) Logger.error("metadata is null");
+//            if(detection.metadata == null) Logger.error("metadata is null");
 
-            currentDetections.add(detection);
-            currentDetectionIDs.add(detection.id);
+//            currentDetections.add(detection);
+//            currentDetectionIDs.add(detection.id);
         }
 
         Logger.log("Cached new Tags!");

@@ -31,6 +31,7 @@ public class Http extends NanoHTTPD {
             return NanoHTTPD.newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "404 not found");
         }
 
+
         // Static file
         uri = uri.replaceFirst("^/", "");
         if (uri.isEmpty()) {

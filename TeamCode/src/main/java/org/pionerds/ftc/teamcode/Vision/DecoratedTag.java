@@ -9,7 +9,7 @@ public class DecoratedTag {
     private int id;
     public DecoratedTag(AprilTagDetection aprilTagDetection, AprilTagPoseFtc displacement){
         this.aprilTagDetection = aprilTagDetection;
-        this.id = aprilTagDetection.id;
+//        this.id = aprilTagDetection.id;
         this.displacement = displacement;
     }
 

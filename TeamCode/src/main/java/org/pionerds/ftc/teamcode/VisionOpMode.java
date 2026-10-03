@@ -29,13 +29,13 @@ public class VisionOpMode extends LinearOpMode {
             }
              */
 
-            Coordination.cacheCoordinates(false, false);
-
-            if (Coordination.getRobotPosition() != null) {
-                telemetry.addLine("robotCoordsX: "+ Coordination.getRobotPosition().getX());
-            } else {
-                telemetry.addLine("robot position is null.");
-            }
+//            Coordination.cacheCoordinates(false, false);
+//
+//            if (Coordination.getRobotPosition() != null) {
+//                telemetry.addLine("robotCoordsX: "+ Coordination.getRobotPosition().getX());
+//            } else {
+//                telemetry.addLine("robot position is null.");
+//            }
 
             //telemetry.addLine("displace:" + disp);
             telemetry.update();

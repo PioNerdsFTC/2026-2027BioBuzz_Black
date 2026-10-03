@@ -33,6 +33,7 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
+    implementation 'androidx.tracing:tracing-perfetto-handshake:1.0.1'
 }
 
 def webProjectDir = rootProject.file('Web')
