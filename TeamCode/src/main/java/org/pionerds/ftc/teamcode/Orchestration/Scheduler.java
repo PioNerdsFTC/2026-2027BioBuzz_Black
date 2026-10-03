@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
-import org.pionerds.ftc.teamcode.Server.Server;
 import org.pionerds.ftc.teamcode.Vision.Vision;
 
 import java.util.ArrayList;
@@ -284,7 +283,6 @@ public class Scheduler {
     static Hardware hardware = new Hardware();
     static Vision vision = new Vision();
     static Coordination coordination = new Coordination();
-    static Server server = new Server();
 
     static {
          Scheduler.addTask("pre-init", (obj) -> {

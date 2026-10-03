@@ -38,6 +38,8 @@ public final class Hardware {
                  for (LynxModule hub : allHubs) {
                      hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
                  }
+
+                 Logger.log("Initialized Hardware");
              } catch (Exception e) {
                  Logger.error(e.getMessage());
              }

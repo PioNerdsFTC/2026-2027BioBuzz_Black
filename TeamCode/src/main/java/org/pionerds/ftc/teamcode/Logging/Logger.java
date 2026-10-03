@@ -13,9 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Goal of this is to make a unified interface for writing errors and logs cleanly.
- * Right now we really don't have a solution for proper logs outside actually writing to the screen.
- * Eventually we should be able to configure different levels of reporting (and maybe some way to export logs?)
+ * Unified Logging method. Reports to the Dashboard
  */
 public class Logger {
 
@@ -80,9 +78,6 @@ public class Logger {
             telemetry = Globals.depend("telemetry");
             telemetry.setAutoClear(false);
 
-            telemetry.addLine("Initialized");
-            telemetry.update();
-
             logNewInfo.set(Scheduler.addTask("log:new:info", (info) -> {
                 Logger.logs.add((String) info);
                 Logger.level.add(LogType.INFO);
@@ -110,7 +105,7 @@ public class Logger {
                 if (Parameters.exitOnError) {
                     Scheduler.stopExecution();
 
-                    Log.e("", "STOPPING EXECUTION DUE TO ERROR");
+                    Logger.log("STOPPING EXECUTION DUE TO ERROR");
                 }
 
                 Log.e("PioNerds-runtime (Error)", (String) info);

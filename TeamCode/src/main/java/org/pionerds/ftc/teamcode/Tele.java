@@ -3,6 +3,7 @@ package org.pionerds.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -20,6 +21,8 @@ public class Tele extends LinearOpMode {
 
         Scheduler.trigger("init", null);
 
+        Logger.log("--- Initialized ---");
+
         while (!isStarted() && Scheduler.continueRunning) {
             Scheduler.tickHook();
             idle();
@@ -31,6 +34,7 @@ public class Tele extends LinearOpMode {
             Scheduler.tickHook();
         }
 
+        Logger.log("--- Exiting ---");
         Scheduler.trigger("exit", null);
     }
 }

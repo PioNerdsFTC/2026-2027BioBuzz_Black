@@ -23,6 +23,8 @@ public class Auto extends LinearOpMode {
 
         Scheduler.trigger("init", null);
 
+        Logger.log("--- Initialized ---");
+
         while (!isStarted() && Scheduler.continueRunning) {
             Scheduler.tickHook();
             idle();
@@ -34,6 +36,7 @@ public class Auto extends LinearOpMode {
             Scheduler.tickHook();
         }
 
+        Logger.log("--- Exiting ---");
         Scheduler.trigger("exit", null);
     }
 }
