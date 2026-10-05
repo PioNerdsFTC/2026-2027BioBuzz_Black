@@ -24,6 +24,8 @@ public class Auto extends LinearOpMode {
         Scheduler.trigger("init", null);
 
         Logger.log("--- Initialized ---");
+        Logger.warn("Robot may be upside down");
+        Logger.error("Robot is upside down");
 
         while (!isStarted() && Scheduler.continueRunning) {
             Scheduler.tickHook();
