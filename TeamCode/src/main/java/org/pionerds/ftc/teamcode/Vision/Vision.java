@@ -48,7 +48,7 @@ public class Vision {
     private static double[] tagScalars = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
 
 
-    public static void collectData() {
+    /*public static void collectData() {
         ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getDetections();
 
         if (aprilTagProcessor.getDetections().isEmpty()) {
@@ -68,4 +68,5 @@ public class Vision {
 
         Logger.log("Cached new Tags!");
     }
+    */
 }
