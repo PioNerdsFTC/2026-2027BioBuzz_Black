@@ -7,15 +7,17 @@ public enum DriverActions {
     ENABLE_INTAKE,
     DISABLE_INTAKE;
 
-
-    public String toString(){
+    public String toString() {
         String string = this.name();
+
         string = string.toLowerCase();
-        while(string.contains("_")){
-            string = string.substring(0,string.indexOf("_")) + "-" +string.substring(string.indexOf("_") + 1);
+
+        int index = string.indexOf("_");
+
+        while (string.contains("_")) {
+            string = string.substring(0, index) + "-" + string.substring(index + 1);
         }
 
         return string;
     }
-
 }

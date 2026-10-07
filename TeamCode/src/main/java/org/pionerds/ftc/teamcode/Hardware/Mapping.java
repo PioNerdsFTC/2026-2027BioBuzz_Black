@@ -44,7 +44,7 @@ public class Mapping {
      * @param motorZeroPowerBehavior The zero power behavior of the motor.
      * @return The motor object.
      */
-    DcMotorImplEx getMotor(
+    public DcMotorImplEx getMotor(
             String motorName,
             Double gearRatio,
             DcMotorSimple.Direction motorDirection,

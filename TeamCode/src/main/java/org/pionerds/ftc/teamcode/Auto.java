@@ -1,7 +1,5 @@
 package org.pionerds.ftc.teamcode;
 
-import android.util.Log;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -24,8 +22,6 @@ public class Auto extends LinearOpMode {
         Scheduler.trigger("init", null);
 
         Logger.log("--- Initialized ---");
-        Logger.warn("Robot may be upside down");
-        Logger.error("Robot is upside down");
 
         while (!isStarted() && Scheduler.continueRunning) {
             Scheduler.tickHook();

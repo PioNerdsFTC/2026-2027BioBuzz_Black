@@ -1,45 +1,55 @@
 package org.pionerds.ftc.teamcode.Drivetrain;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
+
 public class OmniDrivetrain {
 
-    private final DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
-    private final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
-    private final String[] motorNames = {"motor0", "motor1", "motor2", "motor3"};
-    Hardware hardware = null;
-    private Telemetry telemetry = null;
+    /**
+        front right,
+        <br />
+        front left,
+        <br />
+        back left,
+        <br />
+        back right
+        <br />
+     */
+    private static final DcMotorEx[] motors = { null, null, null, null };
+    private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
+    private static final String[] motorNames = {"motor0", "motor1", "motor2", "motor3"};
 
     public DcMotorEx[] getMotors(){
         return motors;
     }
 
-    public void init(Hardware hardware, Telemetry telemetry) {
-        this.hardware = hardware;
-        this.telemetry = telemetry;
+    static {
+        Scheduler.addTask("init", (obj) -> {
+            for (int i = 0; i < 4; i++) {
+                motors[i] = Hardware.mapping.getMotor(
+                        motorNames[i],
+                        40.0,
+                        DcMotorSimple.Direction.FORWARD,
+                        DcMotor.ZeroPowerBehavior.BRAKE
+                );
+            }
 
-        for (int i = 0; i < 4; i++) {
-            motors[i] = this.hardware.mapping.getMotor(
-                    motorNames[i],
-                    40.0,
-                    Direction.FORWARD,
-                    DcMotor.ZeroPowerBehavior.BRAKE
-            );
-        }
-
-        //motors[2].setDirection(Direction.REVERSE);
+            //motors[2].setDirection(Direction.REVERSE);
+        });
     }
 
     /**
      * Sets the motor power to the current motorSpeed array values.
      */
-    public void setDriveMotorsPow() {
+    public static void setDriveMotorsPow() {
         for (int i = 0; i < 4; i++) {
             motors[i].setPower(motorSpeed[i]);
-            telemetry.addLine(
-                    "Motor " +
-                            i +
-                            " Pow: " +
-                            (Math.round(motorSpeed[i] * 100) / 100.0)
-            );
+            Logger.log("Motor " + i + " Pow: " + (Math.round(motorSpeed[i] * 100) / 100.0));
         }
     }
 
@@ -50,12 +60,12 @@ public class OmniDrivetrain {
      * @param driverControls The driver controls.
      */
     public void scaleMotorsToFit(
-            boolean bumperTurning,
-            DriverControls driverControls
+            boolean bumperTurning
+            /* DriverControls driverControls */
     ) {
         if (bumperTurning) {
             for (int i = 0; i < 4; i++) {
-                motorSpeed[i] += driverControls.getRotationSpeed();
+//                motorSpeed[i] += driverControls.getRotationSpeed();
             }
         }
 
@@ -85,7 +95,7 @@ public class OmniDrivetrain {
             motorSpeed[i] /= finalMotorDivisor;
         }
 
-        telemetry.addLine("MotorSpeedDivisor: " + finalMotorDivisor);
+        Logger.log("MotorSpeedDivisor: " + finalMotorDivisor);
     }
 
     /**
@@ -133,7 +143,7 @@ public class OmniDrivetrain {
         if (hasDumbDrivePreference) {
             robotCentricDrive(driverControls);
         } else {
-            stickDrive(driverControls, hardware.gyro.getAngles()[0]);
+            stickDrive(driverControls, Hardware.gyro.getAngles()[0]);
             stickTurn(driverControls);
         }
 
@@ -156,8 +166,7 @@ public class OmniDrivetrain {
         x = convertedAngle[0];
         y = convertedAngle[1];
 
-        telemetry.addLine("\nDrivetrain:");
-        telemetry.addLine("X: " + x + "\nY: " + y);
+        Logger.log("X: " + x + "\nY: " + y);
 
         if (Math.abs(x) < 0.2 && Math.abs(y) < 0.2) {
             stopMotors();

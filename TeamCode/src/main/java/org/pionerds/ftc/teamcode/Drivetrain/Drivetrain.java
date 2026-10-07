@@ -3,17 +3,22 @@ package org.pionerds.ftc.teamcode.Drivetrain;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.pionerds.ftc.teamcode.Driver.Driver;
+import org.pionerds.ftc.teamcode.Driver.DriverActions;
+import org.pionerds.ftc.teamcode.Driver.DriverInputs;
 
 public class Drivetrain {
     Gamepad gamepad = new Gamepad();
-    Driver driver = new Driver(gamepad);
+    static Driver driver = new Driver();
 
-    driver
+    static {
+        DriverActions action = DriverActions.LAUNCH;
+        DriverInputs input = DriverInputs.MOVE_;
+        driver
             .addControl(action, input)
             .addControl(action, input)
             .addControl(action, input)
             .addControl(action, input)
             .addControl(action, input)
             .addControl(action, input);
-
+    }
 }

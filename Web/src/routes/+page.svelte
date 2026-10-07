@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 
 	let healthy = $state(false);
 	let ws: WebSocket | undefined = $state();
@@ -99,16 +99,16 @@
 									>
 										{log.type.charAt(0).toUpperCase()}
 									</span>
-									<span class="mx-4 my-1 rounded-sm border border-accent-500 px-1 py-0.5"
-										>{log.tag}</span
-									>
+									<span class="mx-4 my-1 rounded-sm border border-accent-500 px-1 py-0.5">
+										{log.tag}
+									</span>
 								</td>
 								<td
-									class="px-1 py-1 {log.type === 'debug' ? 'text-text-700' : ''}  {log.type ===
-									'error'
-										? 'text-red-500'
-										: ''}">{log.content}</td
-								>
+									class="px-1 py-1 
+									{log.type === 'debug' ? 'text-text-700' : ''}
+									{log.type === 'error' ? 'text-red-500' : ''}">
+									{log.content}
+								</td>
 							</tr>
 						{/each}
 					</tbody>
