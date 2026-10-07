@@ -8,23 +8,26 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Driver {
 
-    private static Gamepad gamepad;
+    private Gamepad gamepad;
     private static ArrayList<DriverInputs> inputList = new ArrayList<DriverInputs>();
     private ArrayList<String> actionList = new ArrayList<String>();
 
     private HashMap<DriverInputs, DriverActions> past = new HashMap<>();
     private HashMap<DriverInputs, DriverActions> current = new HashMap<>();
 
-    static {
-        Scheduler.addTask("init", (obj) -> {
-            Driver.gamepad = Globals.depend("gamepad");
+    Driver(Gamepad gamepad) {
+        this.gamepad = gamepad;
+
+        UUID tick = Scheduler.addTask((obj) -> {
+            Driver.tickControls();
         });
 
-        Scheduler.addTask((obj) -> {
-            Driver.tickControls();
+        Scheduler.addTask("exit", (obj) -> {
+            Scheduler.removeTask(tick);
         });
     }
 
@@ -34,7 +37,6 @@ public class Driver {
 
         return this;
     }
-
 
     public static void tickControls(){
         for (int i = 0; i < inputList.size(); i++){
