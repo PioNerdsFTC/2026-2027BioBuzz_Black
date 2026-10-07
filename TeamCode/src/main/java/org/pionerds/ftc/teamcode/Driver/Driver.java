@@ -2,24 +2,22 @@ package org.pionerds.ftc.teamcode.Driver;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class Driver {
 
     private Gamepad gamepad;
-    private ArrayList<DriverInputs> inputList = new ArrayList<DriverInputs>();
+    private ArrayList<DriverInput> inputList = new ArrayList<DriverInput>();
     private ArrayList<String> actionList = new ArrayList<String>();
 
-    private HashMap<DriverInputs, Boolean> past = new HashMap<>();
-    private HashMap<DriverInputs, Boolean> current = new HashMap<>();
+    private HashMap<DriverInput, Boolean> past = new HashMap<>();
+    private HashMap<DriverInput, Boolean> current = new HashMap<>();
 
-    Driver(Gamepad gamepad) {
+    public Driver(Gamepad gamepad) {
         this.gamepad = gamepad;
 
         UUID tick = Scheduler.addTask((obj) -> {
@@ -31,7 +29,7 @@ public class Driver {
         });
     }
 
-    public Driver addControl(DriverActions action, DriverInputs input) {
+    public Driver addControl(DriverAction action, DriverInput input) {
         inputList.add(input);
         actionList.add(action.toString());
 
@@ -44,7 +42,7 @@ public class Driver {
     }
 
     public void tickControls() {
-        DriverInputs currentInput;
+        DriverInput currentInput;
 
         for (int i = 0; i < inputList.size(); i++) {
             currentInput = inputList.get(i);

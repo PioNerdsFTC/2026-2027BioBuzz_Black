@@ -1,6 +1,6 @@
 package org.pionerds.ftc.teamcode.Driver;
 
-public enum DriverInputs {
+public enum DriverInput {
     LEFT_STICK_Y,
     LEFT_STICK_X,
     RIGHT_STICK_Y,

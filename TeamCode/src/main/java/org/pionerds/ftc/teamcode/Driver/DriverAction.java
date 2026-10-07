@@ -1,6 +1,6 @@
 package org.pionerds.ftc.teamcode.Driver;
 
-public enum DriverActions {
+public enum DriverAction {
     ENABLE_AIMBOT,
     DISABLE_AIMBOT,
     LAUNCH,
