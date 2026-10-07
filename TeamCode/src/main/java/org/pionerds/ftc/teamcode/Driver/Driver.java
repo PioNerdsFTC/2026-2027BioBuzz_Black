@@ -15,7 +15,7 @@ public class Driver{
     }
 
     public Driver addControl(DriverActions action, DriverInputs input){
-        inputList.add(input); actionList.add(parseEnum(action));
+        inputList.add(input); actionList.add(action.toString());
         return this;
     }
 
@@ -26,23 +26,5 @@ public class Driver{
 
             }
         }
-    }
-
-    public double leftStickX(){
-        return gamepad.left_stick_x;
-    }
-    public double leftStickY(){
-        return gamepad.left_stick_y;
-    }
-
-
-    private String parseEnum(Enum enumeratedValue){
-        String string = enumeratedValue.name();
-        string = string.toLowerCase();
-        while(string.contains("_")){
-            string = string.substring(0,string.indexOf("_")) + "-" +string.substring(string.indexOf("_") + 1);
-        }
-
-        return string;
     }
 }
