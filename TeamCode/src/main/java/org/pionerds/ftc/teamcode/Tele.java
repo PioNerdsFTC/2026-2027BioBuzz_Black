@@ -3,6 +3,9 @@ package org.pionerds.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.pionerds.ftc.teamcode.Driver.Driver;
+import org.pionerds.ftc.teamcode.Driver.DriverAction;
+import org.pionerds.ftc.teamcode.Driver.DriverInput;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Parameters;
