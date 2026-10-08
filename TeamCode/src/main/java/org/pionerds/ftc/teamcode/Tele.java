@@ -22,6 +22,9 @@ public class Tele extends LinearOpMode {
         Globals.add("telemetry", telemetry);
         Globals.add("hardware-map", hardwareMap);
 
+        Globals.add("gamepad1", gamepad1);
+        Globals.add("gamepad2", gamepad2);
+
         Scheduler.trigger("init", null);
 
         Logger.log("--- Initialized ---");
