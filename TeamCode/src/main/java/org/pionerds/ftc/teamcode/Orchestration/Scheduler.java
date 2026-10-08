@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
+import org.pionerds.ftc.teamcode.Driver.DriverConfigurations;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Vision.Vision;
@@ -283,6 +284,7 @@ public class Scheduler {
     static Hardware hardware = new Hardware();
     static Vision vision = new Vision();
     static Coordination coordination = new Coordination();
+    static DriverConfigurations driverConfigurations = new DriverConfigurations();
 
     static {
          Scheduler.addTask("pre-init", (obj) -> {

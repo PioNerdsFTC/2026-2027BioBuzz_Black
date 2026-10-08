@@ -29,7 +29,7 @@ public class Driver {
         });
     }
 
-    public Driver addControl(DriverAction action, DriverInput input) {
+    public Driver addControl(DriverInput input, DriverAction action) {
         inputList.add(input);
         actionList.add(action.toString());
 

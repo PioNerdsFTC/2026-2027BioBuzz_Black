@@ -12,7 +12,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 public class Auto extends LinearOpMode {
     @Override
     public void runOpMode() {
-        Parameters.currentOperatingEnvironment = "AUTO";
+        Parameters.operatingEnvironment = Parameters.OperatingEnvironment.AUTO;
 
         Scheduler.trigger("pre-init", null);
 
@@ -30,11 +30,14 @@ public class Auto extends LinearOpMode {
 
         Scheduler.trigger("pre-run", null);
 
+
         while (opModeIsActive() && Scheduler.continueRunning) {
             Scheduler.tickHook();
         }
 
         Logger.log("--- Exiting ---");
         Scheduler.trigger("exit", null);
+
+        Parameters.operatingEnvironment = Parameters.OperatingEnvironment.NONE;
     }
 }
