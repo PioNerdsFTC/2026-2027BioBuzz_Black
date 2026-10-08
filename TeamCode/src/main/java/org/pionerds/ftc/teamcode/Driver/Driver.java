@@ -87,7 +87,7 @@ public class Driver {
             case X:
                 return gamepad.x;
             case Y:
-                return gamepad.x;
+                return gamepad.y;
             case RIGHT_TRIGGER:
                 return false; // not a boolean
             case LEFT_TRIGGER:
