@@ -13,13 +13,5 @@ public class Drivetrain {
     static Driver driver;
 
     static {
-        Scheduler.addTask("init", (obj) -> {
-            DriverAction action = DriverAction.LAUNCH;
-            DriverInput input = DriverInput.A;
-
-            driver = new Driver(Globals.depend("gamepad0"));
-
-            driver.addControl(DriverAction.LAUNCH, DriverInput.A);
-        });
     }
 }
