@@ -23,22 +23,24 @@ public class Driver {
     public Driver(Gamepad gamepad) {
         this.gamepad = gamepad;
 
-//        UUID tick = Scheduler.addTask((obj) -> {
-//            this.tickControls();
-//        });
+        UUID tick = Scheduler.addTask((obj) -> {
+            this.tickControls();
+        });
 
-//        Scheduler.addTask("exit", (obj) -> {
-//            Scheduler.removeTask(tick);
-//        });
+        Scheduler.addTask("exit", (obj) -> {
+            Scheduler.removeTask(tick);
+        });
     }
 
-    public Driver addControl(DriverInput input, DriverAction action) {
+    public Driver addControl(DriverInput input, DriverAction action, boolean isToggle) {
         inputList.add(input);
         actionList.add(action.toString());
 
-        if (input.isToggle) {
+        if (isToggle) {
             past.put(input, false);
             current.put(input, false);
+
+            input.setToggle();
         }
 
         return this;
@@ -52,15 +54,13 @@ public class Driver {
 
             if (currentInput.isToggle) {
                 past.put(currentInput, current.get(currentInput));
-                past.put(currentInput, getMappedInput(currentInput));
+                current.put(currentInput, getMappedInput(currentInput));
 
-                if (past.get(currentInput) == current.get(currentInput)) {
+                if (past.get(currentInput) != current.get(currentInput) && getMappedInput(currentInput)) {
                     Scheduler.trigger(actionList.get(i), null);
                 }
                 continue;
             }
-
-            Log.d("DEBUG", "" + this.getMappedInput(currentInput));
 
             if (!this.getMappedInput(currentInput)) return;
 
