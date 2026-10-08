@@ -13,9 +13,12 @@ public class DriverConfigurations {
 
     static {
         Scheduler.addTask("init", (obj) -> {
+            Logger.log("Initializing DriverConfigurations");
+
             if (Parameters.operatingEnvironment != Parameters.OperatingEnvironment.TELE) {
                 return;
             }
+
             driver1 = new Driver(Globals.depend("gamepad1"));
             driver2 = new Driver(Globals.depend("gamepad2"));
 

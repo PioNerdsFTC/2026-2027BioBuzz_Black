@@ -11,8 +11,8 @@ import java.util.UUID;
 public class Driver {
 
     private Gamepad gamepad;
-    private ArrayList<DriverInput> inputList = new ArrayList<DriverInput>();
-    private ArrayList<String> actionList = new ArrayList<String>();
+    private ArrayList<DriverInput> inputList = new ArrayList<>();
+    private ArrayList<String> actionList = new ArrayList<>();
 
     private HashMap<DriverInput, Boolean> past = new HashMap<>();
     private HashMap<DriverInput, Boolean> current = new HashMap<>();
