@@ -1,7 +1,10 @@
 package org.pionerds.ftc.teamcode.Driver;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
@@ -56,6 +59,8 @@ public class Driver {
                 }
                 continue;
             }
+
+            Log.d("DEBUG", "" + this.getMappedInput(currentInput));
 
             if (!this.getMappedInput(currentInput)) return;
 
