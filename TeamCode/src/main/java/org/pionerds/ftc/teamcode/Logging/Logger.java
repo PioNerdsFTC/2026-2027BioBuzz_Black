@@ -74,15 +74,20 @@ public class Logger {
         AtomicReference<UUID> logNewError = new AtomicReference<>();
         AtomicReference<UUID> logClear = new AtomicReference<>();
 
-        Scheduler.addTask("init", (obj) -> {
+        Scheduler.addTask("init", (obj2) -> {
             telemetry = Globals.depend("telemetry");
             telemetry.setAutoClear(false);
+        });
+
+        Scheduler.addTask("pre-init", (obj) -> {
 
             logNewInfo.set(Scheduler.addTask("log:new:info", (info) -> {
                 Logger.logs.add((String) info);
                 Logger.level.add(LogType.INFO);
 
                 Log.i("PioNerds-runtime", (String) info);
+
+                if (telemetry == null) return;
 
                 telemetry.addLine((String) info);
                 telemetry.update();
@@ -93,6 +98,8 @@ public class Logger {
                 level.add(LogType.WARNING);
 
                 Log.w("PioNerds-runtime", (String) info);
+
+                if (telemetry == null) return;
 
                 telemetry.addLine((String) info);
                 telemetry.update();
@@ -110,12 +117,17 @@ public class Logger {
 
                 Log.e("PioNerds-runtime (Error)", (String) info);
 
+
+                if (telemetry == null) return;
+
                 telemetry.addLine((String) info);
                 telemetry.update();
             }));
 
             logClear.set(Scheduler.addTask("log:clear", (info) -> {
                 while (!logs.isEmpty()) logs.remove(0);
+
+                if (telemetry == null) return;
 
                 telemetry.clear();
                 telemetry.update();

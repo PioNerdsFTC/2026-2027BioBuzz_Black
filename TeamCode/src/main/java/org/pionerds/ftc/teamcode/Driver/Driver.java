@@ -20,13 +20,13 @@ public class Driver {
     public Driver(Gamepad gamepad) {
         this.gamepad = gamepad;
 
-        UUID tick = Scheduler.addTask((obj) -> {
-            this.tickControls();
-        });
+//        UUID tick = Scheduler.addTask((obj) -> {
+//            this.tickControls();
+//        });
 
-        Scheduler.addTask("exit", (obj) -> {
-            Scheduler.removeTask(tick);
-        });
+//        Scheduler.addTask("exit", (obj) -> {
+//            Scheduler.removeTask(tick);
+//        });
     }
 
     public Driver addControl(DriverInput input, DriverAction action) {
