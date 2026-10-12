@@ -1,10 +1,6 @@
 package org.pionerds.ftc.teamcode.Coordination;
 
-
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
-import org.pionerds.ftc.teamcode.Vision.Vision;
 
 import java.util.HashMap;
 
