@@ -31,7 +31,7 @@ public class Drivetrain {
 
     private static boolean permitDriving = true;
 
-    public void setPermitDriving(boolean allow){permitDriving = }
+    public void setPermitDriving(boolean allow){permitDriving = allow;}
 
     // INSERT METHOD HERE FOR CALLING OmniDrive.java.fieldCentricDrive();
 
