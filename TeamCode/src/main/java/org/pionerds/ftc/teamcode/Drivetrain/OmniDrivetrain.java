@@ -50,6 +50,7 @@ public class OmniDrivetrain {
         motorSpeed[2] *= magnitude;
         motorSpeed[3] *= magnitude;
 
+        updateMotors();
     }
 
     public static void rotateDrive(boolean flipDirection) {
