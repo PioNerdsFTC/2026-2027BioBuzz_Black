@@ -17,4 +17,11 @@ public class Drivetrain {
             Logger.log("Initializing drivetrain");
         });
     }
+
+    private boolean permitDriving = true;
+
+    // INSERT METHOD HERE FOR CALLING OmniDrive.java.fieldCentricDrive();
+
+    // INSERT METHOD HERE FOR CALLING OmniDrive.java.rotateWithBumpers();
+
 }
