@@ -19,10 +19,12 @@ public class DriverConfigurations {
                 return;
             }
 
-            driver1 = new Driver(Globals.depend("gamepad1"));
+            driver1 = new Driver(Globals.depend("gamepad1"))
+                    .addControl(DriverInput.A, DriverAction.LAUNCH, true)
+                    .addControl(DriverInput.B, DriverAction.DISABLE_AIMBOT, false);
+
             driver2 = new Driver(Globals.depend("gamepad2"));
 
-            driver1.addControl(DriverInput.A, DriverAction.LAUNCH);
         });
 
         UUID onLaunch = Scheduler.addTask("launch", (obj) -> {
