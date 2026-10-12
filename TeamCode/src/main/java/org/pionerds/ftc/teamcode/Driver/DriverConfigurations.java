@@ -21,7 +21,11 @@ public class DriverConfigurations {
 
             driver1 = new Driver(Globals.depend("gamepad1"))
                     .addControl(DriverInput.A, DriverAction.LAUNCH, true)
-                    .addControl(DriverInput.B, DriverAction.DISABLE_AIMBOT, false);
+                    .addControl(DriverInput.B, DriverAction.DISABLE_AIMBOT, false)
+
+                    // Driving
+                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, false)
+                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, false);
 
             driver2 = new Driver(Globals.depend("gamepad2"));
 

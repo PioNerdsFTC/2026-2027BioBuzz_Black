@@ -10,6 +10,7 @@ public class OmniDrivetrain {
     private static Driver driver;
     private static final DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
     private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
+    private static final double rotationSpeed = 1.0;
 
 
 
@@ -49,6 +50,18 @@ public class OmniDrivetrain {
         motorSpeed[2] *= magnitude;
         motorSpeed[3] *= magnitude;
 
+    }
+
+    public static void rotateDrive(boolean flipDirection) {
+        double rotSpeed = rotationSpeed;
+        if(flipDirection) rotSpeed = -rotSpeed;
+
+        motorSpeed[0] += rotSpeed;
+        motorSpeed[1] += rotSpeed;
+        motorSpeed[2] += rotSpeed;
+        motorSpeed[3] += rotSpeed;
+
+        // No need to update motors, as it will be called with the drive method.
     }
 
     // Returns an array of [x,y] that the robot should be moving toward. Factoring in the robot's angle. Only God can recreate this method.

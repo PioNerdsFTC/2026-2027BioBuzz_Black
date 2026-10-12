@@ -5,7 +5,9 @@ public enum DriverAction {
     DISABLE_AIMBOT,
     LAUNCH,
     ENABLE_INTAKE,
-    DISABLE_INTAKE;
+    DISABLE_INTAKE,
+    TURN_LEFT,
+    TURN_RIGHT;
 
     public String toString() {
         String string = this.name();

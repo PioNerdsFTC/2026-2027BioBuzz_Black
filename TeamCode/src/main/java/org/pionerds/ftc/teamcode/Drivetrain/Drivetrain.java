@@ -30,8 +30,34 @@ public class Drivetrain {
     }
 
     private static boolean permitDriving = true;
+    private static boolean permitRotating = true;
 
-    public void setPermitDriving(boolean allow){permitDriving = allow;}
+    public static void setPermitDriving(boolean allow){permitDriving = allow;}
+    public static void setPermitRotating(boolean allow){permitRotating = allow;}
+
+    private static boolean isLeftRotationNegative = false;
+
+    UUID onTurnLeft = Scheduler.addTask("turn-left", (obj) -> {
+        OmniDrivetrain.rotateDrive(isLeftRotationNegative);
+        Logger.log("turn-left");
+    });
+
+    UUID onTurnRight = Scheduler.addTask("turn-right", (obj) -> {
+        OmniDrivetrain.rotateDrive(!isLeftRotationNegative);
+        Logger.log("turn-right");
+    });
+
+    public static void driveRobot(){
+        if(permitRotating){
+            return;
+        }
+
+        if (permitDriving){
+            OmniDrivetrain.fieldCentricDrive();
+            return;
+        }
+    }
+
 
     // INSERT METHOD HERE FOR CALLING OmniDrive.java.fieldCentricDrive();
 
