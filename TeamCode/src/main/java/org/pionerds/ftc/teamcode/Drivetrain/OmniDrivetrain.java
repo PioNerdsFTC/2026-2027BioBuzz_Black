@@ -7,9 +7,9 @@ import org.pionerds.ftc.teamcode.Hardware.Hardware;
 
 public class OmniDrivetrain {
 
-    private Driver driver;
-    private final DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
-    private final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
+    private static Driver driver;
+    private static final DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
+    private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
 
 
 
@@ -21,7 +21,7 @@ public class OmniDrivetrain {
 
 
 
-    public void fieldCentricDrive(){
+    public static void fieldCentricDrive(){
         double x = driver.leftStickX();
         double y = driver.leftStickY();
         double gyroAngle = Hardware.yaw;
@@ -52,7 +52,7 @@ public class OmniDrivetrain {
     }
 
     // Returns an array of [x,y] that the robot should be moving toward. Factoring in the robot's angle. Only God can recreate this method.
-    public double[] getFieldCentricPositionRequest(double x, double y, double robotOrientation){
+    public static double[] getFieldCentricPositionRequest(double x, double y, double robotOrientation){
         x = -x;
         y = -y;
 
@@ -68,7 +68,7 @@ public class OmniDrivetrain {
 
     }
 
-    public void robotCentricDrive(){
+    public static void robotCentricDrive(){
         double x = driver.leftStickX();
         double y = driver.leftStickY();
 
@@ -86,13 +86,13 @@ public class OmniDrivetrain {
 
 
 
-    public void updateMotors(){
+    public static void updateMotors(){
         for (int i = 0; i < 4; i++) {
             motors[i].setPower(motorSpeed[i]);
         }
     }
 
-    public void normalizeMotors(){
+    public static void normalizeMotors(){
         // Don't judge me... >:(
         double max = (
                 motorSpeed[0]>motorSpeed[1] && motorSpeed[0]>motorSpeed[2] && motorSpeed[0]>=motorSpeed[3] ? motorSpeed[0] :
@@ -109,7 +109,7 @@ public class OmniDrivetrain {
         motorSpeed[3] /= max;
     }
 
-    public void emergencyStop() {
+    public static void emergencyStop() {
         motorSpeed[0] = 0.00;
         motorSpeed[1] = 0.00;
         motorSpeed[2] = 0.00;
@@ -120,7 +120,7 @@ public class OmniDrivetrain {
         // Spawn new thread here to lock motors from being updated.
     }
 
-    public void nonEmergencyStop() {
+    public static void nonEmergencyStop() {
         motorSpeed[0] = 0.00;
         motorSpeed[1] = 0.00;
         motorSpeed[2] = 0.00;
