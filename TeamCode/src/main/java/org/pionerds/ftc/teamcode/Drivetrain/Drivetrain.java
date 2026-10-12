@@ -10,7 +10,6 @@ import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 public class Drivetrain {
-    Gamepad gamepad = new Gamepad();
     static Driver driver;
 
     static {
