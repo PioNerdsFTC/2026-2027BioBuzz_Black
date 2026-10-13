@@ -10,7 +10,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 public class OmniDrivetrain {
 
     private static Driver driver;
-    private static final DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
+    private static DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
     private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
     private static final double rotationSpeed = 1.0;
 
