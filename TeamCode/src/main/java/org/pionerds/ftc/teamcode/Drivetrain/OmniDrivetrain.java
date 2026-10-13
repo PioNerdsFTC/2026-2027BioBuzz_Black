@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.pionerds.ftc.teamcode.Driver.Driver;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Orchestration.Globals;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 public class OmniDrivetrain {
 
@@ -15,9 +17,9 @@ public class OmniDrivetrain {
 
 
     static {
-
-
-
+        Scheduler.addTask("init", (obj) -> {
+            driver = Globals.depend("driver1");
+        });
     }
 
 

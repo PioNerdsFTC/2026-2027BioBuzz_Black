@@ -27,6 +27,8 @@ public class DriverConfigurations {
                     .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, false)
                     .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, false);
 
+            Globals.add("driver1", driver1);
+
             driver2 = new Driver(Globals.depend("gamepad2"));
 
         });
