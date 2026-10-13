@@ -14,8 +14,8 @@ public class OmniDrivetrain {
     private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
     private static final double rotationSpeed = 1.0;
 
-    private static boolean flipDirection = false;
-    private static boolean turning = false;
+    public static boolean flipDirection = false;
+    public static boolean turning = false;
 
     static {
         Scheduler.addTask("init", (obj) -> {
@@ -73,11 +73,6 @@ public class OmniDrivetrain {
 
         normalizeMotors();
         updateMotors();
-    }
-
-    public static void rotateDrive(boolean flipDirection) {
-        OmniDrivetrain.flipDirection = flipDirection;
-        OmniDrivetrain.turning = true;
     }
 
     // Returns an array of [x,y] that the robot should be moving toward. Factoring in the robot's angle. Only God can recreate this method.

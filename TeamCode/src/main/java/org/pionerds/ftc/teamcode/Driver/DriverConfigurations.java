@@ -24,8 +24,8 @@ public class DriverConfigurations {
                     .addControl(DriverInput.B, DriverAction.DISABLE_AIMBOT, false)
 
                     // Driving
-                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, false)
-                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, false);
+                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, true)
+                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, true);
 
             Globals.add("driver1", driver1);
 

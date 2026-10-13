@@ -36,7 +36,9 @@ public class Drivetrain {
         AtomicReference<UUID> tick = new AtomicReference<>();
 
         AtomicReference<UUID> onTurnLeft = new AtomicReference<>();
+        AtomicReference<UUID> onTurnLeftUp = new AtomicReference<>();
         AtomicReference<UUID> onTurnRight = new AtomicReference<>();
+        AtomicReference<UUID> onTurnRightUp = new AtomicReference<>();
 
         Scheduler.addTask("init", (obj) -> {
 
@@ -53,14 +55,24 @@ public class Drivetrain {
                 OmniDrivetrain.fieldCentricDrive();
             }));
 
-            onTurnLeft.set(Scheduler.addTask("turn-left", (obj2) -> {
-                OmniDrivetrain.rotateDrive(isLeftRotationNegative);
+            onTurnLeft.set(Scheduler.addTask("turn-left:down", (obj2) -> {
+                OmniDrivetrain.flipDirection = isLeftRotationNegative;
+                OmniDrivetrain.turning = true;
                 Logger.log("turn-left");
             }));
 
-            onTurnRight.set(Scheduler.addTask("turn-right", (obj2) -> {
-                OmniDrivetrain.rotateDrive(!isLeftRotationNegative);
+            onTurnLeftUp.set(Scheduler.addTask("turn-left:up", (obj2) -> {
+                OmniDrivetrain.turning = false;
+            }));
+
+            onTurnRight.set(Scheduler.addTask("turn-right:down", (obj2) -> {
+                OmniDrivetrain.flipDirection = !isLeftRotationNegative;
+                OmniDrivetrain.turning = true;
                 Logger.log("turn-right");
+            }));
+
+            onTurnRightUp.set(Scheduler.addTask("turn-right:up", (obj2) -> {
+                OmniDrivetrain.turning = false;
             }));
 
             Logger.log("Initializing drivetrain");
