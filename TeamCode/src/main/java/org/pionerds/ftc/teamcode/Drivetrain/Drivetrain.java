@@ -3,6 +3,7 @@ package org.pionerds.ftc.teamcode.Drivetrain;
 import org.pionerds.ftc.teamcode.Driver.Driver;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.UUID;
@@ -17,6 +18,8 @@ public class Drivetrain {
 
         Scheduler.addTask("init", (obj) -> {
             Logger.log("Initializing drivetrain");
+
+            driver = Globals.depend("driver1");
 
             OmniDrivetrain.setMotors(
                Hardware.mapping.getMotor("motor0"),

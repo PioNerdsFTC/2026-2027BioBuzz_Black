@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.pionerds.ftc.teamcode.Driver.Driver;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Orchestration.Globals;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 public class OmniDrivetrain {
 
@@ -12,7 +14,11 @@ public class OmniDrivetrain {
     private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
     private static final double rotationSpeed = 1.0;
 
-    static { }
+    static {
+        Scheduler.addTask("init", (obj) -> {
+            driver = Globals.depend("driver1");
+        });
+    }
 
     public static void setMotors(
             DcMotorEx motor0,

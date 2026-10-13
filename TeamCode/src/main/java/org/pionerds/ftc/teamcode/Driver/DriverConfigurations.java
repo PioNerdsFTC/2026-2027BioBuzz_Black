@@ -29,6 +29,9 @@ public class DriverConfigurations {
 
             driver2 = new Driver(Globals.depend("gamepad2"));
 
+            Globals.add("driver1", driver1);
+            Globals.add("driver2", driver2);
+
         });
 
         UUID onLaunch = Scheduler.addTask("launch", (obj) -> {
