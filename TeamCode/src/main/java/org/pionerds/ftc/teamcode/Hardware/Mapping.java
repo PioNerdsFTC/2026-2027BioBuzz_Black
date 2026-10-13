@@ -37,26 +37,28 @@ public class Mapping {
         this.map = map;
     }
 
-    /**
-     * @param motorName              The name of the motor.
+    /*
      * @param gearRatio              The gear ratio of the motor.
      * @param motorDirection         The direction of the motor.
      * @param motorZeroPowerBehavior The zero power behavior of the motor.
+     */
+    /**
+     * @param motorName              The name of the motor.
      * @return The motor object.
      */
     public DcMotorImplEx getMotor(
-            String motorName,
-            Double gearRatio,
-            DcMotorSimple.Direction motorDirection,
-            DcMotor.ZeroPowerBehavior motorZeroPowerBehavior
+            String motorName
+//            Double gearRatio,
+//            DcMotorSimple.Direction motorDirection,
+//            DcMotor.ZeroPowerBehavior motorZeroPowerBehavior
     ) {
         DcMotorImplEx motor = null;
 
         try {
             motor = this.map.get(DcMotorImplEx.class, motorName);
-            motor.setDirection(motorDirection);
-            motor.setZeroPowerBehavior(motorZeroPowerBehavior);
-            motor.getMotorType().setGearing(gearRatio);
+//            motor.setDirection(motorDirection);
+//            motor.setZeroPowerBehavior(motorZeroPowerBehavior);
+//            motor.getMotorType().setGearing(gearRatio);
         } catch (Exception e) {
             Logger.error("Cannot map motor: " + motorName);
         }

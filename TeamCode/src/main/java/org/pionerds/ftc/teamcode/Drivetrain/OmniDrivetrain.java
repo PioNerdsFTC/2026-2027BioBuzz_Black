@@ -14,12 +14,15 @@ public class OmniDrivetrain {
     private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
     private static final double rotationSpeed = 1.0;
 
+    static { }
 
-
-    static {
-        Scheduler.addTask("init", (obj) -> {
-            driver = Globals.depend("driver1");
-        });
+    public static void setMotors(
+            DcMotorEx motor0,
+            DcMotorEx motor1,
+            DcMotorEx motor2,
+            DcMotorEx motor3
+    ) {
+        motors = new DcMotorEx[] { motor0, motor1, motor2, motor3 };
     }
 
 

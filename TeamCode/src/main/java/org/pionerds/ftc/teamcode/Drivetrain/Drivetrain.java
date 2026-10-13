@@ -1,6 +1,7 @@
 package org.pionerds.ftc.teamcode.Drivetrain;
 
 import org.pionerds.ftc.teamcode.Driver.Driver;
+import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
@@ -17,8 +18,15 @@ public class Drivetrain {
         Scheduler.addTask("init", (obj) -> {
             Logger.log("Initializing drivetrain");
 
+            OmniDrivetrain.setMotors(
+               Hardware.mapping.getMotor("motor0"),
+               Hardware.mapping.getMotor("motor1"),
+               Hardware.mapping.getMotor("motor2"),
+               Hardware.mapping.getMotor("motor3")
+            );
+
             tick.set(Scheduler.addTask((obj2) -> {
-                Drivetrain.omni.fieldCentricDrive();
+                OmniDrivetrain.fieldCentricDrive();
             }));
         });
 
