@@ -39,7 +39,6 @@ public class Drivetrain {
         AtomicReference<UUID> onTurnRight = new AtomicReference<>();
 
         Scheduler.addTask("init", (obj) -> {
-            Logger.log("Initializing drivetrain");
 
             driver = Globals.depend("driver1");
 
@@ -63,9 +62,11 @@ public class Drivetrain {
                 OmniDrivetrain.rotateDrive(!isLeftRotationNegative);
                 Logger.log("turn-right");
             }));
+
+            Logger.log("Initializing drivetrain");
         });
 
-        Scheduler.addTask("exit", (obj3) -> {
+        Scheduler.addTask("exit", (obj) -> {
             if (tick.get() != null) {
                 Scheduler.removeTask(tick.get());
             }

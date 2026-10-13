@@ -56,8 +56,13 @@ public class Driver {
                 past.put(currentInput, current.get(currentInput));
                 current.put(currentInput, getMappedInput(currentInput));
 
-                if (past.get(currentInput) != current.get(currentInput) && getMappedInput(currentInput)) {
-                    Scheduler.trigger(actionList.get(i), null);
+                if (past.get(currentInput) != current.get(currentInput)) {
+                    if (getMappedInput(currentInput)) {
+                        Scheduler.trigger(actionList.get(i) + ":down", null);
+                    }
+                    if (!getMappedInput(currentInput)) {
+                        Scheduler.trigger(actionList.get(i) + ":up", null);
+                    }
                 }
                 continue;
             }
