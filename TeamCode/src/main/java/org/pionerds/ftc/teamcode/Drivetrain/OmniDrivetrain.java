@@ -50,10 +50,10 @@ public class OmniDrivetrain {
         double magnitude = fieldCentricPositionRequest[2];
 
 
-        motorSpeed[0] += (-x - y);
-        motorSpeed[1] += (-x + y);
-        motorSpeed[2] += (x + y);
-        motorSpeed[3] += (x - y);
+        motorSpeed[0] = (-x - y);
+        motorSpeed[1] = (-x + y);
+        motorSpeed[2] = (x + y);
+        motorSpeed[3] = (x - y);
 
         motorSpeed[0] *= magnitude;
         motorSpeed[1] *= magnitude;
@@ -101,10 +101,10 @@ public class OmniDrivetrain {
             return;
         }
 
-        motorSpeed[0] += (-x - y);
-        motorSpeed[1] += (-x + y);
-        motorSpeed[2] += (x + y);
-        motorSpeed[3] += (x - y);
+        motorSpeed[0] = (-x - y);
+        motorSpeed[1] = (-x + y);
+        motorSpeed[2] = (x + y);
+        motorSpeed[3] = (x - y);
     }
 
     public static void updateMotors() {
@@ -114,15 +114,15 @@ public class OmniDrivetrain {
     }
 
     public static void normalizeMotors() {
-        // Don't judge me... >:(
-        double max = (
-                motorSpeed[0]>motorSpeed[1] && motorSpeed[0]>motorSpeed[2] && motorSpeed[0]>=motorSpeed[3] ? motorSpeed[0] :
-                        (motorSpeed[1]>motorSpeed[0] && motorSpeed[1]>motorSpeed[2] && motorSpeed[1]>=motorSpeed[3] ? motorSpeed[1] :
-                                (motorSpeed[2]>motorSpeed[0] && motorSpeed[2]>motorSpeed[1] && motorSpeed[2]>=motorSpeed[3] ? motorSpeed[2] :
-                                        (motorSpeed[3]>motorSpeed[0] && motorSpeed[3]>motorSpeed[1] && motorSpeed[3]>=motorSpeed[2] ? motorSpeed[3] : 0.00)
-                                )
-                        )
-                );
+        double max = 0.00;
+
+        for (int i = 0; i < 4; i++) {
+            double speed = Math.abs(motorSpeed[i]);
+
+            if (speed > max) max = speed;
+        }
+
+        if (max <= 1.00) return;
 
         motorSpeed[0] /= max;
         motorSpeed[1] /= max;

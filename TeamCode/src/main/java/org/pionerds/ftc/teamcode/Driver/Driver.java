@@ -67,7 +67,7 @@ public class Driver {
                 continue;
             }
 
-            if (!this.getMappedInput(currentInput)) return;
+            if (!this.getMappedInput(currentInput)) continue;
 
             Scheduler.trigger(actionList.get(i), null);
         }
