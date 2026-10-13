@@ -13,33 +13,6 @@ public class Drivetrain {
     static Driver driver;
     public static OmniDrivetrain omni = new OmniDrivetrain();
 
-    static {
-        AtomicReference<UUID> tick = new AtomicReference<>();
-
-        Scheduler.addTask("init", (obj) -> {
-            Logger.log("Initializing drivetrain");
-
-            driver = Globals.depend("driver1");
-
-            OmniDrivetrain.setMotors(
-               Hardware.mapping.getMotor("motor0"),
-               Hardware.mapping.getMotor("motor1"),
-               Hardware.mapping.getMotor("motor2"),
-               Hardware.mapping.getMotor("motor3")
-            );
-
-            tick.set(Scheduler.addTask((obj2) -> {
-                OmniDrivetrain.fieldCentricDrive();
-            }));
-        });
-
-        Scheduler.addTask("exit", (obj3) -> {
-            if (tick.get() != null) {
-                Scheduler.removeTask(tick.get());
-            }
-        });
-    }
-
     private static boolean permitDriving = true;
     private static boolean permitRotating = true;
 
@@ -48,25 +21,62 @@ public class Drivetrain {
 
     private static boolean isLeftRotationNegative = false;
 
-    UUID onTurnLeft = Scheduler.addTask("turn-left", (obj) -> {
-        OmniDrivetrain.rotateDrive(isLeftRotationNegative);
-        Logger.log("turn-left");
-    });
-
-    UUID onTurnRight = Scheduler.addTask("turn-right", (obj) -> {
-        OmniDrivetrain.rotateDrive(!isLeftRotationNegative);
-        Logger.log("turn-right");
-    });
-
-    public static void driveRobot(){
-        if(permitRotating){
+    public static void driveRobot() {
+        if (permitRotating) {
             return;
         }
 
-        if (permitDriving){
+        if (permitDriving) {
             OmniDrivetrain.fieldCentricDrive();
             return;
         }
+    }
+
+    static {
+        AtomicReference<UUID> tick = new AtomicReference<>();
+
+        AtomicReference<UUID> onTurnLeft = new AtomicReference<>();
+        AtomicReference<UUID> onTurnRight = new AtomicReference<>();
+
+        Scheduler.addTask("init", (obj) -> {
+            Logger.log("Initializing drivetrain");
+
+            driver = Globals.depend("driver1");
+
+            OmniDrivetrain.setMotors(
+                    Hardware.mapping.getMotor("motor0"),
+                    Hardware.mapping.getMotor("motor1"),
+                    Hardware.mapping.getMotor("motor2"),
+                    Hardware.mapping.getMotor("motor3")
+            );
+
+            tick.set(Scheduler.addTask((obj2) -> {
+                OmniDrivetrain.fieldCentricDrive();
+            }));
+
+            onTurnLeft.set(Scheduler.addTask("turn-left", (obj2) -> {
+                OmniDrivetrain.rotateDrive(isLeftRotationNegative);
+                Logger.log("turn-left");
+            }));
+
+            onTurnRight.set(Scheduler.addTask("turn-right", (obj2) -> {
+                OmniDrivetrain.rotateDrive(!isLeftRotationNegative);
+                Logger.log("turn-right");
+            }));
+        });
+
+        Scheduler.addTask("exit", (obj3) -> {
+            if (tick.get() != null) {
+                Scheduler.removeTask(tick.get());
+            }
+            if (onTurnRight.get() != null) {
+                Scheduler.removeTask(onTurnRight.get());
+            }
+
+            if (onTurnLeft.get() != null) {
+                Scheduler.removeTask(onTurnLeft.get());
+            }
+        });
     }
 
 
