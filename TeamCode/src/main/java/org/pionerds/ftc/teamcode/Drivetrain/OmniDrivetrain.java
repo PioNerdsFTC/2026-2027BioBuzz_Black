@@ -47,8 +47,8 @@ public class OmniDrivetrain {
 
         x = fieldCentricPositionRequest[0];
         y = fieldCentricPositionRequest[1];
-        double magnitude = fieldCentricPositionRequest[2];
 
+        double magnitude = fieldCentricPositionRequest[2];
 
         motorSpeed[0] = (-x - y);
         motorSpeed[1] = (-x + y);
