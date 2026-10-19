@@ -267,7 +267,7 @@ public class Scheduler {
     }
 
     public static void stopExecution() {
-//        Scheduler.continueRunning = false;
+        Scheduler.continueRunning = false;
     }
 
     // --- DO NOT DELETE UNLESS YOU HAVE A VERY VALID REASON --- //
