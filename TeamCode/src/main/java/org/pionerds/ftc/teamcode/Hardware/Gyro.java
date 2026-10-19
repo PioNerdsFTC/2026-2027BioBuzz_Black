@@ -3,6 +3,7 @@ package org.pionerds.ftc.teamcode.Hardware;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 
@@ -53,9 +54,9 @@ public class Gyro {
         YawPitchRollAngles newGyroData = gyro.getRobotYawPitchRollAngles();
 //        double[] oldGyroData = DataStorage.getAllStoredAngles();
 
-        result[0] = /* oldGyroData[0] + */ newGyroData.getYaw();
-        result[1] = /* oldGyroData[1] + */ newGyroData.getPitch();
-        result[2] = /* oldGyroData[2] + */ newGyroData.getRoll();
+        result[0] = /* oldGyroData[0] + */ newGyroData.getYaw(AngleUnit.RADIANS);
+        result[1] = /* oldGyroData[1] + */ newGyroData.getPitch(AngleUnit.RADIANS);
+        result[2] = /* oldGyroData[2] + */ newGyroData.getRoll(AngleUnit.RADIANS);
 
         return result;
     }

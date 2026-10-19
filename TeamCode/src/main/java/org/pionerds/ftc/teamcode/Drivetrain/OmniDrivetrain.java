@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.pionerds.ftc.teamcode.Driver.Driver;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
@@ -39,6 +40,7 @@ public class OmniDrivetrain {
 
         // Tolerance-Dead Zone
         if (Math.abs(x) < 0.2 && Math.abs(y) < 0.2) {
+            Logger.log("Inside Dead Zone (Driving)");
             nonEmergencyStop();
             return;
         }
@@ -50,17 +52,19 @@ public class OmniDrivetrain {
         double magnitude = fieldCentricPositionRequest[2];
 
 
-        motorSpeed[0] = (-x - y);
-        motorSpeed[1] = (-x + y);
-        motorSpeed[2] = (x + y);
-        motorSpeed[3] = (x - y);
+        motorSpeed[0] = (x + y);
+        motorSpeed[1] = (x - y);
+        motorSpeed[2] = (-x - y);
+        motorSpeed[3] = (-x + y);
 
         motorSpeed[0] *= magnitude;
         motorSpeed[1] *= magnitude;
         motorSpeed[2] *= magnitude;
         motorSpeed[3] *= magnitude;
+        Logger.log("DRIVING ROBOT");
 
         if (turning) {
+            Logger.log("TURNING ROBOT");
             double rotSpeed = rotationSpeed;
 
             if (flipDirection) rotSpeed = -rotSpeed;
