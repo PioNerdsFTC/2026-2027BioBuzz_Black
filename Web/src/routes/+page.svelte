@@ -48,6 +48,10 @@
 					console.log(object);
 					logs.push({ tag: object.tag, content: object.msg, type: object.type });
 				}
+
+				if (json.type === '') {
+
+				}
 			};
 
 			ws!.onclose = () => {
@@ -85,17 +89,19 @@
 		</div>
 	</div>
 	<div class="flex h-full w-full justify-between font-mono">
-		<div class="flex flex-row grow">
-			<div class="border-b border-l border-primary-500 py-4 pl-3">
+		<div class="flex flex-col grow">
+			<div class="border-b border-primary-500 py-4 pl-3">
 				<h1 class="ml-4 text-2xl text-text-500">Robot</h1>
 			</div>
 
 			<div class="w-full h-full flex justify-center items-center">
-				<Robot />
+				<div class="border-x border-primary-500 text-text relative">
+					<Robot />
+				</div>
 			</div>	
 		</div>
-		<div class="mb-4 ml-4 flex w-[40vw] max-w-[40vw] flex-col gap-0 pl-2 text-text-500">
-			<div class="border-b border-l border-primary-500 py-4 pl-3">
+		<div class="mb-4 ml-4 flex flex-col w-[40vw] max-w-[40vw] gap-0 pl-2 text-text-500">
+			<div class="border-b border-primary-500 py-4 pl-3">
 				<h1 class="ml-4 text-2xl text-text-500">Logs</h1>
 			</div>
 			<table class="mr-0 h-full border-primary-500 border-l p-4 ml-auto w-full">

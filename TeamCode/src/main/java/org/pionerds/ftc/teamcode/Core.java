@@ -32,11 +32,13 @@ import java.util.Locale;
 import fi.iki.elonen.NanoHTTPD;
 
 public class Core {
-    private static final String TAG = "Core";
+    private static final String TAG = "PioCore";
     private static final String ASSET_ROOT = "web";
     private static final String ROUTE_PREFIX = "/dashboard";
     private static final String INDEX_FILE = "index.html";
     private static final String WS_NAMESPACE = "dashboard";
+
+    private static Menu menu;
 
     private static volatile WebSocketManager webSocketManager;
     private static volatile boolean webSocketRegistered = false;
@@ -90,6 +92,12 @@ public class Core {
         }
 
         manager.register(ROUTE_PREFIX + "/api/get-health", session -> NanoHTTPD.newFixedLengthResponse("ok"));
+
+        manager.register(ROUTE_PREFIX + "/api/trigger-init", session -> {
+                menu
+                return NanoHTTPD.newFixedLengthResponse("ok");
+            }
+        );
 
         WebSocketManager sockets = manager.getWebServer().getWebSocketManager();
 
