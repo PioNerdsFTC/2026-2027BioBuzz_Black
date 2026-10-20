@@ -94,7 +94,13 @@ public class Core {
         manager.register(ROUTE_PREFIX + "/api/get-health", session -> NanoHTTPD.newFixedLengthResponse("ok"));
 
         manager.register(ROUTE_PREFIX + "/api/trigger-init", session -> {
-                menu
+                String menuItems = "";
+
+                for (int i = 0;; i++) {
+                    if (menu.getItem(i) == null) break;
+                    menuItems += "," + menu.getItem(i);
+                }
+
                 return NanoHTTPD.newFixedLengthResponse("ok");
             }
         );

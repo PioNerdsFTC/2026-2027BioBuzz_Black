@@ -51,6 +51,7 @@ public class Scheduler {
 
     private static final ElapsedTime time = new ElapsedTime();
     private static int iterateDepth = 0;
+    private static int x = 0;
 
     public static boolean continueRunning = true;
 
@@ -236,6 +237,7 @@ public class Scheduler {
         Iterator<Task<?>> iterator = tasks.iterator();
 
         iterateDepth++;
+        x++;
 
         try {
             while (iterator.hasNext()) {
@@ -263,6 +265,11 @@ public class Scheduler {
             iterateDepth--;
 
             if (iterateDepth == 0) flushQueues();
+
+            if (x == 20) {
+                Log.i("SCHEDULER", "Took " + (time.milliseconds() - now));
+                x = 0;
+            }
         }
     }
 
