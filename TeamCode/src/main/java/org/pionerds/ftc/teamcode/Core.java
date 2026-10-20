@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.webkit.MimeTypeMap;
 
 import com.qualcomm.ftccommon.FtcEventLoop;
@@ -27,13 +28,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import fi.iki.elonen.NanoHTTPD;
 
-public class Dashboard {
-    private static final String TAG = "Dashboard";
+public class Core {
+    private static final String TAG = "Core";
     private static final String ASSET_ROOT = "web";
     private static final String ROUTE_PREFIX = "/dashboard";
     private static final String INDEX_FILE = "index.html";
@@ -44,30 +43,18 @@ public class Dashboard {
 
     @OnCreate
     public static void start(Context context) {
-        Log.i(TAG, "starting");
+        Log.i(TAG, "Initializing hooks");
 
-        AtomicReference<UUID> newInfo = new AtomicReference<>();
-        AtomicReference<UUID> errorInfo = new AtomicReference<>();
-        AtomicReference<UUID> warnInfo = new AtomicReference<>();
+        Scheduler.addTask("log:new:info", (str) -> {
+            Core.broadcast("log", "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+        });
 
-        Scheduler.addTask("init", (obj) -> {
-            newInfo.set(Scheduler.addTask("log:new:info", (str) -> {
-                Dashboard.broadcast("log", "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
-            }));
+        Scheduler.addTask("log:new:warn", (str) -> {
+            Core.broadcast("log", "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+        });
 
-            warnInfo.set(Scheduler.addTask("log:new:warn", (str) -> {
-                Dashboard.broadcast("log", "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
-            }));
-
-            errorInfo.set(Scheduler.addTask("log:new:error", (str) -> {
-                Dashboard.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
-            }));
-
-            Scheduler.addTask("exit", (obj2) -> {
-                Scheduler.removeTask(newInfo.get());
-                Scheduler.removeTask(warnInfo.get());
-                Scheduler.removeTask(errorInfo.get());
-            });
+        Scheduler.addTask("log:new:error", (str) -> {
+            Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
         });
     }
 
@@ -75,7 +62,11 @@ public class Dashboard {
     public static void stop(Context context) {}
 
     @OnCreateMenu
-    public static void populateMenu(Context context, Menu menu) {}
+    public static void populateMenu(Context context, Menu menu) {
+        MenuItem menuItem = menu.add("Test");
+
+        menuItem.setTitle("huh");
+    }
 
     @WebHandlerRegistrar
     public static void attachWebServer(Context context, WebHandlerManager manager) {

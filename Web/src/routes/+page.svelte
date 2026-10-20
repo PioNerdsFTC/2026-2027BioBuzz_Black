@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import Robot from './Robot.svelte';
 
 	let healthy = $state(false);
 	let ws: WebSocket | undefined = $state();
+	let healthInterval: number | undefined;
 
 	onMount(() => {
-		setInterval(async () => {
+		healthInterval = setInterval(async () => {
 			const response = await fetch('/dashboard/api/get-health');
 
 			if (response.ok) {
@@ -55,6 +57,10 @@
 				}, 1000);
 			};
 		}
+
+		return () => {
+			clearInterval(healthInterval);
+		}
 	});
 
 	const logs: {
@@ -78,42 +84,49 @@
 			{/if}
 		</div>
 	</div>
-	<div class="flex h-full w-full justify-end font-mono">
+	<div class="flex h-full w-full justify-between font-mono">
+		<div class="flex flex-row grow">
+			<div class="border-b border-l border-primary-500 py-4 pl-3">
+				<h1 class="ml-4 text-2xl text-text-500">Robot</h1>
+			</div>
+
+			<div class="w-full h-full flex justify-center items-center">
+				<Robot />
+			</div>	
+		</div>
 		<div class="mb-4 ml-4 flex w-[40vw] max-w-[40vw] flex-col gap-0 pl-2 text-text-500">
 			<div class="border-b border-l border-primary-500 py-4 pl-3">
 				<h1 class="ml-4 text-2xl text-text-500">Logs</h1>
 			</div>
-			<div class="h-full border-l border-primary-500 p-4">
-				<table class="mr-0 ml-auto w-full">
-					<tbody>
-						{#each logs as log}
-							<tr in:fade>
-								<td class="py-1 pr-1 pl-2">
-									<span
-										class="h-full rounded-md px-1.25 py-0.5 text-black
-                                        {log.type === 'debug' ? 'bg-blue-300' : ''}
-                                        {log.type === 'info' ? 'bg-blue-500' : ''}
-                                        {log.type === 'warn' ? 'bg-yellow-500' : ''}
-                                        {log.type === 'error' ? 'bg-red-500' : ''}
-                                    "
-									>
-										{log.type.charAt(0).toUpperCase()}
-									</span>
-									<span class="mx-4 my-1 rounded-sm border border-accent-500 px-1 py-0.5">
-										{log.tag}
-									</span>
-								</td>
-								<td
-									class="px-1 py-1 
-									{log.type === 'debug' ? 'text-text-700' : ''}
-									{log.type === 'error' ? 'text-red-500' : ''}">
-									{log.content}
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
+			<table class="mr-0 h-full border-primary-500 border-l p-4 ml-auto w-full">
+				<tbody>
+					{#each logs as log}
+						<tr in:fade>
+							<td class="py-1 pr-1 pl-2">
+								<span
+									class="h-full rounded-md px-1.25 py-0.5 text-black
+                                       {log.type === 'debug' ? 'bg-blue-300' : ''}
+                                       {log.type === 'info' ? 'bg-blue-500' : ''}
+                                       {log.type === 'warn' ? 'bg-yellow-500' : ''}
+                                       {log.type === 'error' ? 'bg-red-500' : ''}
+                                   "
+								>
+									{log.type.charAt(0).toUpperCase()}
+								</span>
+								<span class="mx-4 my-1 rounded-sm border border-accent-500 px-1 py-0.5">
+									{log.tag}
+								</span>
+							</td>
+							<td
+								class="px-1 py-1 
+								{log.type === 'debug' ? 'text-text-700' : ''}
+								{log.type === 'error' ? 'text-red-500' : ''}">
+								{log.content}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
 		</div>
 	</div>
 </div>
