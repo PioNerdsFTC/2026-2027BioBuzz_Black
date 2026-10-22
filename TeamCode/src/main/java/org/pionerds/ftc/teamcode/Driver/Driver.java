@@ -74,10 +74,14 @@ public class Driver {
     }
 
     public double leftStickX() {
-        return gamepad.left_stick_x;
+        return nonLinearScaleStick(gamepad.left_stick_x);
     }
     public double leftStickY() {
-        return gamepad.left_stick_y;
+        return nonLinearScaleStick(gamepad.left_stick_y);
+    }
+
+    public double nonLinearScaleStick(double input){
+        return Math.pow(input,2);
     }
 
     private boolean getMappedInput(DriverInput input) {
