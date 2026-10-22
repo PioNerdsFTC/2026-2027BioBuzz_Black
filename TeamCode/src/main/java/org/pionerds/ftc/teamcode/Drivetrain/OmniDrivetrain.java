@@ -39,29 +39,36 @@ public class OmniDrivetrain {
         double gyroAngle = Hardware.yaw;
 
         // Tolerance-Dead Zone
-        if (Math.abs(x) < 0.2 && Math.abs(y) < 0.2) {
+        if (Math.abs(x) < 0.05 && Math.abs(y) < 0.05) {
             Logger.log("Inside Dead Zone (Driving)");
-            nonEmergencyStop();
-            return;
+
+            for(int i = 0; i< motors.length; i++){
+                motorSpeed[i] = 0.00;
+            }
+
+            if(!turning) return;
+        } else {
+
+            double[] fieldCentricPositionRequest = getFieldCentricPositionRequest(x, y, gyroAngle);
+
+            x = fieldCentricPositionRequest[0];
+            y = fieldCentricPositionRequest[1];
+
+            double magnitude = fieldCentricPositionRequest[2];
+
+            motorSpeed[0] = (x + y);
+            motorSpeed[1] = (x - y);
+            motorSpeed[2] = (-x - y);
+            motorSpeed[3] = (-x + y);
+
+            motorSpeed[0] *= magnitude;
+            motorSpeed[1] *= magnitude;
+            motorSpeed[2] *= magnitude;
+            motorSpeed[3] *= magnitude;
+            Logger.log("DRIVING ROBOT");
+
+
         }
-
-        double[] fieldCentricPositionRequest = getFieldCentricPositionRequest(x, y, gyroAngle);
-
-        x = fieldCentricPositionRequest[0];
-        y = fieldCentricPositionRequest[1];
-
-        double magnitude = fieldCentricPositionRequest[2];
-
-        motorSpeed[0] = (x + y);
-        motorSpeed[1] = (x - y);
-        motorSpeed[2] = (-x - y);
-        motorSpeed[3] = (-x + y);
-
-        motorSpeed[0] *= magnitude;
-        motorSpeed[1] *= magnitude;
-        motorSpeed[2] *= magnitude;
-        motorSpeed[3] *= magnitude;
-        Logger.log("DRIVING ROBOT");
 
         if (turning) {
             Logger.log("TURNING ROBOT");
