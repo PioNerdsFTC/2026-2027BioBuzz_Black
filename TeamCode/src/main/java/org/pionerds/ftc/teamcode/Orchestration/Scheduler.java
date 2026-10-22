@@ -299,7 +299,10 @@ public class Scheduler {
 
     static {
          Scheduler.addTask("pre-init", (obj) -> {
-            tasks.removeIf(task -> task.type == ExecutionType.TIMED);
+             for (Task<?> task : tasks) {
+                 if (task.type == ExecutionType.TIMED) removeTask(task.id);
+             }
+
             time.reset();
 
             Scheduler.running = false;
