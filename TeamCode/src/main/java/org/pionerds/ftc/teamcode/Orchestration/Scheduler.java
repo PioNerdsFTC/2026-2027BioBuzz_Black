@@ -299,6 +299,8 @@ public class Scheduler {
 
     static {
          Scheduler.addTask("pre-init", (obj) -> {
+             Scheduler.continueRunning = true;
+
              for (Task<?> task : tasks) {
                  if (task.type == ExecutionType.TIMED) removeTask(task.id);
              }
