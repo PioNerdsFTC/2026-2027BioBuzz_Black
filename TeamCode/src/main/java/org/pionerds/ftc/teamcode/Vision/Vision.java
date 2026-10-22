@@ -8,11 +8,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-<<<<<<< HEAD
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-=======
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
->>>>>>> c774a7af15533f7da4dcbb4ecaa1d71bd8f6a2f1
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.apriltag.AprilTagPose;
