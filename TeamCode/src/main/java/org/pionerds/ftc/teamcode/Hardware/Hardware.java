@@ -5,6 +5,7 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -19,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class Hardware {
     public static Mapping mapping = new Mapping();
     public static Gyro gyro = new Gyro();
+    public static WebcamName webcam;
     public static double yaw = 0;
     public static double pitch = 0;
     public static double roll = 0;
@@ -31,6 +33,7 @@ public final class Hardware {
                  HardwareMap hardwareMap = Globals.depend("hardware-map");
                  Hardware.mapping.init(hardwareMap);
                  Hardware.gyro.init();
+                 //webcam = ...
 
                  // Enable bulk-reading
                  List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);

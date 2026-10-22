@@ -3,10 +3,12 @@ package org.pionerds.ftc.teamcode.Vision;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.apriltag.AprilTagPose;
@@ -25,10 +27,15 @@ public class Vision {
     // static final int VENDOR_ID_SUNPLUS_INNOVATION_TECHNOLOGY = 0x046d;
     // static final int PRODUCT_ID_ARDUCAM_OV5648 = 0x08e5;
 
-    private static HardwareMap hardwareMap;
+    static{
 
-    private static Telemetry telemetry;
-    public static void addTelemetry(Telemetry telemetry){Vision.telemetry = telemetry;}
+        Scheduler.addTask("init",(obj)->{
+            aprilTagProcessor = AprilTagProcessor.easyCreateWithDefaults(
+
+            );
+        });
+
+    }
 
     private static ArrayList<AprilTagDetection> currentDetections = new ArrayList<>();
     private static ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
@@ -38,14 +45,16 @@ public class Vision {
         return currentDetections.get(currentDetectionIDs.indexOf(id)).ftcPose;
     }
 
-    public static AprilTagDetection[] getCurrentDetections() {
-        return currentDetections.toArray(new AprilTagDetection[0]);
+    // Returns the detections arrayList and updates the detection IDs
+    public static ArrayList<AprilTagDetection> getCurrentDetections() {
+
+        return aprilTagProcessor.getDetections();
     }
 
     // offsets for all April Tags to map them to our coordinate field are below as
     // x, y, z, yaw, pitch, roll, range, bearing, elevation
-    private static double[] tagOffsets = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
-    private static double[] tagScalars = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
+    //private static double[] tagOffsets = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
+    //private static double[] tagScalars = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
 
 
     /*public static void collectData() {
