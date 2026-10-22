@@ -36,10 +36,6 @@ public class Gyro {
         }
     }
 
-    public double getHeading() {
-        return Math.toRadians(this.gyro.getRobotYawPitchRollAngles().getYaw() + 90);
-    }
-
     /**
      * Gets the accumulated angles (yaw, pitch, roll) by adding stored angles to current gyro readings.
      * The returned array contains [yaw, pitch, roll] in the gyro's default angle unit (usually degrees).

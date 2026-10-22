@@ -91,10 +91,4 @@ public class Drivetrain {
             }
         });
     }
-
-
-    // INSERT METHOD HERE FOR CALLING OmniDrive.java.fieldCentricDrive();
-
-    // INSERT METHOD HERE FOR CALLING OmniDrive.java.rotateWithBumpers();
-
 }
