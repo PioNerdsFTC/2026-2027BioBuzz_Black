@@ -46,7 +46,10 @@ public class OmniDrivetrain {
                 motorSpeed[i] = 0.00;
             }
 
-            if(!turning) return;
+            if(!turning) {
+                updateMotors();
+                return;
+            }
         } else {
 
             double[] fieldCentricPositionRequest = getFieldCentricPositionRequest(x, y, gyroAngle);

@@ -19,7 +19,7 @@ public class Drivetrain {
     public static void setPermitDriving(boolean allow){permitDriving = allow;}
     public static void setPermitRotating(boolean allow){permitRotating = allow;}
 
-    private static boolean isLeftRotationNegative = false;
+    private static boolean isLeftRotationNegative = true;
 
     public static void driveRobot() {
         if (permitRotating) {
