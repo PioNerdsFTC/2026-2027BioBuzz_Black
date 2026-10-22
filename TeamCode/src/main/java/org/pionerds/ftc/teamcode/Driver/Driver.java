@@ -81,7 +81,7 @@ public class Driver {
     }
 
     public double nonLinearScaleStick(double input){
-        return Math.pow(input,2);
+        return Math.pow(input,2)*Math.signum(input);
     }
 
     private boolean getMappedInput(DriverInput input) {
