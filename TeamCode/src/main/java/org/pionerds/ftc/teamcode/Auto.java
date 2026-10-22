@@ -30,7 +30,6 @@ public class Auto extends LinearOpMode {
 
         Scheduler.trigger("pre-run", null);
 
-
         while (opModeIsActive() && Scheduler.continueRunning) {
             Scheduler.tickHook();
         }

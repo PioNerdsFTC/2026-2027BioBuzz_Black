@@ -1,5 +1,7 @@
 package org.pionerds.ftc.teamcode.Vision;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -61,20 +63,24 @@ public class Vision {
 
 
     public static void collectData() {
-        ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getDetections();
+        try {
+            ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getDetections();
 
-        if (aprilTagProcessor.getDetections().isEmpty()) {
-            Logger.error("Did not cache.");
-            return;
+            if (aprilTagProcessor.getDetections().isEmpty()) {
+                Logger.error("Did not cache.");
+                return;
+            }
+
+            currentDetections = new ArrayList<>();
+            currentDetections.addAll(freshDetections);
+
+            Logger.log("Found " + currentDetections.size() + " things");
+
+            Scheduler.addTask(500, (obj) -> {
+                collectData();
+            });
+        } catch(Exception e) {
+            Logger.log(Log.getStackTraceString(e));
         }
-
-        currentDetections = new ArrayList<>();
-        currentDetections.addAll(freshDetections);
-
-        Logger.log("Found " + currentDetections.size() + " things");
-
-        Scheduler.addTask(500, (obj) -> {
-            collectData();
-        });
     }
 }

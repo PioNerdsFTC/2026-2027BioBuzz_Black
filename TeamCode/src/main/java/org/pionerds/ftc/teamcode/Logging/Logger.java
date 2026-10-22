@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Logger {
 
+    private static final String TAG = "PioNerds-Runtime";
     private static Telemetry telemetry;
 
     public enum LogType {
@@ -69,77 +70,67 @@ public class Logger {
     }
 
     static {
-        AtomicReference<UUID> logNewInfo = new AtomicReference<>();
-        AtomicReference<UUID> logNewWarn = new AtomicReference<>();
-        AtomicReference<UUID> logNewError = new AtomicReference<>();
-        AtomicReference<UUID> logClear = new AtomicReference<>();
+        Logger.logs.clear();
+        Logger.level.clear();
 
         Scheduler.addTask("init", (obj2) -> {
             telemetry = Globals.depend("telemetry");
             telemetry.setAutoClear(false);
         });
 
-        Scheduler.addTask("pre-init", (obj) -> {
-
-            logNewInfo.set(Scheduler.addTask("log:new:info", (info) -> {
-                Logger.logs.add((String) info);
-                Logger.level.add(LogType.INFO);
-
-                Log.i("PioNerds-runtime", (String) info);
-
-                if (telemetry == null) return;
-
-                telemetry.addLine((String) info);
-                telemetry.update();
-            }));
-
-            logNewWarn.set(Scheduler.addTask("log:new:warn", (info) -> {
-                logs.add((String) info);
-                level.add(LogType.WARNING);
-
-                Log.w("PioNerds-runtime", (String) info);
-
-                if (telemetry == null) return;
-
-                telemetry.addLine((String) info);
-                telemetry.update();
-            }));
-
-            logNewError.set(Scheduler.addTask("log:new:error", (info) -> {
-                logs.add((String) info);
-                level.add(LogType.ERROR);
-
-                if (Parameters.exitOnError) {
-                    Scheduler.stopExecution();
-
-                    Logger.log("STOPPING EXECUTION DUE TO ERROR");
-                }
-
-                Log.e("PioNerds-runtime (Error)", (String) info);
-
-
-                if (telemetry == null) return;
-
-                telemetry.addLine((String) info);
-                telemetry.update();
-            }));
-
-            logClear.set(Scheduler.addTask("log:clear", (info) -> {
-                while (!logs.isEmpty()) logs.remove(0);
-
-                if (telemetry == null) return;
-
-                telemetry.clear();
-                telemetry.update();
-            }));
+        Scheduler.addTask("exit", (obj3) -> {
+            telemetry = null;
         });
 
-        Scheduler.addTask("exit", (obj) -> {
-            telemetry.clear();
+        Scheduler.addTask("log:new:info", (info) -> {
+            Logger.logs.add((String) info);
+            Logger.level.add(LogType.INFO);
 
-            if (logNewInfo.get() != null) Scheduler.removeTask(logNewInfo.get());
-            if (logNewWarn.get() != null) Scheduler.removeTask(logNewWarn.get());
-            if (logNewError.get() != null) Scheduler.removeTask(logNewError.get());
+            Log.i(TAG, (String) info);
+
+            if (telemetry == null) return;
+
+            telemetry.addLine((String) info);
+            telemetry.update();
+        });
+
+        Scheduler.addTask("log:new:warn", (info) -> {
+            logs.add((String) info);
+            level.add(LogType.WARNING);
+
+            Log.w(TAG, (String) info);
+
+            if (telemetry == null) return;
+
+            telemetry.addLine((String) info);
+            telemetry.update();
+        });
+
+        Scheduler.addTask("log:new:error", (info) -> {
+            logs.add((String) info);
+            level.add(LogType.ERROR);
+
+            if (Parameters.exitOnError) {
+                Scheduler.stopExecution();
+
+                Logger.log("STOPPING EXECUTION DUE TO ERROR");
+            }
+
+            Log.e(TAG, (String) info);
+
+            if (telemetry == null) return;
+
+            telemetry.addLine((String) info);
+            telemetry.update();
+        });
+
+        Scheduler.addTask("log:clear", (info) -> {
+            while (!logs.isEmpty()) logs.remove(0);
+
+            if (telemetry == null) return;
+
+            telemetry.clear();
+            telemetry.update();
         });
     }
 }
