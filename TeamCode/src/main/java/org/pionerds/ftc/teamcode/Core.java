@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import android.webkit.MimeTypeMap;
 
 import com.qualcomm.ftccommon.FtcEventLoop;
@@ -65,9 +65,6 @@ public class Core {
 
     @OnCreateMenu
     public static void populateMenu(Context context, Menu menu) {
-        MenuItem menuItem = menu.add("Test");
-
-        menuItem.setTitle("huh");
     }
 
     @WebHandlerRegistrar

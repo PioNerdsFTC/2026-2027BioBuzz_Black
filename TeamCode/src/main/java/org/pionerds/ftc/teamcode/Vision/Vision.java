@@ -7,6 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.apriltag.AprilTagPose;
@@ -20,20 +21,29 @@ import java.util.HashMap;
 
 public class Vision {
     private static AprilTagProcessor aprilTagProcessor;
+    private static AprilTagProcessor.Builder aprilTagProcessorBuilder;
+
     private static VisionPortal visionPortal;
 
-    // static final int VENDOR_ID_SUNPLUS_INNOVATION_TECHNOLOGY = 0x046d;
-    // static final int PRODUCT_ID_ARDUCAM_OV5648 = 0x08e5;
+    static {
+        Scheduler.addTask("init", (obj) -> {
+            aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
+            aprilTagProcessorBuilder.setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary());
+
+            aprilTagProcessor = aprilTagProcessorBuilder.build();
+
+            Scheduler.addTask(500, (obj2) -> {
+                Vision.collectData();
+            });
+        });
+    }
+
 
     private static HardwareMap hardwareMap;
-
-    private static Telemetry telemetry;
-    public static void addTelemetry(Telemetry telemetry){Vision.telemetry = telemetry;}
-
     private static ArrayList<AprilTagDetection> currentDetections = new ArrayList<>();
     private static ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
 
-    public static AprilTagPoseFtc getTagFTCPose(int id){
+    public static AprilTagPoseFtc getTagFTCPose(int id) {
         if (!currentDetectionIDs.contains(id)) return null;
         return currentDetections.get(currentDetectionIDs.indexOf(id)).ftcPose;
     }
@@ -48,7 +58,7 @@ public class Vision {
     private static double[] tagScalars = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
 
 
-    /*public static void collectData() {
+    public static void collectData() {
         ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getDetections();
 
         if (aprilTagProcessor.getDetections().isEmpty()) {
@@ -57,16 +67,12 @@ public class Vision {
         }
 
         currentDetections = new ArrayList<>();
-        currentDetectionIDs = new ArrayList<>();
+        currentDetections.addAll(freshDetections);
 
-        for (AprilTagDetection detection : freshDetections) {
-//            if(detection.metadata == null) Logger.error("metadata is null");
+        Logger.log("Found " + currentDetections.size() + " things");
 
-//            currentDetections.add(detection);
-//            currentDetectionIDs.add(detection.id);
-        }
-
-        Logger.log("Cached new Tags!");
+        Scheduler.addTask(500, (obj) -> {
+            collectData();
+        });
     }
-    */
 }
