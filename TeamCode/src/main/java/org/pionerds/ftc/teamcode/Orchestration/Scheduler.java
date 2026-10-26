@@ -266,8 +266,8 @@ public class Scheduler {
 
             if (iterateDepth == 0) flushQueues();
 
-            if (x == 20) {
-                Log.i("SCHEDULER", "Took " + (time.milliseconds() - now));
+            if (x == 50) {
+                Log.d("SCHEDULER", "Took " + (time.milliseconds() - now) + " ms");
                 x = 0;
             }
         }
