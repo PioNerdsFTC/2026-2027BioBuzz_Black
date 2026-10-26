@@ -36,23 +36,19 @@ public class Vision {
 
             aprilTagProcessor = aprilTagProcessorBuilder.build();
 
-            Scheduler.addTask(500, (obj2) -> {
-                Vision.collectData();
-            });
+            testDetections();
         });
     }
 
-    private static ArrayList<AprilTagDetection> currentDetections = new ArrayList<>();
-    private static ArrayList<Integer> currentDetectionIDs = new ArrayList<>();
-
-    public static AprilTagPoseFtc getTagFTCPose(int id) {
-        if (!currentDetectionIDs.contains(id)) return null;
-        return currentDetections.get(currentDetectionIDs.indexOf(id)).ftcPose;
+    private static void testDetections() {
+        Scheduler.addTask(500, (obj) -> {
+            Logger.log("Found " + getCurrentDetections().size() + " detection(s)");
+            testDetections();
+        });
     }
 
     // Returns the detections arrayList and updates the detection IDs
     public static ArrayList<AprilTagDetection> getCurrentDetections() {
-
         return aprilTagProcessor.getDetections();
     }
 
@@ -60,27 +56,4 @@ public class Vision {
     // x, y, z, yaw, pitch, roll, range, bearing, elevation
     //private static double[] tagOffsets = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
     //private static double[] tagScalars = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
-
-
-    public static void collectData() {
-        try {
-            ArrayList<AprilTagDetection> freshDetections = aprilTagProcessor.getDetections();
-
-            if (aprilTagProcessor.getDetections().isEmpty()) {
-                Logger.error("Did not cache.");
-                return;
-            }
-
-            currentDetections = new ArrayList<>();
-            currentDetections.addAll(freshDetections);
-
-            Logger.log("Found " + currentDetections.size() + " things");
-
-            Scheduler.addTask(500, (obj) -> {
-                collectData();
-            });
-        } catch(Exception e) {
-            Logger.log(Log.getStackTraceString(e));
-        }
-    }
 }
