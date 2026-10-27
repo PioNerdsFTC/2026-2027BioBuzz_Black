@@ -4,14 +4,17 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.HashMap;
 
-public class Coordination {
-    public static double x;
-    public static double y;
 
-    /**
-     * Field dimensions in centimeters divided by 100 (our dimensions are in x/100)
-     */
-    public final double UNIT = 365.75 / 100;
+/**
+ * Field dimensions are 365.75 cm x 365.75 cm, however we convert to a 0-100 unit.
+ */
+public class Coordination {
+    public static double x = -1;
+    public static double y = -1;
+
+    public static double rotation = 0;
+
+    public static double UNIT = ((double) 1 /100 * 365.75);
 
     static {
         Scheduler.addTask("init", (obj) -> {
@@ -19,11 +22,25 @@ public class Coordination {
 
             Coordination.x = 50;
             Coordination.y = 50;
+            Coordination.rotation = 0;
+        });
+
+        Scheduler.addTask("exit", (obj) -> {
+            Coordination.x = -1;
+            Coordination.y = -1;
+            Coordination.rotation = -1;
         });
     }
 
-    public static void updateFromVector(double deltaX, double deltaY) {
-        Coordination.x+=deltaX;
-        Coordination.y+=deltaY;
+    /**
+     *
+     * @param deltaX X updates (in cm)
+     * @param deltaY Y updates (in cm)
+     */
+    public static void updateFromVector(double deltaX, double deltaY) throws Exception {
+        if (x == -1 || y == -1 || Coordination.rotation == -1) throw new Exception("Called updateFromVector before initialization");
+
+        Coordination.x += deltaX * UNIT;
+        Coordination.y += deltaY * UNIT;
     }
 }

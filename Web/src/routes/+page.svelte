@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import Robot from './Robot.svelte';
+
+	import Board from '$lib/components/board/Board.svelte';
+	import Robot from '$lib/components/board/Robot.svelte';
 
 	let healthy = $state(false);
 	let ws: WebSocket | undefined = $state();
@@ -45,12 +47,11 @@
 
 				if (json.type === 'log') {
 					const object = JSON.parse(json.payload);
-					console.log(object);
 					logs.push({ tag: object.tag, content: object.msg, type: object.type });
 				}
 
-				if (json.type === '') {
-
+				if (json.type === 'position') {
+				    robot = JSON.parse(json.payload);
 				}
 			};
 
@@ -72,6 +73,12 @@
 		content: string;
 		type: 'debug' | 'info' | 'warn' | 'error';
 	}[] = $state([]);
+
+	let robot = $state({
+	    x: 50,
+		y: 50,
+		rotation: 2 * Math.PI / 3
+	});
 </script>
 
 <div class="flex h-screen w-screen flex-col">
@@ -90,15 +97,13 @@
 	</div>
 	<div class="flex h-full w-full justify-between font-mono">
 		<div class="flex flex-col grow">
-			<div class="border-b border-primary-500 py-4 pl-3">
+			<div class="ml-2 py-4">
 				<h1 class="ml-4 text-2xl text-text-500">Robot</h1>
 			</div>
 
-			<div class="w-full h-full flex justify-center items-center">
-				<div class="border-x border-primary-500 text-text relative">
-					<Robot />
-				</div>
-			</div>	
+			<Board bind:robot>
+			    <Robot bind:x={robot.x} bind:y={robot.y} bind:rotation={robot.rotation} />
+			</Board>
 		</div>
 		<div class="mb-4 ml-4 flex flex-col w-[40vw] max-w-[40vw] gap-0 pl-2 text-text-500">
 			<div class="border-b border-primary-500 py-4 pl-3">
@@ -124,7 +129,7 @@
 								</span>
 							</td>
 							<td
-								class="px-1 py-1 
+								class="px-1 py-1
 								{log.type === 'debug' ? 'text-text-700' : ''}
 								{log.type === 'error' ? 'text-red-500' : ''}">
 								{log.content}
