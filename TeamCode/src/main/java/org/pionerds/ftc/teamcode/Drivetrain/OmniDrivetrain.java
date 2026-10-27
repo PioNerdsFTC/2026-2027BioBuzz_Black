@@ -40,7 +40,7 @@ public class OmniDrivetrain {
 
         // Tolerance-Dead Zone
         if (Math.abs(x) < 0.05 && Math.abs(y) < 0.05) {
-            Logger.log("Inside Dead Zone (Driving)");
+            //Logger.log("Inside Dead Zone (Driving)");
 
             for(int i = 0; i< motors.length; i++){
                 motorSpeed[i] = 0.00;
@@ -68,13 +68,13 @@ public class OmniDrivetrain {
             motorSpeed[1] *= magnitude;
             motorSpeed[2] *= magnitude;
             motorSpeed[3] *= magnitude;
-            Logger.log("DRIVING ROBOT");
+            //Logger.log("DRIVING ROBOT");
 
 
         }
 
         if (turning) {
-            Logger.log("TURNING ROBOT");
+            //Logger.log("TURNING ROBOT");
             double rotSpeed = rotationSpeed;
 
             if (flipDirection) rotSpeed = -rotSpeed;

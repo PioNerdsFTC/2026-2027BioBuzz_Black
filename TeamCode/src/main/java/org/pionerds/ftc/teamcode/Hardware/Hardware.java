@@ -33,7 +33,7 @@ public final class Hardware {
                  HardwareMap hardwareMap = Globals.depend("hardware-map");
                  Hardware.mapping.init(hardwareMap);
                  Hardware.gyro.init();
-                 //webcam = ...
+                 webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
 
                  // Enable bulk-reading
                  List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);

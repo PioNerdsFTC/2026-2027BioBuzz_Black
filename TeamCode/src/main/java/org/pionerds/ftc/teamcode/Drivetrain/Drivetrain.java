@@ -58,7 +58,7 @@ public class Drivetrain {
             onTurnLeft.set(Scheduler.addTask("turn-left:down", (obj2) -> {
                 OmniDrivetrain.flipDirection = isLeftRotationNegative;
                 OmniDrivetrain.turning = true;
-                Logger.log("turn-left");
+                //Logger.log("turn-left");
             }));
 
             onTurnLeftUp.set(Scheduler.addTask("turn-left:up", (obj2) -> {
@@ -68,7 +68,7 @@ public class Drivetrain {
             onTurnRight.set(Scheduler.addTask("turn-right:down", (obj2) -> {
                 OmniDrivetrain.flipDirection = !isLeftRotationNegative;
                 OmniDrivetrain.turning = true;
-                Logger.log("turn-right");
+                //Logger.log("turn-right");
             }));
 
             onTurnRightUp.set(Scheduler.addTask("turn-right:up", (obj2) -> {
