@@ -22,6 +22,7 @@ import org.firstinspires.ftc.robotcore.internal.webserver.websockets.FtcWebSocke
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.FtcWebSocketMessage;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.WebSocketManager;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.WebSocketNamespaceHandler;
+import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.io.IOException;
@@ -58,14 +59,17 @@ public class Core {
         Scheduler.addTask("log:new:error", (str) -> {
             Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
         });
+
+        Scheduler.addTask("coordination:update", (str) -> {
+            Core.broadcast("position", "{ \"x\": \"" + Coordination.x + "\", \"" + "\"y\": \"" + Coordination.y + "\", \"rotation\": \"" + Coordination.rotation + "\"");
+        });
     }
 
     @OnDestroy
     public static void stop(Context context) {}
 
     @OnCreateMenu
-    public static void populateMenu(Context context, Menu menu) {
-    }
+    public static void populateMenu(Context context, Menu menu) { }
 
     @WebHandlerRegistrar
     public static void attachWebServer(Context context, WebHandlerManager manager) {
