@@ -4,8 +4,8 @@ package org.pionerds.ftc.teamcode.Logging;
 import android.util.Log;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
-import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
@@ -110,7 +110,7 @@ public class Logger {
             logs.add((String) info);
             level.add(LogType.ERROR);
 
-            if (Parameters.exitOnError) {
+            if (Environment.Parameters.exitOnError) {
                 Scheduler.stopExecution();
 
                 Logger.log("STOPPING EXECUTION DUE TO ERROR");

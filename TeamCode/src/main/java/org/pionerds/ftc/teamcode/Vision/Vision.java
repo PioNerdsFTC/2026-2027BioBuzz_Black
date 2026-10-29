@@ -17,6 +17,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagSingleDetection;
 import org.openftc.apriltag.AprilTagPose;
+import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -33,6 +34,8 @@ public class Vision {
 
     static {
         Scheduler.addTask("init", (obj) -> {
+            if (!Environment.Capabilities.vision) return;
+
             aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
             aprilTagProcessorBuilder.setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary());
 
@@ -104,7 +107,7 @@ public class Vision {
         return null;
     }
 
-    public static void LogAllViewableTags(){
+    private static void LogAllViewableTags(){
         for(int i = 0; i<aprilTagProcessor.getDetections().size(); i++){
             if(aprilTagProcessor.getDetections().get(i) instanceof AprilTagClusterDetection) {
                 Logger.log("Bulk-Detection Metadata Found. Name: "+((AprilTagClusterDetection) aprilTagProcessor.getDetections().get(i)).metadata.name);

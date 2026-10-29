@@ -1,8 +1,8 @@
 package org.pionerds.ftc.teamcode.Driver;
 
+import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
-import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.UUID;
@@ -15,7 +15,7 @@ public class DriverConfigurations {
         Scheduler.addTask("init", (obj) -> {
             Logger.log("Initializing DriverConfigurations");
 
-            if (Parameters.operatingEnvironment != Parameters.OperatingEnvironment.TELE) {
+            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) {
                 return;
             }
 

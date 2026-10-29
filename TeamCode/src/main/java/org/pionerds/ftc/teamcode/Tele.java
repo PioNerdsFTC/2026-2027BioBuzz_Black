@@ -3,19 +3,15 @@ package org.pionerds.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.pionerds.ftc.teamcode.Driver.Driver;
-import org.pionerds.ftc.teamcode.Driver.DriverAction;
-import org.pionerds.ftc.teamcode.Driver.DriverInput;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
-import org.pionerds.ftc.teamcode.Orchestration.Parameters;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 @TeleOp(name="Tele")
 public class Tele extends LinearOpMode {
     @Override
     public void runOpMode() {
-        Parameters.operatingEnvironment = Parameters.OperatingEnvironment.TELE;
+        Environment.Parameters.operatingEnvironment = Environment.Parameters.OperatingEnvironment.TELE;
 
         Scheduler.trigger("pre-init", null);
 
@@ -43,6 +39,6 @@ public class Tele extends LinearOpMode {
         Logger.log("--- Exiting ---");
         Scheduler.trigger("exit", null);
 
-        Parameters.operatingEnvironment = Parameters.OperatingEnvironment.NONE;
+        Environment.Parameters.operatingEnvironment = Environment.Parameters.OperatingEnvironment.NONE;
     }
 }

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -33,9 +34,11 @@ public final class Hardware {
                  HardwareMap hardwareMap = Globals.depend("hardware-map");
                  Hardware.mapping.init(hardwareMap);
                  Hardware.gyro.init();
-                 webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
 
-                 // Enable bulk-reading
+                 if (Environment.Capabilities.vision) {
+                     webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
+                 }
+
                  List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
                  for (LynxModule hub : allHubs) {
