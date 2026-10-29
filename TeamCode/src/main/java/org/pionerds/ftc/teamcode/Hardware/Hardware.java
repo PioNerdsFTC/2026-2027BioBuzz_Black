@@ -21,7 +21,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class Hardware {
     public static Mapping mapping = new Mapping();
     public static Gyro gyro = new Gyro();
+    public static Odometer odometer = new Odometer();
     public static WebcamName webcam;
+    public static SparkFunOTOS otos;
+
     public static double yaw = 0;
     public static double pitch = 0;
     public static double roll = 0;
@@ -32,12 +35,18 @@ public final class Hardware {
          Scheduler.addTask("init", (o) -> {
              try {
                  HardwareMap hardwareMap = Globals.depend("hardware-map");
-                 Hardware.mapping.init(hardwareMap);
-                 Hardware.gyro.init();
 
                  if (Environment.Capabilities.vision) {
                      webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
                  }
+
+                 if (Environment.Capabilities.otos) {
+                     otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+                     Hardware.odometer.init(otos);
+                 }
+
+                 Hardware.mapping.init(hardwareMap);
+                 Hardware.gyro.init();
 
                  List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 

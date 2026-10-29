@@ -1,5 +1,7 @@
 package org.pionerds.ftc.teamcode.Coordination;
 
+import org.pionerds.ftc.teamcode.Environment;
+import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.HashMap;
@@ -25,22 +27,17 @@ public class Coordination {
             Coordination.rotation = 0;
         });
 
+        Scheduler.addTask((obj) -> {
+            if (Environment.Capabilities.otos) {
+                Coordination.x = 50 + Hardware.odometer.x;
+                Coordination.y = 50 + Hardware.odometer.y;
+            }
+        });
+
         Scheduler.addTask("exit", (obj) -> {
             Coordination.x = -1;
             Coordination.y = -1;
             Coordination.rotation = -1;
         });
-    }
-
-    /**
-     *
-     * @param deltaX X updates (in cm)
-     * @param deltaY Y updates (in cm)
-     */
-    public static void updateFromVector(double deltaX, double deltaY) throws Exception {
-        if (x == -1 || y == -1 || Coordination.rotation == -1) throw new Exception("Called updateFromVector before initialization");
-
-        Coordination.x += deltaX * UNIT;
-        Coordination.y += deltaY * UNIT;
     }
 }
