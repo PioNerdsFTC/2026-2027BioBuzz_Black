@@ -27,7 +27,7 @@ public class Coordination {
             Coordination.rotation = 0;
 
             Scheduler.addTask(200, (obj2) -> {
-                Scheduler.trigger("coordination:update-position", null);
+                updateRemotes();
             });
         });
 
@@ -42,6 +42,14 @@ public class Coordination {
             Coordination.x = -1;
             Coordination.y = -1;
             Coordination.rotation = -1;
+        });
+    }
+
+    private static void updateRemotes() {
+        Scheduler.trigger("coordination:update-position", null);
+
+        Scheduler.addTask(200, (obj) -> {
+            updateRemotes();
         });
     }
 }
