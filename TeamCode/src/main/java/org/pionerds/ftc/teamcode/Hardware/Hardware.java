@@ -77,5 +77,7 @@ public final class Hardware {
         Hardware.yaw = angles[0];
         Hardware.pitch = angles[1];
         Hardware.roll = angles[2];
+
+        if (Environment.Capabilities.otos) odometer.tick();
     }
 }
