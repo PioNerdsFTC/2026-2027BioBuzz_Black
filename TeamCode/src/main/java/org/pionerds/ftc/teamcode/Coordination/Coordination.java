@@ -25,6 +25,10 @@ public class Coordination {
             Coordination.x = 50;
             Coordination.y = 50;
             Coordination.rotation = 0;
+
+            Scheduler.addTask(200, (obj2) -> {
+                Scheduler.trigger("coordination:update-position", null);
+            });
         });
 
         Scheduler.addTask((obj) -> {

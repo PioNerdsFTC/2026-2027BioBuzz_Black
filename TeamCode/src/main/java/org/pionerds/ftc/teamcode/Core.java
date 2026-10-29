@@ -60,8 +60,8 @@ public class Core {
             Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
         });
 
-        Scheduler.addTask("coordination:update", (str) -> {
-            Core.broadcast("position", "{ \"x\": \"" + Coordination.x + "\", \"" + "\"y\": \"" + Coordination.y + "\", \"rotation\": \"" + Coordination.rotation + "\"");
+        Scheduler.addTask("coordination:update-position", (str) -> {
+            Core.broadcast("position", "{ \"x\": \"" + Coordination.x + "\", \"" + "\"y\": \"" + Coordination.y + "\", \"rotation\": \"" + 0 + "\"");
         });
     }
 
@@ -135,20 +135,17 @@ public class Core {
 
         @Override
         public void onSubscribe(FtcWebSocket webSocket) {
-            Log.i(TAG, "ws subscribed: " + webSocket.getRemoteHostname());
-            webSocket.send(new FtcWebSocketMessage(WS_NAMESPACE, "welcome", "{\"status\":\"ok\"}"));
         }
 
         @Override
         public void onUnsubscribe(FtcWebSocket webSocket) {
-            Log.i(TAG, "ws unsubscribed: " + webSocket.getRemoteHostname());
         }
 
         @Override
         public boolean onMessage(FtcWebSocketMessage message, FtcWebSocket webSocket) {
             if (super.onMessage(message, webSocket)) return true;
 
-            webSocket.send(new FtcWebSocketMessage(WS_NAMESPACE, "echo", message.getPayload()));
+//            webSocket.send(new FtcWebSocketMessage(WS_NAMESPACE, "echo", message.getPayload()));
             return true;
         }
     }
