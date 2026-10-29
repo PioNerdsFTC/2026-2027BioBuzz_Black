@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -20,7 +21,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class Hardware {
     public static Mapping mapping = new Mapping();
     public static Gyro gyro = new Gyro();
+    public static Odometer odometer = new Odometer();
     public static WebcamName webcam;
+    public static SparkFunOTOS otos;
+
     public static double yaw = 0;
     public static double pitch = 0;
     public static double roll = 0;
@@ -28,39 +32,36 @@ public final class Hardware {
     static {
         AtomicReference<UUID> tick = new AtomicReference<>();
 
-         Scheduler.addTask("init", (o) -> {
-             try {
-                 HardwareMap hardwareMap = Globals.depend("hardware-map");
-                 Hardware.mapping.init(hardwareMap);
+        Scheduler.addTask("init", (o) -> {
+            try {
+                HardwareMap hardwareMap = Globals.depend("hardware-map");
 
-                 try {
-                     webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
-                     Logger.log("Mapped webcam: " + webcam.getDeviceName());
-                 } catch (Exception e) {
-                     Logger.error("Cannot map webcam 'Webcam 1': " + e.getMessage());
-                 }
+                if (Environment.Capabilities.vision) {
+                    webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
+                }
 
-                 try {
-                     Hardware.gyro.init();
-                 } catch (Exception e) {
-                     Logger.error("Cannot initialize gyro: " + e.getMessage());
-                 }
+                if (Environment.Capabilities.otos) {
+                    otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+                    Hardware.odometer.init(otos);
+                }
 
-                 // Enable bulk-reading
-                 List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+                Hardware.mapping.init(hardwareMap);
+                Hardware.gyro.init();
 
-                 for (LynxModule hub : allHubs) {
-                     hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-                 }
+                List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
-                 Logger.log("Initialized Hardware");
-             } catch (Exception e) {
-                 Logger.error(e.getMessage());
-             }
+                for (LynxModule hub : allHubs) {
+                    hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+                }
 
-             tick.set(Scheduler.addTask((obj) -> {
-                 Hardware.tick();
-             }));
+                Logger.log("Initialized Hardware");
+            } catch (Exception e) {
+                Logger.error(e.getMessage());
+            }
+
+            tick.set(Scheduler.addTask((obj) -> {
+                Hardware.tick();
+            }));
         });
 
         Scheduler.addTask("exit", (obj) -> {
