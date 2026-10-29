@@ -15,6 +15,11 @@ public class Gyro {
     public void init() {
         gyro = Hardware.mapping.getIMU();
 
+        if (gyro == null) {
+            Logger.error("IMU not found, gyro disabled");
+            return;
+        }
+
         params = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,

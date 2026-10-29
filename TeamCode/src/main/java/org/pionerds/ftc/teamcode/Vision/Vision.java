@@ -37,9 +37,13 @@ public class Vision {
             if (!Environment.Capabilities.vision) return;
 
             aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
-            aprilTagProcessorBuilder.setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary());
 
-            aprilTagProcessor = aprilTagProcessorBuilder.build();
+            aprilTagProcessor = aprilTagProcessorBuilder
+                    .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
+                    .setDrawAxes(true)
+                    .setDrawTagOutline(true)
+                    .setDrawTagID(true)
+                    .build();
 
 
             Scheduler.addTask(0, (obj2) -> {

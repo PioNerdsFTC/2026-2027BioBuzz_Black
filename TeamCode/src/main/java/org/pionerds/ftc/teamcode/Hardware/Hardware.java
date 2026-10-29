@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -21,10 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class Hardware {
     public static Mapping mapping = new Mapping();
     public static Gyro gyro = new Gyro();
-    public static Odometer odometer = new Odometer();
     public static WebcamName webcam;
-    public static SparkFunOTOS otos;
-
     public static double yaw = 0;
     public static double pitch = 0;
     public static double roll = 0;
@@ -35,19 +31,22 @@ public final class Hardware {
          Scheduler.addTask("init", (o) -> {
              try {
                  HardwareMap hardwareMap = Globals.depend("hardware-map");
-
-                 if (Environment.Capabilities.vision) {
-                     webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
-                 }
-
-                 if (Environment.Capabilities.otos) {
-                     otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
-                     Hardware.odometer.init(otos);
-                 }
-
                  Hardware.mapping.init(hardwareMap);
-                 Hardware.gyro.init();
 
+                 try {
+                     webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
+                     Logger.log("Mapped webcam: " + webcam.getDeviceName());
+                 } catch (Exception e) {
+                     Logger.error("Cannot map webcam 'Webcam 1': " + e.getMessage());
+                 }
+
+                 try {
+                     Hardware.gyro.init();
+                 } catch (Exception e) {
+                     Logger.error("Cannot initialize gyro: " + e.getMessage());
+                 }
+
+                 // Enable bulk-reading
                  List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
                  for (LynxModule hub : allHubs) {
