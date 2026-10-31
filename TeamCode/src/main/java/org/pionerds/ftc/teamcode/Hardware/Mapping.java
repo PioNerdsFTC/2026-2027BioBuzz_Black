@@ -78,7 +78,7 @@ public class Mapping {
      * @param servoDirection Direction of crServo
      * @return The servo
      */
-    CRServo getContinuousServo(
+    public CRServo getContinuousServo(
             String servoName,
             CRServoImplEx.Direction servoDirection
     ) {
@@ -99,7 +99,7 @@ public class Mapping {
      *
      * @return the IMU
      */
-    IMU getIMU() {
+    public IMU getIMU() {
         IMU imu = null;
 
         try {
@@ -117,7 +117,7 @@ public class Mapping {
      * @param servoMotorName The name of the servo motor
      * @return The servo motor
      */
-    Servo getServoMotor(String servoMotorName) {
+    public Servo getServoMotor(String servoMotorName) {
         Servo servoMotor = null;
 
         try {
