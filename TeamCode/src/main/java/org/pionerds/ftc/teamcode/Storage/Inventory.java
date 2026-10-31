@@ -13,14 +13,16 @@ public class Inventory {
 
     private static DcMotorEx motorBottomInv;
     private static CRServo servoPollen;
-    private static CRServo servoNectar;
+    private static CRServo servoNectar1;
+    private static CRServo servoNectar2;
 
 
     static{
         Scheduler.addTask("init", (Obj1) -> {
             motorBottomInv = Hardware.mapping.getMotor("motorBottomInv");
             servoPollen = Hardware.mapping.getContinuousServo("servoPollen", DcMotorSimple.Direction.FORWARD);
-            servoNectar = Hardware.mapping.getContinuousServo("servoNectar", DcMotorSimple.Direction.FORWARD);
+            servoNectar1 = Hardware.mapping.getContinuousServo("servoNectar1", DcMotorSimple.Direction.FORWARD);
+            servoNectar2 = Hardware.mapping.getContinuousServo("servoNectar2", DcMotorSimple.Direction.REVERSE);
         });
     }
 
@@ -31,10 +33,14 @@ public class Inventory {
     public void disableIntake(){motorBottomInv.setPower(0.0);}
     public void enablePollenServo(){servoPollen.setPower(1.0);}
     public void disablePollenServo(){servoPollen.setPower(1.0);}
-    public void enableNectarServo(){servoNectar.setPower(1.0);}
-    public void disableNectarServo(){servoNectar.setPower(0.0);}
+    public void enableNectarServo(){servoNectar1.setPower(1.0); servoNectar2.setPower(1.0);}
+    public void disableNectarServo(){servoNectar1.setPower(0.0); servoNectar2.setPower(0.0);}
 
+
+    // Currently Unused
     public void addElement(GamePiece gamePiece){currentInventory.add(gamePiece);}
+
+    // Currently Unused
     public void removeElement(GamePiece gamePiece){
         for (GamePiece gamepiece : currentInventory) {
             if (gamepiece.equals(gamepiece)){
