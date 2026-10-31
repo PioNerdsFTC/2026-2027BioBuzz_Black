@@ -2,7 +2,7 @@ package org.pionerds.ftc.teamcode;
 
 public class Environment {
     public static class Capabilities {
-        public static boolean vision = false;
+        public static boolean vision = true;
         public static boolean drivetrain = false;
         public static boolean otos = false;
     }
