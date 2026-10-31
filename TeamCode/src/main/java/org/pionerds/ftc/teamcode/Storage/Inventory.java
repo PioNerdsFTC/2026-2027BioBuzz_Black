@@ -22,19 +22,28 @@ public class Inventory {
             servoPollen = Hardware.mapping.getContinuousServo("servoPollen", DcMotorSimple.Direction.FORWARD);
             servoNectar = Hardware.mapping.getContinuousServo("servoNectar", DcMotorSimple.Direction.FORWARD);
         });
+
+        final boolean[] toggledIntake = { false };
+
+        Scheduler.addTask("toggle-intake:down", (obj2) -> {
+            if (toggledIntake[0]) disableIntake();
+            else enableIntake();
+
+            toggledIntake[0] = !toggledIntake[0];
+        });
     }
 
 
-    private final ArrayList<GamePiece> currentInventory = new ArrayList<GamePiece>();
+    private final ArrayList<GamePiece> currentInventory = new ArrayList<>();
 
-    public void enableIntake(){motorBottomInv.setPower(1.0);}
-    public void disableIntake(){motorBottomInv.setPower(0.0);}
-    public void enablePollenServo(){servoPollen.setPower(1.0);}
-    public void disablePollenServo(){servoPollen.setPower(1.0);}
-    public void enableNectarServo(){servoNectar.setPower(1.0);}
-    public void disableNectarServo(){servoNectar.setPower(0.0);}
+    public static void enableIntake() { motorBottomInv.setPower(1.0); }
+    public static void disableIntake() { motorBottomInv.setPower(0.0); }
+    public static void enablePollenServo() { servoPollen.setPower(1.0); }
+    public static void disablePollenServo() { servoPollen.setPower(1.0); }
+    public static void enableNectarServo() { servoNectar.setPower(1.0); }
+    public static void disableNectarServo() { servoNectar.setPower(0.0); }
 
-    public void addElement(GamePiece gamePiece){currentInventory.add(gamePiece);}
+    public void addElement(GamePiece gamePiece) { currentInventory.add(gamePiece); }
     public void removeElement(GamePiece gamePiece){
         for (GamePiece currentGamePiece : currentInventory) {
             if (gamePiece.equals(currentGamePiece)){

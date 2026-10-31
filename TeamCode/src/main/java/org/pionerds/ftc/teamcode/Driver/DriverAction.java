@@ -3,9 +3,9 @@ package org.pionerds.ftc.teamcode.Driver;
 public enum DriverAction {
     ENABLE_AIMBOT,
     DISABLE_AIMBOT,
-    LAUNCH,
-    ENABLE_INTAKE,
-    DISABLE_INTAKE,
+    TOGGLE_INTAKE,
+    TRIGGER_FLOWER_LAUNCHER,
+    TRIGGER_POLLEN_LAUNCHER,
     TURN_LEFT,
     TURN_RIGHT;
 
