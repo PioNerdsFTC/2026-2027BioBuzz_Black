@@ -16,7 +16,7 @@ public class Inventory {
     private static CRServo servoNectar;
 
 
-    static{
+    static {
         Scheduler.addTask("init", (Obj1) -> {
             motorBottomInv = Hardware.mapping.getMotor("motorBottomInv");
             servoPollen = Hardware.mapping.getContinuousServo("servoPollen", DcMotorSimple.Direction.FORWARD);
@@ -25,7 +25,7 @@ public class Inventory {
     }
 
 
-    private ArrayList<GamePiece> currentInventory = new ArrayList<GamePiece>();
+    private final ArrayList<GamePiece> currentInventory = new ArrayList<GamePiece>();
 
     public void enableIntake(){motorBottomInv.setPower(1.0);}
     public void disableIntake(){motorBottomInv.setPower(0.0);}
@@ -36,9 +36,9 @@ public class Inventory {
 
     public void addElement(GamePiece gamePiece){currentInventory.add(gamePiece);}
     public void removeElement(GamePiece gamePiece){
-        for (GamePiece gamepiece : currentInventory) {
-            if (gamepiece.equals(gamepiece)){
-                currentInventory.remove(gamepiece);
+        for (GamePiece currentGamePiece : currentInventory) {
+            if (gamePiece.equals(currentGamePiece)){
+                currentInventory.remove(gamePiece);
                 return;
             }
         }
