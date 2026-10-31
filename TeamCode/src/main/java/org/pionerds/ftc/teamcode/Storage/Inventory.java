@@ -17,17 +17,26 @@ public class Inventory {
     private static CRServo servoNectar2;
 
 
-    static{
+    static {
         Scheduler.addTask("init", (Obj1) -> {
             motorBottomInv = Hardware.mapping.getMotor("motorBottomInv");
             servoPollen = Hardware.mapping.getContinuousServo("servoPollen", DcMotorSimple.Direction.FORWARD);
             servoNectar1 = Hardware.mapping.getContinuousServo("servoNectar1", DcMotorSimple.Direction.FORWARD);
             servoNectar2 = Hardware.mapping.getContinuousServo("servoNectar2", DcMotorSimple.Direction.REVERSE);
         });
+
+        final boolean[] toggledIntake = { false };
+
+        Scheduler.addTask("toggle-intake:down", (obj2) -> {
+            if (toggledIntake[0]) disableIntake();
+            else enableIntake();
+
+            toggledIntake[0] = !toggledIntake[0];
+        });
     }
 
 
-    private ArrayList<GamePiece> currentInventory = new ArrayList<GamePiece>();
+    private final ArrayList<GamePiece> currentInventory = new ArrayList<>();
 
     public void enableIntake(){motorBottomInv.setPower(1.0);}
     public void disableIntake(){motorBottomInv.setPower(0.0);}
@@ -42,9 +51,9 @@ public class Inventory {
 
     // Currently Unused
     public void removeElement(GamePiece gamePiece){
-        for (GamePiece gamepiece : currentInventory) {
-            if (gamepiece.equals(gamepiece)){
-                currentInventory.remove(gamepiece);
+        for (GamePiece currentGamePiece : currentInventory) {
+            if (gamePiece.equals(currentGamePiece)){
+                currentInventory.remove(gamePiece);
                 return;
             }
         }

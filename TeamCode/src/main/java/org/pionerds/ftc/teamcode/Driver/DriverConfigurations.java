@@ -20,12 +20,10 @@ public class DriverConfigurations {
             }
 
             driver1 = new Driver(Globals.depend("gamepad1"))
-                    .addControl(DriverInput.A, DriverAction.LAUNCH, true)
-                    .addControl(DriverInput.B, DriverAction.DISABLE_AIMBOT, false)
+                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TOGGLE_INTAKE, false);
 
-                    // Driving
-                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, true)
-                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, true);
+//                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, true)
+//                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, true);
 
             Globals.add("driver1", driver1);
 
