@@ -1,11 +1,9 @@
 <script lang="ts">
-    let { children, robot = $bindable() } = $props();
-
+	let { children, robot = $bindable() } = $props();
 </script>
 
-<div
-    class="w-full h-full border border-primary-500 mb-2 mx-2 flex">
+<div class="mx-2 mb-2 flex h-full w-full border border-primary-500">
 	<div class="text-text relative flex grow">
-	    {@render children?.()}
+		{@render children?.()}
 	</div>
 </div>
