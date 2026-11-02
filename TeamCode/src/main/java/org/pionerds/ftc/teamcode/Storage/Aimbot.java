@@ -4,7 +4,7 @@ public class Aimbot {
 
     private static final double g = 9.80665;
 
-    public double getCalculatedAngle(double xi, double xf, double yf, double v){
+    public static double getCalculatedAngle(double xi, double xf, double yf, double v){
         double[] experimentalAngles = calculateLaunchAnglesTheoretical(xi, xf, yf, v);
 
         double minAngle = experimentalAngles[0];
@@ -15,11 +15,11 @@ public class Aimbot {
         return empericalCorrection(averageAngle);
     }
 
-    private double empericalCorrection(double angle){
+    private static double empericalCorrection(double angle){
         return angle + 0.00;
     }
 
-    public double[] calculateLaunchAnglesTheoretical(double xi, double xf, double yf, double v){
+    public static double[] calculateLaunchAnglesTheoretical(double xi, double xf, double yf, double v){
         double Δx = xf - xi;
         double Δy = yf;
 
