@@ -1,4 +1,4 @@
 package org.pionerds.ftc.teamcode.Storage;
 
-public class Launching {
+public class Launcher {
 }
