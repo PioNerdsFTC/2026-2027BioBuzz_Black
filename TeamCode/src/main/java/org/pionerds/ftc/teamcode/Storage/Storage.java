@@ -9,7 +9,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
 
-public class Inventory {
+public class Storage {
 
     private static DcMotorEx motorBottomInv;
     private static CRServo servoPollen;
