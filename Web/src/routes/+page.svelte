@@ -107,14 +107,14 @@
 		</div>
 		<div class="relative flex w-[40vw] m-4 overflow-scroll border-l border-primary-500">
 			<div class="absolute right-0 left-0 bottom-0 top-0 flex min-w-[40vw] flex-col gap-0 pl-2 text-text-500">
-				<div class="border-b border-primary-500 py-2 pl-3">
+				<div class="border-b border-primary-500 sticky bg-background-950 top-0 py-2 pl-3">
 					<h1 class="ml-4 text-2xl text-text-500">Logs</h1>
 				</div>
 				<div class="p-4">
 					<table class="mr-0 whitespace-nowrap">
 						<tbody>
 							{#each logs as log}
-								<tr in:fade>
+								<tr in:fade class="border-b border-accent-500/20">
 									<td class="py-1 pr-1 pl-2">
 										<span
 											class="h-full rounded-md px-1.25 py-0.5 text-black
