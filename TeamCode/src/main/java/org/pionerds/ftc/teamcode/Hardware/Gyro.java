@@ -16,7 +16,7 @@ public class Gyro {
         gyro = Hardware.mapping.getIMU();
 
         if (gyro == null) {
-            Logger.error("IMU not found, gyro disabled");
+            Logger.warn("IMU not found, gyro disabled");
             return;
         }
 
