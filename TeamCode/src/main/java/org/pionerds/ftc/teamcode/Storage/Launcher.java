@@ -1,5 +1,6 @@
 package org.pionerds.ftc.teamcode.Storage;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -16,10 +17,20 @@ public class Launcher {
         launchMotor = Hardware.mapping.getMotor(motorName);
         hoodServo = Hardware.mapping.getServoMotor(launchServoName);
 
+        launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
     public void setLaunchAngle(double theta){
-        hoodServo.setPosition(theta);
+        hoodServo.setPosition(theta - 180);
+
+    }
+
+    public void enableLauncher(){
+        launchMotor.setPower(1.0);
+    }
+
+    public void disableLauncher(){
+        launchMotor.setPower(0.0);
     }
 
 }
