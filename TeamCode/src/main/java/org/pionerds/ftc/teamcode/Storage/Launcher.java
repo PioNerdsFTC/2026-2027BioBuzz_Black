@@ -5,12 +5,24 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Orchestration.Globals;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 public class Launcher {
 
     private String name;
     private DcMotorEx launchMotor;
     private Servo hoodServo;
+
+
+    static {
+
+        Scheduler.addTask("init", (Obj)->{
+            Globals.add("Launcher1",new Launcher("Launcher0","launcher0","launchHood0"));
+            Globals.add("Launcher1",new Launcher("Launcher1","launcher1","launchHood1"));
+        });
+
+    }
 
 
     public Launcher(String name, String motorName, String launchServoName){
