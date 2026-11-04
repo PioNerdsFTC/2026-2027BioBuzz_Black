@@ -18,7 +18,7 @@ public class Launcher {
     static {
 
         Scheduler.addTask("init", (Obj)->{
-            Globals.add("Launcher1",new Launcher("Launcher0","launcher0","launchHood0"));
+            Globals.add("Launcher0",new Launcher("Launcher0","launcher0","launchHood0"));
             Globals.add("Launcher1",new Launcher("Launcher1","launcher1","launchHood1"));
         });
 
