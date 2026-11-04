@@ -104,9 +104,7 @@ public class Mapping {
 
         try {
             imu = this.map.get(IMU.class, "imu");
-        } catch (Exception e) {
-            Logger.error("Cannot map IMU, is it named 'imu'?");
-        }
+        } catch (Exception ignored) { }
 
         return imu;
     }

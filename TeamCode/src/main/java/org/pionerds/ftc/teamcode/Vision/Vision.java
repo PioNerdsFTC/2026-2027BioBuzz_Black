@@ -75,54 +75,55 @@ public class Vision {
         });
     }
 
-    private AprilTagSingleDetection getSingleTagByID(int id){
-        for(int i = 0; i<aprilTagProcessor.getDetections().size(); i++){
-            if(aprilTagProcessor.getDetections().get(i) instanceof AprilTagSingleDetection){
+    private AprilTagSingleDetection getSingleTagByID(int id) {
+        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
 
-                AprilTagSingleDetection detection = (AprilTagSingleDetection) aprilTagProcessor.getDetections().get(i);
+        for (int i = 0; i < detections.size(); i++){
+            if (!(detections.get(i) instanceof AprilTagSingleDetection)) continue;
 
-                Logger.log("Found a single-tag with ID: "+detection.metadata.id);
+            AprilTagSingleDetection detection = (AprilTagSingleDetection) detections.get(i);
 
-                if(detection != null && detection.metadata != null && detection.metadata.id == id){
-                    Logger.log("<"+id+"> found correctly!");
-                    return detection;
-                }
+            Logger.log("Found a single-tag with ID: " + detection.metadata.id);
 
+            if (detection.metadata.id == id) {
+                Logger.log("<" + id + "> found correctly!");
+                return detection;
             }
         }
         return null;
     }
 
     private AprilTagClusterDetection getClusterTagByName(String name){
-        for(int i = 0; i<aprilTagProcessor.getDetections().size(); i++){
-            if(aprilTagProcessor.getDetections().get(i) instanceof AprilTagClusterDetection){
+        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
 
-                AprilTagClusterDetection detection = (AprilTagClusterDetection) aprilTagProcessor.getDetections().get(i);
+        for (int i = 0; i < detections.size(); i++) {
+            if (!(detections.get(i) instanceof AprilTagClusterDetection)) continue;
 
-                Logger.log("Found a cluster named: "+detection.metadata.name);
+            AprilTagClusterDetection detection = (AprilTagClusterDetection) detections.get(i);
 
-                if(detection != null && detection.metadata.name.equals(name)){
-                    Logger.log("<"+name+"> found correctly!");
-                    return detection;
-                }
+            Logger.log("Found a cluster named: " + detection.metadata.name);
 
+            if (detection.metadata.name.equals(name)) {
+                Logger.log("<" + name + "> found correctly!");
+                return detection;
             }
         }
         return null;
     }
 
     private static void LogAllViewableTags(){
-        for(int i = 0; i<aprilTagProcessor.getDetections().size(); i++){
-            if(aprilTagProcessor.getDetections().get(i) instanceof AprilTagClusterDetection) {
-                Logger.log("Bulk-Detection Metadata Found. Name: "+((AprilTagClusterDetection) aprilTagProcessor.getDetections().get(i)).metadata.name);
-                Logger.log("Bulk-Detection Metadata Found. Short-Name: "+((AprilTagClusterDetection) aprilTagProcessor.getDetections().get(i)).metadata.shortName);
-            } else if(aprilTagProcessor.getDetections().get(i) instanceof AprilTagSingleDetection) {
-                Logger.log("Bulk-Detection Metadata Found. ID: "+((AprilTagSingleDetection) aprilTagProcessor.getDetections().get(i)).metadata.id);
-                Logger.log("Bulk-Detection Metadata Found. Name: "+((AprilTagSingleDetection) aprilTagProcessor.getDetections().get(i)).metadata.name);
-            }
+        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
 
+        for (int i = 0; i < detections.size(); i++) {
+            if (detections.get(i) instanceof AprilTagClusterDetection) {
+                Logger.log("Bulk-Detection Metadata Found. Name: "+((AprilTagClusterDetection) detections.get(i)).metadata.name);
+                Logger.log("Bulk-Detection Metadata Found. Short-Name: "+((AprilTagClusterDetection) detections.get(i)).metadata.shortName);
+            } else if(detections.get(i) instanceof AprilTagSingleDetection) {
+                Logger.log("Bulk-Detection Metadata Found. ID: "+((AprilTagSingleDetection) detections.get(i)).metadata.id);
+                Logger.log("Bulk-Detection Metadata Found. Name: "+((AprilTagSingleDetection) detections.get(i)).metadata.name);
+            }
         }
 
-        Scheduler.addTask(500, (obj2) -> {LogAllViewableTags();});
+        Scheduler.addTask(500, (obj2) -> LogAllViewableTags());
     }
 }
