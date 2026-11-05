@@ -18,7 +18,7 @@ public class Storage {
 
 
     static {
-        Scheduler.addTask("init", (Obj1) -> {
+        Scheduler.addTask("init", (obj) -> {
             motorBottomInv = Hardware.mapping.getMotor("motorBottomInv");
             servoPollen = Hardware.mapping.getContinuousServo("servoPollen", DcMotorSimple.Direction.FORWARD);
             servoNectar1 = Hardware.mapping.getContinuousServo("servoNectar1", DcMotorSimple.Direction.FORWARD);
@@ -26,24 +26,40 @@ public class Storage {
         });
 
         final boolean[] toggledIntake = { false };
+        final boolean[] toggledPollenServo = { false };
+        final boolean[] toggledNectar = { false };
 
-        Scheduler.addTask("toggle-intake:down", (obj2) -> {
+        Scheduler.addTask("toggle-intake:down", (obj) -> {
             if (toggledIntake[0]) disableIntake();
             else enableIntake();
 
             toggledIntake[0] = !toggledIntake[0];
         });
-    }
 
+        Scheduler.addTask("toggle-pollen:down", (obj) -> {
+            if (toggledPollenServo[0]) disablePollenServo();
+            else enablePollenServo();
+
+            toggledPollenServo[0] = !toggledPollenServo[0];
+        });
+
+
+        Scheduler.addTask("toggle-nectar:down", (obj) -> {
+            if (toggledNectar[0]) disableNectarServo();
+            else enableNectarServo();
+
+            toggledNectar[0] = !toggledNectar[0];
+        });
+    }
 
     private final ArrayList<GamePiece> currentInventory = new ArrayList<>();
 
-    public static void enableIntake(){ motorBottomInv.setPower(1.0); }
-    public static void disableIntake(){ motorBottomInv.setPower(0.0); }
-    public static void enablePollenServo(){ servoPollen.setPower(1.0); }
-    public static void disablePollenServo(){ servoPollen.setPower(1.0); }
-    public static void enableNectarServo(){ servoNectar1.setPower(1.0); servoNectar2.setPower(1.0); }
-    public static void disableNectarServo(){ servoNectar1.setPower(0.0); servoNectar2.setPower(0.0); }
+    public static void enableIntake() { motorBottomInv.setPower(1.0); }
+    public static void disableIntake() { motorBottomInv.setPower(0.0); }
+    public static void enablePollenServo() { servoPollen.setPower(1.0); }
+    public static void disablePollenServo() { servoPollen.setPower(1.0); }
+    public static void enableNectarServo() { servoNectar1.setPower(1.0); servoNectar2.setPower(1.0); }
+    public static void disableNectarServo() { servoNectar1.setPower(0.0); servoNectar2.setPower(0.0); }
 
 
     // Currently Unused
@@ -58,5 +74,4 @@ public class Storage {
             }
         }
     }
-
 }

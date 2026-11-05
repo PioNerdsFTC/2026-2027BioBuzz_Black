@@ -2,8 +2,6 @@ package org.pionerds.ftc.teamcode.Orchestration;
 
 import android.util.Log;
 
-import androidx.core.widget.TintableCompoundDrawablesView;
-
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
@@ -11,6 +9,8 @@ import org.pionerds.ftc.teamcode.Driver.DriverConfigurations;
 import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Storage.Storage;
+import org.pionerds.ftc.teamcode.Storage.StorageInitializer;
 import org.pionerds.ftc.teamcode.Vision.Vision;
 
 import java.util.ArrayList;
@@ -296,6 +296,8 @@ public class Scheduler {
     static Coordination coordination = new Coordination();
     static DriverConfigurations driverConfigurations = new DriverConfigurations();
     static Drivetrain drivetrain = new Drivetrain();
+
+    static StorageInitializer storageInitializer = new StorageInitializer();
 
     static {
          Scheduler.addTask("pre-init", (obj) -> {
