@@ -63,6 +63,8 @@ import android.widget.TextView;
 
 // import com.google.blocks.ftcrobotcontroller.ProgrammingWebHandlers;
 // import com.google.blocks.ftcrobotcontroller.runtime.BlocksOpMode;
+import com.google.blocks.ftcrobotcontroller.ProgrammingWebHandlers;
+import com.google.blocks.ftcrobotcontroller.runtime.BlocksOpMode;
 import com.qualcomm.ftccommon.ClassManagerFactory;
 import com.qualcomm.ftccommon.FtcAboutActivity;
 import com.qualcomm.ftccommon.FtcEventLoop;
@@ -105,6 +107,9 @@ import org.firstinspires.ftc.ftccommon.internal.ProgramAndManageActivity;
 // import org.firstinspires.ftc.onbotjava.ExternalLibraries;
 // import org.firstinspires.ftc.onbotjava.OnBotJavaHelperImpl;
 // import org.firstinspires.ftc.onbotjava.OnBotJavaProgrammingMode;
+import org.firstinspires.ftc.onbotjava.ExternalLibraries;
+import org.firstinspires.ftc.onbotjava.OnBotJavaHelperImpl;
+import org.firstinspires.ftc.onbotjava.OnBotJavaProgrammingMode;
 import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.robotcore.internal.hardware.android.AndroidBoard;
 import org.firstinspires.ftc.robotcore.internal.network.DeviceNameManagerFactory;
@@ -343,10 +348,10 @@ public class FtcRobotControllerActivity extends Activity
     //  Disables OnbotJava and block coding. If needed, uncomment.
     // ================
 
-    // BlocksOpMode.setActivityAndWebView(this, (WebView) findViewById(R.id.webViewBlocksRuntime));
+     BlocksOpMode.setActivityAndWebView(this, (WebView) findViewById(R.id.webViewBlocksRuntime));
 
-    // ExternalLibraries.getInstance().onCreate();
-    // onBotJavaHelper = new OnBotJavaHelperImpl();
+     ExternalLibraries.getInstance().onCreate();
+     onBotJavaHelper = new OnBotJavaHelperImpl();
 
     /*
      * Paranoia as the ClassManagerFactory requires EXTERNAL_STORAGE permissions
@@ -380,9 +385,9 @@ public class FtcRobotControllerActivity extends Activity
     dimmer = new Dimmer(this);
     dimmer.longBright();
 
-//    programmingModeManager = new ProgrammingModeManager();
-//    programmingModeManager.register(new ProgrammingWebHandlers());
-//    programmingModeManager.register(new OnBotJavaProgrammingMode());
+    programmingModeManager = new ProgrammingModeManager();
+    programmingModeManager.register(new ProgrammingWebHandlers());
+    programmingModeManager.register(new OnBotJavaProgrammingMode());
 
     updateUI = createUpdateUI();
     callback = createUICallback(updateUI);

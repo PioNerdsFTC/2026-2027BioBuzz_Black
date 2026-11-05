@@ -70,7 +70,6 @@ public class Drivetrain {
                 OmniDrivetrain.fieldCentricDrive();
             }));
 
-
             Logger.log("Initialized drivetrain");
         });
     }

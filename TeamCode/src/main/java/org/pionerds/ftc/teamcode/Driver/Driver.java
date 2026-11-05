@@ -1,5 +1,6 @@
 package org.pionerds.ftc.teamcode.Driver;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -46,6 +47,7 @@ public class Driver {
         return this;
     }
 
+    @SuppressLint("UseValueOf")
     public void tickControls() {
         DriverInput currentInput;
 
@@ -71,6 +73,9 @@ public class Driver {
 
             Scheduler.trigger(actionList.get(i), null);
         }
+
+        // TODO: Determine perf impact.
+        Scheduler.trigger("right-trigger", gamepad.right_trigger);
     }
 
     public double leftStickX() {
