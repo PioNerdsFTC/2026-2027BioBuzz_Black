@@ -22,16 +22,16 @@ public class Drivetrain {
 
     private static boolean isLeftRotationNegative = true;
 
-    public static void driveRobot() {
-        if (permitRotating) {
-            return;
-        }
-
-        if (permitDriving) {
-            OmniDrivetrain.fieldCentricDrive();
-            return;
-        }
-    }
+//    public static void driveRobot() {
+//        if (permitRotating) {
+//            return;
+//        }
+//
+//        if (permitDriving) {
+//            OmniDrivetrain.fieldCentricDrive();
+//            return;
+//        }
+//    }
 
     static {
         AtomicReference<UUID> tick = new AtomicReference<>();

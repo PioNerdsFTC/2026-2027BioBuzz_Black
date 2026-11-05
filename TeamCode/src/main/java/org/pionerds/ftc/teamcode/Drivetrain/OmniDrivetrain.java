@@ -59,31 +59,25 @@ public class OmniDrivetrain {
 
             double magnitude = fieldCentricPositionRequest[2];
 
-            motorSpeed[0] = (x + y);
-            motorSpeed[1] = (x - y);
-            motorSpeed[2] = (-x - y);
-            motorSpeed[3] = (-x + y);
+            double F = y;
+            double S = x;
+            double T = rotationSpeed * (flipDirection ? -1.00 : 1.00);
 
-            motorSpeed[0] *= magnitude;
-            motorSpeed[1] *= magnitude;
-            motorSpeed[2] *= magnitude;
-            motorSpeed[3] *= magnitude;
-            //Logger.log("DRIVING ROBOT");
+            motorSpeed[0] = F - S - T;  // front right
+            motorSpeed[1] = F + S + T;  // front left
+            motorSpeed[2] = F - S + T;  // back left
+            motorSpeed[3] = F + S - T;  // back right
 
+            boolean useOmniDrive = false;
+            if(useOmniDrive){
+                motorSpeed[0] = (x + y) + rotationSpeed;   // front right
+                motorSpeed[1] = (x - y) + rotationSpeed;   // front left
+                motorSpeed[2] = (-x - y) +rotationSpeed;  // back left
+                motorSpeed[3] = (-x + y) + rotationSpeed;  // back right
+            }
 
         }
 
-        if (turning) {
-            //Logger.log("TURNING ROBOT");
-            double rotSpeed = rotationSpeed;
-
-            if (flipDirection) rotSpeed = -rotSpeed;
-
-            motorSpeed[0] += rotSpeed;
-            motorSpeed[1] += rotSpeed;
-            motorSpeed[2] += rotSpeed;
-            motorSpeed[3] += rotSpeed;
-        }
 
         normalizeMotors();
         updateMotors();
