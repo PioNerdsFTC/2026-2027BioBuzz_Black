@@ -28,7 +28,7 @@ public class Launcher {
 
         final boolean[] launcherToggled =  { false };
 
-        UUID toggleLauncher = Scheduler.addTask("toggle-launcher", (obj) -> {
+        UUID toggleLauncher = Scheduler.addTask("toggle-launcher:down", (obj) -> {
             if (launcherToggled[0]) disableLauncher();
             else enableLauncher();
 
@@ -41,9 +41,7 @@ public class Launcher {
         });
     }
 
-    public void setLaunchAngle(double theta) {
-        hoodServo.setPosition(theta - 180);
-    }
+    public void setLaunchAngle(double theta) { hoodServo.setPosition(theta - 180); }
 
     public void enableLauncher() { launchMotor.setPower(1.0); }
     public void disableLauncher() { launchMotor.setPower(0.0); }
