@@ -46,7 +46,12 @@ public class Autonomous {
         // set the forward-force
         driveForces[1] = calculateSpeedForceY();
 
-        if(isWithinTolerance()) OmniDrivetrain.fieldCentricDrive();
+        if(isWithinTolerance()){
+            requestMovement(positionQueue.get(0)); // request next in queue
+            positionQueue.remove(0); // remove said request from queue
+        } else {
+            OmniDrivetrain.fieldCentricDrive();
+        }
     }
 
 
