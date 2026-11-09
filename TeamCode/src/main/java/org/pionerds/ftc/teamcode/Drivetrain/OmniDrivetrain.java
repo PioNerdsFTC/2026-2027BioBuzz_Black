@@ -24,6 +24,11 @@ public class OmniDrivetrain {
         });
     }
 
+    // Used for Autonomous
+    public static void OVERRIDE_DRIVER(Driver driver){
+        OmniDrivetrain.driver = driver;
+    }
+
     public static void setMotors(
             DcMotorEx motor0,
             DcMotorEx motor1,
