@@ -6,11 +6,12 @@ public enum DriverAction {
     TOGGLE_INTAKE,
     TRIGGER_FLOWER_LAUNCHER,
     TRIGGER_POLLEN_LAUNCHER,
-    TOGGLE_POLLEN,
-    TOGGLE_NECTAR,
     TOGGLE_LAUNCHER,
     TURN_LEFT,
+    TRIGGER_INTAKE,
+    TRIGGER_EJECTION_INTAKE,
     TURN_RIGHT;
+
 
     public String toString() {
         String string = this.name();

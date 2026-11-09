@@ -4,9 +4,6 @@ import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
-import java.util.HashMap;
-
-
 /**
  * Field dimensions are 365.75 cm x 365.75 cm, however we convert to a 0-100 unit.
  */
@@ -16,14 +13,20 @@ public class Coordination {
 
     public static double rotation = 0;
 
-    public static double UNIT = ((double) 1 /100 * 365.75);
+    public static double UNIT = ((double) 1 / 100 * 365.75);
 
     static {
         Scheduler.addTask("init", (obj) -> {
             // TODO: implement robot starting positions
 
-            Coordination.x = 50;
-            Coordination.y = 50;
+            if (Environment.Parameters.alliance == Environment.Parameters.Side.RED) {
+                Coordination.x = 0;
+                Coordination.y = 85;
+            } else {
+                Coordination.x = 100;
+                Coordination.y = 15;
+            }
+
             Coordination.rotation = 0;
 
             Scheduler.addTask(200, (obj2) -> {

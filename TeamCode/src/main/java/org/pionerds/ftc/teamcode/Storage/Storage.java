@@ -16,7 +16,6 @@ public class Storage {
     private static CRServo servoNectar1;
     private static CRServo servoNectar2;
 
-
     static {
         Scheduler.addTask("init", (obj) -> {
             motorBottomInv = Hardware.mapping.getMotor("motorBottomInv");
