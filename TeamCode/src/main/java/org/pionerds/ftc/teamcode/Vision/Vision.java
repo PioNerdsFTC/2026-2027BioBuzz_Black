@@ -2,6 +2,8 @@ package org.pionerds.ftc.teamcode.Vision;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import android.util.Size;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -27,6 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Vision {
+    private static final int CAMERA_WIDTH = 640;
+    private static final int CAMERA_HEIGHT = 480;
+
     private static AprilTagProcessor aprilTagProcessor;
     private static AprilTagProcessor.Builder aprilTagProcessorBuilder;
 
@@ -55,7 +60,13 @@ public class Vision {
                     return;
                 }
 
-                visionPortal = VisionPortal.easyCreateWithDefaults(Hardware.webcam, aprilTagProcessor);
+                visionPortal = new VisionPortal.Builder()
+                        .setCamera(Hardware.webcam)
+                        .setCameraResolution(new Size(CAMERA_WIDTH, CAMERA_HEIGHT))
+                        .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
+                        .enableLiveView(true)
+                        .addProcessor(aprilTagProcessor)
+                        .build();
 
                 Scheduler.addTask(500, (obj3) -> {
                     Logger.log("Webcam: " + Hardware.webcam);
@@ -112,6 +123,10 @@ public class Vision {
     }
 
     private static void LogAllViewableTags(){
+        if (visionPortal != null) {
+            Logger.log("Camera-State: " + visionPortal.getCameraState() + " FPS: " + visionPortal.getFps());
+        }
+
         ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
 
         for (int i = 0; i < detections.size(); i++) {
