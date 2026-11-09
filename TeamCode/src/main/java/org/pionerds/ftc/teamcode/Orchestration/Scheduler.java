@@ -298,8 +298,7 @@ public class Scheduler {
     static DriverConfigurations driverConfigurations = new DriverConfigurations();
     static Drivetrain drivetrain = new Drivetrain();
     static Intake intake = new Intake();
-    static Storage storage = new Storage();
-
+    static Storage storage = new Storage(); // Yes, don't worry about it :/
     static StorageInitializer storageInitializer = new StorageInitializer();
 
     static {
