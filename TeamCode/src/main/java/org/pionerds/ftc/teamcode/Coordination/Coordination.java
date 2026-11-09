@@ -21,10 +21,10 @@ public class Coordination {
 
             if (Environment.Parameters.alliance == Environment.Parameters.Side.RED) {
                 Coordination.x = 0;
-                Coordination.y = 75;
+                Coordination.y = 85;
             } else {
                 Coordination.x = 100;
-                Coordination.y = 25;
+                Coordination.y = 15;
             }
 
             Coordination.rotation = 0;
