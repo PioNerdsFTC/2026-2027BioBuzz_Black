@@ -9,6 +9,7 @@ import org.pionerds.ftc.teamcode.Driver.DriverConfigurations;
 import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Storage.Intake;
 import org.pionerds.ftc.teamcode.Storage.Storage;
 import org.pionerds.ftc.teamcode.Storage.StorageInitializer;
 import org.pionerds.ftc.teamcode.Vision.Vision;
@@ -296,6 +297,8 @@ public class Scheduler {
     static Coordination coordination = new Coordination();
     static DriverConfigurations driverConfigurations = new DriverConfigurations();
     static Drivetrain drivetrain = new Drivetrain();
+    static Intake intake = new Intake();
+    static Storage storage = new Storage();
 
     static StorageInitializer storageInitializer = new StorageInitializer();
 
