@@ -9,6 +9,7 @@ public enum DriverAction {
     TOGGLE_LAUNCHER,
     TURN_LEFT,
     TRIGGER_INTAKE,
+    TRIGGER_EJECTION_INTAKE,
     TURN_RIGHT;
 
 

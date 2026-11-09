@@ -29,5 +29,19 @@ public class Intake {
             intake0.setPower(0);
             intake1.setPower(0);
         });
+
+
+        Scheduler.addTask("trigger-ejection-intake:down", (obj) -> {
+            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) return;
+
+            intake0.setPower(-1);
+            intake1.setPower(-1);
+        });
+        Scheduler.addTask("trigger-intake:up", (obj) -> {
+            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) return;
+
+            intake0.setPower(0);
+            intake1.setPower(0);
+        });
     }
 }
