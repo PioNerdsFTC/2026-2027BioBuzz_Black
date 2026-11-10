@@ -2,6 +2,7 @@ package org.pionerds.ftc.teamcode.Autonomous;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
+import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
 import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
 import org.pionerds.ftc.teamcode.Drivetrain.OmniDrivetrain;
@@ -56,8 +57,8 @@ public class Autonomous {
 
 
     private static void cacheTarget(double[] targetPos){
-        x = Hardware.odometer.x;
-        y = Hardware.odometer.y;
+        x = Coordination.x;
+        y = Coordination.y;
 
         xf = targetPos[0];
         yf = targetPos[1];
