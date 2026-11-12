@@ -23,7 +23,7 @@ public class Gyro {
         params = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                 )
         );
         gyro.initialize(params);
