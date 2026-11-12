@@ -42,9 +42,8 @@ public class Coordination {
 
         Scheduler.addTask((obj) -> {
             if (Environment.Capabilities.otos) {
-                Coordination.x = startX + Hardware.odometer.x / UNIT;
-                Coordination.y = startY + Hardware.odometer.y / UNIT;
-                Coordination.rotation = Hardware.odometer.h;
+                Coordination.x = 50 + Hardware.odometer.x;
+                Coordination.y = 50 + Hardware.odometer.y;
             }
         });
 
