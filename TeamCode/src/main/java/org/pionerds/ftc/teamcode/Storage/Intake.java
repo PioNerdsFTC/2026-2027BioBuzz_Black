@@ -14,7 +14,7 @@ public class Intake {
     static {
         Scheduler.addTask("init", (obj) -> {
             intake0 = Hardware.mapping.getMotor("intake0");
-            intake1 = Hardware.mapping.getMotor("intake0");
+            intake1 = Hardware.mapping.getMotor("intake1");
         });
 
         Scheduler.addTask("trigger-intake:down", (obj) -> {

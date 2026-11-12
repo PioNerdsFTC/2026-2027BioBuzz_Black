@@ -11,6 +11,9 @@ public class Coordination {
     public static double x = -1;
     public static double y = -1;
 
+    public static double initialX = -1;
+    public static double initialY = -1;
+
     public static double rotation = 0;
 
     public static double UNIT = ((double) 1 / 100 * 365.75);
@@ -20,12 +23,15 @@ public class Coordination {
             // TODO: implement robot starting positions
 
             if (Environment.Parameters.alliance == Environment.Parameters.Side.RED) {
-                Coordination.x = 0;
-                Coordination.y = 85;
+                Coordination.initialX = 0;
+                Coordination.initialY = 85;
             } else {
-                Coordination.x = 100;
-                Coordination.y = 15;
+                Coordination.initialX = 100;
+                Coordination.initialY = 15;
             }
+
+            Coordination.x = Coordination.initialX;
+            Coordination.y = Coordination.initialY;
 
             Coordination.rotation = 0;
 
@@ -36,8 +42,8 @@ public class Coordination {
 
         Scheduler.addTask((obj) -> {
             if (Environment.Capabilities.otos) {
-                Coordination.x = 50 + Hardware.odometer.x;
-                Coordination.y = 50 + Hardware.odometer.y;
+                Coordination.x = Coordination.initialX + Hardware.odometer.x;
+                Coordination.y = Coordination.initialY + Hardware.odometer.y;
             }
         });
 
