@@ -1,24 +1,27 @@
 <script lang="ts">
 	import {
 		CELLS,
-		COLUMNS,
 		FLOWER_RADIUS,
 		FLOWERS,
 		GARDENS,
 		HIVE_FRAME,
 		LOADING_ZONES,
-		TILE_SIZE
+		TILE_SIZE,
+		type Rect
 	} from '$lib/field';
 
-	const NECTAR_RADIUS = 1.25;
-	const POLLEN_RADIUS = 0.95;
+	const COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 	const allianceFill = { red: 'fill-red-500', blue: 'fill-blue-500' };
 	const allianceStroke = { red: 'stroke-red-500', blue: 'stroke-blue-500' };
+
+	const box = (rect: Rect) => ({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+	const tiles = Array.from({ length: 6 }, (_, i) => i);
 </script>
 
+<!-- Overflow is visible so the axis labels can sit in the margin Board leaves around the field -->
 <svg
-	class="pointer-events-none absolute inset-0 h-full w-full select-none"
+	class="pointer-events-none absolute inset-0 h-full w-full overflow-visible select-none"
 	viewBox="0 0 100 100"
 	aria-hidden="true"
 >
@@ -26,40 +29,53 @@
 	<rect x="0" y="0" width="50" height="100" class="fill-red-500/5" />
 	<rect x="50" y="0" width="50" height="100" class="fill-blue-500/5" />
 
-	<!-- TILE grid -->
-	{#each Array.from({ length: 5 }, (_, i) => (i + 1) * TILE_SIZE) as offset}
+	<!-- TILE grid, labelled outside the field -->
+	{#each tiles.slice(1) as i}
 		<line
-			x1={offset}
+			x1={i * TILE_SIZE}
 			y1="0"
-			x2={offset}
+			x2={i * TILE_SIZE}
 			y2="100"
 			class="stroke-primary-500/20"
 			stroke-width="0.25"
 		/>
 		<line
 			x1="0"
-			y1={offset}
+			y1={i * TILE_SIZE}
 			x2="100"
-			y2={offset}
+			y2={i * TILE_SIZE}
 			class="stroke-primary-500/20"
 			stroke-width="0.25"
 		/>
 	{/each}
 
-	{#each COLUMNS as column, i}
-		{#each Array.from({ length: 6 }, (_, j) => j) as row}
-			<text x={i * TILE_SIZE + 1} y={row * TILE_SIZE + 3} class="fill-text-800" font-size="2.2"
-				>{column}{row + 1}</text
-			>
-		{/each}
+	{#each tiles as i}
+		<text
+			x={(i + 0.5) * TILE_SIZE}
+			y="-1.2"
+			text-anchor="middle"
+			class="fill-text-700"
+			font-size="2.2">{COLUMNS[i]}</text
+		>
+		<text
+			x="-1.4"
+			y={(i + 0.5) * TILE_SIZE}
+			text-anchor="end"
+			dominant-baseline="central"
+			class="fill-text-700"
+			font-size="2.2">{i + 1}</text
+		>
 	{/each}
 
-	<text x="50" y="98.8" text-anchor="middle" class="fill-text-700" font-size="2">▼ audience ▼</text>
+	<text x="50" y="103" text-anchor="middle" class="fill-text-700" font-size="2">▼ audience ▼</text>
 
 	<!-- LOADING ZONES -->
 	{#each LOADING_ZONES as zone}
-		<rect
-			{...{ x: zone.x, y: zone.y, width: zone.width, height: zone.height }}
+		<!-- Open on the wall side, so the dashes don't run over the perimeter -->
+		<path
+			d={zone.alliance === 'red'
+				? `M 0 ${zone.y} H ${zone.x + zone.width} V ${zone.y + zone.height} H 0`
+				: `M 100 ${zone.y} H ${zone.x} V ${zone.y + zone.height} H 100`}
 			class="fill-none {allianceStroke[zone.alliance]}"
 			stroke-width="0.4"
 			stroke-dasharray="1.5 1"
@@ -75,22 +91,9 @@
 		>
 	{/each}
 
-	<!-- GARDENS, each staged with 4 POLLEN -->
+	<!-- GARDENS -->
 	{#each GARDENS as garden}
-		<rect
-			{...{ x: garden.x, y: garden.y, width: garden.width, height: garden.height }}
-			class="{allianceFill[garden.alliance]} opacity-60"
-		/>
-		{#each [0, 1, 2, 3] as i}
-			<circle
-				cx={garden.alliance === 'red'
-					? garden.x + POLLEN_RADIUS + i * 2 * POLLEN_RADIUS
-					: garden.x + garden.width - POLLEN_RADIUS - i * 2 * POLLEN_RADIUS}
-				cy={garden.y + garden.height / 2}
-				r={POLLEN_RADIUS}
-				class="fill-yellow-300"
-			/>
-		{/each}
+		<rect {...box(garden)} class="{allianceFill[garden.alliance]} opacity-60" />
 		<text
 			x={garden.x + garden.width / 2}
 			y={garden.alliance === 'red' ? garden.y + garden.height + 2.4 : garden.y - 1}
@@ -121,7 +124,7 @@
 
 	<!-- HIVE structure -->
 	<rect
-		{...{ x: HIVE_FRAME.x, y: HIVE_FRAME.y, width: HIVE_FRAME.width, height: HIVE_FRAME.height }}
+		{...box(HIVE_FRAME)}
 		class="fill-amber-900/20 stroke-amber-500/70"
 		stroke-width="0.4"
 		rx="0.8"
@@ -137,33 +140,15 @@
 
 	{#each CELLS as cell}
 		<rect
-			{...{ x: cell.x, y: cell.y, width: cell.width, height: cell.height }}
-			class="{cell.alliance === 'red' ? 'stroke-red-500' : 'stroke-blue-500'}
-				{cell.up ? (cell.alliance === 'red' ? 'fill-red-500/35' : 'fill-blue-500/35') : 'fill-none'}"
+			{...box(cell)}
+			class="{allianceStroke[cell.alliance]} {cell.alliance === 'red'
+				? 'fill-red-500/15'
+				: 'fill-blue-500/15'}"
 			stroke-width="0.4"
-			stroke-dasharray={cell.up ? undefined : '1 0.8'}
 			rx="0.5"
 		>
-			<title
-				>{cell.alliance}
-				{cell.side} cell{cell.up ? ' (up at start)' : ''} · AprilTags {cell.aprilTags.join(
-					', '
-				)}</title
-			>
+			<title>{cell.alliance} {cell.side} cell · AprilTags {cell.aprilTags.join(', ')}</title>
 		</rect>
-
-		<!-- The upward-facing CELL starts with 3 NECTAR -->
-		{#if cell.up}
-			{#each [-1, 0, 1] as i}
-				<circle
-					cx={cell.x + cell.width / 2 + i * 2.8}
-					cy={cell.y + cell.height / 2}
-					r={NECTAR_RADIUS}
-					class="{allianceFill[cell.alliance]} stroke-white/70"
-					stroke-width="0.25"
-				/>
-			{/each}
-		{/if}
 	{/each}
 
 	<!-- Perimeter, alliance walls colored -->

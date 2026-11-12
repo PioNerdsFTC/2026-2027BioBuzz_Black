@@ -1,12 +1,15 @@
+import type { IconName } from '$lib/components/Icon.svelte';
+
 /**
  * Actions run in order once the robot reaches a waypoint (or before it moves, for the start).
  * Mirrors `AutonomousProgram.java`.
  */
 export type Action =
-	| { type: 'intake'; mode: 'in' | 'out' | 'off' }
-	| { type: 'launcher'; enabled: boolean; angle: number }
-	| { type: 'feed'; piece: 'pollen' | 'nectar'; duration: number }
+	| { type: 'shoot'; piece: Piece; count: number; angle: number }
+	| { type: 'intake'; duration: number }
 	| { type: 'wait'; duration: number };
+
+export type Piece = 'pollen' | 'nectar';
 
 export type ActionType = Action['type'];
 
@@ -18,6 +21,8 @@ export type Waypoint = {
 	x: number;
 	y: number;
 	tolerance: number;
+	/** Run the intake while driving to this waypoint. */
+	intake: boolean;
 	actions: Action[];
 };
 
@@ -39,6 +44,7 @@ export const INCH = 100 / 144;
 export const ROBOT_SIZE = 18 * INCH;
 
 export const MAX_DURATION_MS = 30000;
+export const MAX_SHOTS = 8;
 
 /**
  * Starting positions touching the alliance wall, outside the LOADING ZONE.
@@ -52,10 +58,15 @@ export const START_POSITIONS: Record<Alliance, { x: number; y: number }> = {
 export const DEFAULT_TOLERANCE = 2;
 
 export const ACTION_LABELS: Record<ActionType, string> = {
+	shoot: 'Shoot',
 	intake: 'Intake',
-	launcher: 'Launcher',
-	feed: 'Feed',
 	wait: 'Wait'
+};
+
+export const ACTION_ICONS: Record<ActionType, IconName> = {
+	shoot: 'launcher',
+	intake: 'intake',
+	wait: 'wait'
 };
 
 const STORAGE_KEY = 'autonomous-program';
@@ -75,14 +86,15 @@ export function round(value: number, digits = 2): number {
 	return Math.round(value * factor) / factor;
 }
 
-export function defaultAction(type: ActionType): Action {
+export function defaultAction(type: ActionType, previous?: Action): Action {
 	switch (type) {
+		case 'shoot':
+			// Repeat the last shot's settings, since consecutive shots usually match
+			return previous?.type === 'shoot'
+				? { ...previous }
+				: { type, piece: 'pollen', count: 1, angle: 45 };
 		case 'intake':
-			return { type, mode: 'in' };
-		case 'launcher':
-			return { type, enabled: true, angle: 45 };
-		case 'feed':
-			return { type, piece: 'pollen', duration: 500 };
+			return { type, duration: 1000 };
 		case 'wait':
 			return { type, duration: 500 };
 	}
@@ -94,14 +106,12 @@ export function emptyProgram(alliance: Alliance = 'red'): Program {
 
 export function describeAction(action: Action): string {
 	switch (action.type) {
+		case 'shoot':
+			return `Shoot ${action.count} ${action.piece} @ ${action.angle}°`;
 		case 'intake':
-			return `Intake ${action.mode}`;
-		case 'launcher':
-			return action.enabled ? `Launcher on @ ${action.angle}°` : 'Launcher off';
-		case 'feed':
-			return `Feed ${action.piece} ${action.duration}ms`;
+			return `Intake ${action.duration / 1000}s`;
 		case 'wait':
-			return `Wait ${action.duration}ms`;
+			return `Wait ${action.duration / 1000}s`;
 	}
 }
 
@@ -114,12 +124,13 @@ function isAction(value: unknown): value is Action {
 	const action = value as Record<string, unknown>;
 
 	switch (action.type) {
+		case 'shoot':
+			return (
+				(action.piece === 'pollen' || action.piece === 'nectar') &&
+				isNumber(action.count) &&
+				isNumber(action.angle)
+			);
 		case 'intake':
-			return action.mode === 'in' || action.mode === 'out' || action.mode === 'off';
-		case 'launcher':
-			return typeof action.enabled === 'boolean' && isNumber(action.angle);
-		case 'feed':
-			return (action.piece === 'pollen' || action.piece === 'nectar') && isNumber(action.duration);
 		case 'wait':
 			return isNumber(action.duration);
 		default:
@@ -141,6 +152,7 @@ function parseWaypoint(value: unknown): Waypoint | null {
 		x: point.x,
 		y: point.y,
 		tolerance: point.tolerance,
+		intake: point.intake === true,
 		actions: parseActions(point.actions)
 	};
 }

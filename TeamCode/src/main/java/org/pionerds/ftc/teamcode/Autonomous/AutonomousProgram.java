@@ -15,33 +15,37 @@ import java.util.List;
  */
 public class AutonomousProgram {
     public static final double MAX_DURATION_MS = 30000;
+    public static final int MAX_SHOTS = 8;
 
     public static final AutonomousProgram EMPTY =
             new AutonomousProgram(null, Collections.emptyList(), Collections.emptyList());
 
+    /**
+     * What the robot should do, not how: Autonomous turns these into motor and servo commands,
+     * including launcher spin-up and feed timing.
+     */
     public static class Action {
         public enum Type {
+            SHOOT,
             INTAKE,
-            LAUNCHER,
-            FEED,
             WAIT
         }
 
         public final Type type;
 
-        /** INTAKE: "in", "out" or "off". FEED: "pollen" or "nectar". */
-        public final String mode;
+        /** SHOOT: "pollen" or "nectar". */
+        public final String piece;
 
-        /** LAUNCHER: whether the launcher motors spin. */
-        public final boolean enabled;
+        /** SHOOT: how many pieces to launch. */
+        public final int count;
 
-        /** LAUNCHER: hood angle in degrees. FEED and WAIT: duration in ms. */
+        /** SHOOT: hood angle in degrees. INTAKE and WAIT: duration in ms. */
         public final double value;
 
-        Action(Type type, String mode, boolean enabled, double value) {
+        Action(Type type, String piece, int count, double value) {
             this.type = type;
-            this.mode = mode;
-            this.enabled = enabled;
+            this.piece = piece;
+            this.count = count;
             this.value = value;
         }
     }
@@ -50,12 +54,16 @@ public class AutonomousProgram {
         public final double x;
         public final double y;
         public final double tolerance;
+
+        /** Run the intake while driving to this waypoint. */
+        public final boolean intake;
         public final List<Action> actions;
 
-        public Step(double x, double y, double tolerance, List<Action> actions) {
+        public Step(double x, double y, double tolerance, boolean intake, List<Action> actions) {
             this.x = x;
             this.y = y;
             this.tolerance = tolerance;
+            this.intake = intake;
             this.actions = Collections.unmodifiableList(new ArrayList<>(actions));
         }
     }
@@ -98,6 +106,7 @@ public class AutonomousProgram {
                     coordinate(point, "x", where),
                     coordinate(point, "y", where),
                     tolerance,
+                    point.optBoolean("intake", false),
                     parseActions(point.optJSONArray("actions"), where)
             ));
         }
@@ -123,6 +132,7 @@ public class AutonomousProgram {
                         .put("x", step.x)
                         .put("y", step.y)
                         .put("tolerance", step.tolerance)
+                        .put("intake", step.intake)
                         .put("actions", actionsToJson(step.actions)));
             }
 
@@ -148,30 +158,26 @@ public class AutonomousProgram {
             String type = action.getString("type");
 
             switch (type) {
-                case "intake": {
-                    String mode = action.getString("mode");
-                    if (!mode.equals("in") && !mode.equals("out") && !mode.equals("off")) {
-                        throw new JSONException(where + " has an unknown intake mode '" + mode + "'");
-                    }
-                    actions.add(new Action(Action.Type.INTAKE, mode, false, 0));
-                    break;
-                }
-                case "launcher": {
-                    double angle = action.getDouble("angle");
-                    if (!(angle >= 0 && angle <= 180)) throw new JSONException(where + " hood angle is out of range");
-                    actions.add(new Action(Action.Type.LAUNCHER, null, action.getBoolean("enabled"), angle));
-                    break;
-                }
-                case "feed": {
+                case "shoot": {
                     String piece = action.getString("piece");
                     if (!piece.equals("pollen") && !piece.equals("nectar")) {
                         throw new JSONException(where + " has an unknown game piece '" + piece + "'");
                     }
-                    actions.add(new Action(Action.Type.FEED, piece, false, duration(action, where)));
+
+                    int count = action.getInt("count");
+                    if (count < 1 || count > MAX_SHOTS) throw new JSONException(where + " shot count is out of range");
+
+                    double angle = action.getDouble("angle");
+                    if (!(angle >= 0 && angle <= 180)) throw new JSONException(where + " hood angle is out of range");
+
+                    actions.add(new Action(Action.Type.SHOOT, piece, count, angle));
                     break;
                 }
+                case "intake":
+                    actions.add(new Action(Action.Type.INTAKE, null, 0, duration(action, where)));
+                    break;
                 case "wait":
-                    actions.add(new Action(Action.Type.WAIT, null, false, duration(action, where)));
+                    actions.add(new Action(Action.Type.WAIT, null, 0, duration(action, where)));
                     break;
                 default:
                     throw new JSONException(where + " has an unknown action '" + type + "'");
@@ -194,14 +200,11 @@ public class AutonomousProgram {
             JSONObject json = new JSONObject();
 
             switch (action.type) {
+                case SHOOT:
+                    json.put("type", "shoot").put("piece", action.piece).put("count", action.count).put("angle", action.value);
+                    break;
                 case INTAKE:
-                    json.put("type", "intake").put("mode", action.mode);
-                    break;
-                case LAUNCHER:
-                    json.put("type", "launcher").put("enabled", action.enabled).put("angle", action.value);
-                    break;
-                case FEED:
-                    json.put("type", "feed").put("piece", action.mode).put("duration", action.value);
+                    json.put("type", "intake").put("duration", action.value);
                     break;
                 case WAIT:
                     json.put("type", "wait").put("duration", action.value);

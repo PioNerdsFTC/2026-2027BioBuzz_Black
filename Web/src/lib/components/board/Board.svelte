@@ -8,7 +8,7 @@
 <div class="mx-2 mb-2 flex min-h-0 grow items-center justify-center" style="container-type: size">
 	<div
 		class="text-text relative border border-primary-500"
-		style="width: min(100cqw, 100cqh); height: min(100cqw, 100cqh);"
+		style="width: min(100cqw - 3rem, 100cqh - 3rem); height: min(100cqw - 3rem, 100cqh - 3rem);"
 	>
 		<Field />
 		{@render children?.()}

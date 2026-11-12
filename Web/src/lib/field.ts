@@ -32,8 +32,6 @@ const CELL_DEPTH = 12 * INCH;
 export type Cell = Rect & {
 	alliance: 'red' | 'blue';
 	side: 'far' | 'audience';
-	/** The CELL facing up at the start of the match, which holds 3 NECTAR. */
-	up: boolean;
 	aprilTags: number[];
 };
 
@@ -42,28 +40,24 @@ export const CELLS: Cell[] = [
 		...centered(50 - PIVOT_OFFSET, 50 - CELL_OFFSET, CELL_WIDTH, CELL_DEPTH),
 		alliance: 'red',
 		side: 'far',
-		up: false,
 		aprilTags: [30, 31, 32, 33]
 	},
 	{
 		...centered(50 - PIVOT_OFFSET, 50 + CELL_OFFSET, CELL_WIDTH, CELL_DEPTH),
 		alliance: 'red',
 		side: 'audience',
-		up: true,
 		aprilTags: [34, 35, 36, 37]
 	},
 	{
 		...centered(50 + PIVOT_OFFSET, 50 + CELL_OFFSET, CELL_WIDTH, CELL_DEPTH),
 		alliance: 'blue',
 		side: 'audience',
-		up: false,
 		aprilTags: [38, 39, 40, 41]
 	},
 	{
 		...centered(50 + PIVOT_OFFSET, 50 - CELL_OFFSET, CELL_WIDTH, CELL_DEPTH),
 		alliance: 'blue',
 		side: 'far',
-		up: true,
 		aprilTags: [42, 43, 44, 45]
 	}
 ];
@@ -79,7 +73,7 @@ export const FLOWERS: { x: number; y: number; wall: string }[] = [
 ];
 
 /** 4 in. FLOWER top opening, drawn larger so it is visible. */
-export const FLOWER_RADIUS = 3 * INCH;
+export const FLOWER_RADIUS = 2.6 * INCH;
 
 /** 23 in. x 2 in. tape strips in opposite corners: red at A1 (far wall), blue at F6 (audience wall). */
 export const GARDENS: (Rect & { alliance: 'red' | 'blue' })[] = [
@@ -94,4 +88,3 @@ export const LOADING_ZONES: (Rect & { alliance: 'red' | 'blue' })[] = [
 ];
 
 export const TILE_SIZE = TILE;
-export const COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F'];

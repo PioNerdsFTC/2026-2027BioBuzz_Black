@@ -151,7 +151,9 @@
 			</div>
 
 			<Board bind:robot>
-				<Robot bind:x={robot.x} bind:y={robot.y} bind:rotation={robot.rotation} />
+				{#if mode === 'live'}
+					<Robot bind:x={robot.x} bind:y={robot.y} bind:rotation={robot.rotation} />
+				{/if}
 
 				{#if mode === 'autonomous'}
 					<PathOverlay bind:program bind:selected {alliance} />

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ActionList from './ActionList.svelte';
+	import Icon, { type IconName } from '$lib/components/Icon.svelte';
 	import {
 		clamp,
 		clampStart,
@@ -7,8 +8,10 @@
 		fetchProgram,
 		parseProgram,
 		uploadProgram,
+		ACTION_ICONS,
 		DEFAULT_TOLERANCE,
 		START_POSITIONS,
+		type Action,
 		type Alliance,
 		type Program,
 		type Selection,
@@ -22,21 +25,26 @@
 	}: { program: Program; selected: Selection; alliance: Alliance } = $props();
 
 	let status: { type: 'info' | 'error'; msg: string } | null = $state(null);
+	let statusTimeout: ReturnType<typeof setTimeout>;
 	let busy = $state(false);
 	let importInput: HTMLInputElement;
 
-	const btn =
-		'rounded-sm border border-accent-500 px-2 py-0.5 hover:bg-accent-500/20 disabled:opacity-40';
-	const input = 'w-20 rounded-sm border border-accent-500/50 bg-background-950 px-1';
+	const field =
+		'h-7 w-full rounded-sm bg-background-900 px-1.5 text-right text-text-200 outline-none focus:ring-1 focus:ring-accent-400';
+	const toolButton =
+		'flex h-8 items-center gap-0.5 rounded-sm px-2 text-text-500 hover:bg-accent-500/15 hover:text-text-200 disabled:opacity-40';
+	const rowButton =
+		'grid h-6 w-6 place-items-center rounded-sm text-text-600 hover:bg-accent-500/15 hover:text-text-200 disabled:pointer-events-none disabled:opacity-0';
 
 	const waypoints = $derived(program.waypoints);
-	const plural = (n: number) => `${n} waypoint${n === 1 ? '' : 's'}`;
 
 	async function run(action: () => Promise<string>) {
 		busy = true;
+		clearTimeout(statusTimeout);
 
 		try {
 			status = { type: 'info', msg: await action() };
+			statusTimeout = setTimeout(() => (status = null), 3000);
 		} catch (error) {
 			status = { type: 'error', msg: error instanceof Error ? error.message : String(error) };
 		} finally {
@@ -47,14 +55,14 @@
 	const upload = () =>
 		run(async () => {
 			await uploadProgram(program);
-			return `Uploaded ${plural(waypoints.length)} to the robot`;
+			return 'Uploaded';
 		});
 
 	const download = () =>
 		run(async () => {
 			program = await fetchProgram(alliance);
 			selected = null;
-			return `Loaded ${plural(program.waypoints.length)} from the robot`;
+			return 'Loaded from robot';
 		});
 
 	function exportFile() {
@@ -77,10 +85,12 @@
 
 			program = imported;
 			selected = null;
-			return `Imported ${plural(imported.waypoints.length)} from ${file.name}`;
+			return `Imported ${file.name}`;
 		});
 
 	function setAlliance(value: Alliance) {
+		if (value === alliance) return;
+
 		alliance = value;
 		program.start = { ...START_POSITIONS[value] };
 	}
@@ -98,6 +108,19 @@
 		selected = null;
 	}
 
+	function addWaypoint() {
+		const last = waypoints.at(-1);
+
+		waypoints.push({
+			x: last?.x ?? program.start.x,
+			y: last?.y ?? program.start.y,
+			tolerance: last?.tolerance ?? DEFAULT_TOLERANCE,
+			intake: last?.intake ?? false,
+			actions: []
+		});
+		selected = waypoints.length - 1;
+	}
+
 	function setCoordinate(point: Waypoint, key: 'x' | 'y' | 'tolerance', value: number) {
 		if (!Number.isFinite(value)) return;
 		point[key] = key === 'tolerance' ? clamp(value, 0.1, 50) : clamp(value);
@@ -108,24 +131,78 @@
 	}
 </script>
 
-<div class="flex flex-col gap-4 p-4">
-	<div class="flex flex-wrap items-center gap-2">
-		<label class="mr-2 flex items-center gap-2">
-			Alliance
-			<select
-				value={alliance}
-				onchange={(event) => setAlliance(event.currentTarget.value as Alliance)}
-				class="rounded-sm border border-accent-500 bg-background-950 px-1 py-0.5"
-			>
-				<option value="red">Red</option>
-				<option value="blue">Blue</option>
-			</select>
-		</label>
+{#snippet tool(icon: IconName, arrow: IconName, label: string, onclick: () => void)}
+	<button class={toolButton} disabled={busy} aria-label={label} title={label} {onclick}>
+		<Icon name={icon} />
+		<Icon name={arrow} size={12} />
+	</button>
+{/snippet}
 
-		<button class={btn} disabled={busy} onclick={download}>Load from robot</button>
-		<button class={btn} disabled={busy} onclick={upload}>Upload to robot</button>
-		<button class={btn} onclick={exportFile}>Export</button>
-		<button class={btn} disabled={busy} onclick={() => importInput.click()}>Import</button>
+{#snippet chips(actions: Action[])}
+	<span class="flex min-w-0 items-center gap-0.5 overflow-hidden text-accent-300">
+		{#each actions as action}
+			<Icon name={ACTION_ICONS[action.type]} size={13} />
+		{/each}
+	</span>
+{/snippet}
+
+{#snippet number(value: number, label: string, onchange: (value: number) => void)}
+	<input
+		type="number"
+		step="0.5"
+		class={field}
+		aria-label={label}
+		{value}
+		onclick={(event) => event.stopPropagation()}
+		onchange={(event) => onchange(event.currentTarget.valueAsNumber)}
+	/>
+{/snippet}
+
+<div class="flex flex-col gap-3 p-4">
+	<div class="flex items-center gap-1">
+		<div class="flex gap-1" role="radiogroup" aria-label="Alliance">
+			{#each ['red', 'blue'] as const as value}
+				<button
+					role="radio"
+					aria-checked={alliance === value}
+					aria-label="{value} alliance"
+					title="{value} alliance"
+					class="h-6 w-6 rounded-sm border-2 transition
+						{value === 'red' ? 'bg-red-500' : 'bg-blue-500'}
+						{alliance === value ? 'border-text-100' : 'border-transparent opacity-35 hover:opacity-70'}"
+					onclick={() => setAlliance(value)}
+				></button>
+			{/each}
+		</div>
+
+		<p
+			class="min-w-0 flex-1 truncate px-3 text-xs transition-opacity
+				{status ? 'opacity-100' : 'opacity-0'}
+				{status?.type === 'error' ? 'text-red-400' : 'text-accent-300'}"
+			role="status"
+			title={status?.msg}
+		>
+			{status?.msg}
+		</p>
+
+		{@render tool('bot', 'down', 'Load from robot', download)}
+		{@render tool('bot', 'up', 'Upload to robot', upload)}
+		<span class="mx-1 h-5 w-px bg-primary-500/40"></span>
+		{@render tool('file', 'down', 'Export file', exportFile)}
+		{@render tool('file', 'up', 'Import file', () => importInput.click())}
+		<span class="mx-1 h-5 w-px bg-primary-500/40"></span>
+		<button
+			class="{toolButton} hover:text-red-400"
+			aria-label="Clear"
+			title="Clear"
+			onclick={() => {
+				program = emptyProgram(alliance);
+				selected = null;
+			}}
+		>
+			<Icon name="trash" />
+		</button>
+
 		<input
 			bind:this={importInput}
 			type="file"
@@ -137,130 +214,135 @@
 				event.currentTarget.value = '';
 			}}
 		/>
-		<button
-			class="{btn} border-red-500/60 text-red-400"
-			onclick={() => {
-				program = emptyProgram(alliance);
-				selected = null;
-			}}
-		>
-			Clear
-		</button>
 	</div>
 
-	{#if status}
-		<p class={status.type === 'error' ? 'text-red-500' : 'text-text-400'}>{status.msg}</p>
-	{/if}
+	<div class="flex flex-col">
+		<div
+			class="grid grid-cols-[2rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] gap-2 px-2 pb-1 text-xs text-text-700"
+		>
+			<span></span><span class="text-right">x</span><span class="text-right">y</span><span
+				class="text-right"
+				title="Tolerance">±</span
+			>
+		</div>
 
-	<p class="text-sm text-text-700">
-		Click the field to add a waypoint, drag to move it, right-click to delete. Drag the start box to
-		set where the robot begins. Select a row to give it actions, which run in order once the robot
-		arrives. Units are Coordination units (0–100). The uploaded program runs when the Auto OpMode
-		starts.
-	</p>
-
-	<table class="w-full text-left">
-		<thead>
-			<tr class="border-b border-primary-500 text-text-600">
-				<th class="py-1 pl-2">#</th>
-				<th>X</th>
-				<th>Y</th>
-				<th>Tolerance</th>
-				<th>Actions</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr
-				class="cursor-pointer border-b border-accent-500/20 {selected === 'start'
-					? 'bg-accent-500/10'
-					: ''}"
-				onclick={() => (selected = 'start')}
+		<!-- Start -->
+		<div
+			class="rounded-sm border-l-2 {selected === 'start'
+				? 'border-accent-300 bg-accent-500/10'
+				: 'border-transparent hover:bg-accent-500/5'}"
+		>
+			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+			<div
+				class="grid cursor-pointer grid-cols-[2rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] items-center gap-2 px-2 py-1"
+				onclick={() => (selected = selected === 'start' ? null : 'start')}
 				onfocusin={() => (selected = 'start')}
 			>
-				<td class="py-1 pl-2">Start</td>
-				{#each ['x', 'y'] as const as key}
-					<td>
-						<input
-							type="number"
-							step="0.5"
-							class={input}
-							value={program.start[key]}
-							onchange={(event) => setStart(key, event.currentTarget.valueAsNumber)}
-						/>
-					</td>
-				{/each}
-				<td class="text-text-700">—</td>
-				<td>{program.startActions.length || ''}</td>
-				<td></td>
-			</tr>
-			{#each waypoints as point, i}
-				<tr
-					class="cursor-pointer border-b border-accent-500/20 {selected === i
-						? 'bg-accent-500/10'
-						: ''}"
-					onclick={() => (selected = i)}
+				<span
+					title="Start"
+					class="h-4 w-4 rounded-sm border-2 {alliance === 'red'
+						? 'border-red-400 bg-red-500/30'
+						: 'border-blue-400 bg-blue-500/30'}"
+				></span>
+				{@render number(program.start.x, 'Start x', (value) => setStart('x', value))}
+				{@render number(program.start.y, 'Start y', (value) => setStart('y', value))}
+				<span></span>
+				{@render chips(program.startActions)}
+				<span></span>
+			</div>
+
+			{#if selected === 'start'}
+				<div class="ml-10 pr-2 pb-3">
+					<ActionList bind:actions={program.startActions} />
+				</div>
+			{/if}
+		</div>
+
+		{#each waypoints as point, i}
+			<div
+				class="group rounded-sm border-l-2 {selected === i
+					? 'border-accent-300 bg-accent-500/10'
+					: 'border-transparent hover:bg-accent-500/5'}"
+			>
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+				<div
+					class="grid cursor-pointer grid-cols-[2rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] items-center gap-2 px-2 py-1"
+					onclick={() => (selected = selected === i ? null : i)}
 					onfocusin={() => (selected = i)}
 				>
-					<td class="py-1 pl-2">{i + 1}</td>
-					{#each ['x', 'y', 'tolerance'] as const as key}
-						<td>
-							<input
-								type="number"
-								step="0.5"
-								class={input}
-								value={point[key]}
-								onchange={(event) => setCoordinate(point, key, event.currentTarget.valueAsNumber)}
-							/>
-						</td>
-					{/each}
-					<td>{point.actions.length || ''}</td>
-					<td class="whitespace-nowrap">
-						<button class="px-1" title="Move up" disabled={i === 0} onclick={() => move(i, -1)}
-							>↑</button
-						>
+					<span
+						class="grid h-5 w-5 place-items-center rounded-full border text-[0.65rem] font-semibold
+							{selected === i
+							? 'border-accent-100 bg-accent-200 text-background-950'
+							: 'border-accent-300 text-accent-200'}">{i + 1}</span
+					>
+					{@render number(point.x, `Waypoint ${i + 1} x`, (value) =>
+						setCoordinate(point, 'x', value)
+					)}
+					{@render number(point.y, `Waypoint ${i + 1} y`, (value) =>
+						setCoordinate(point, 'y', value)
+					)}
+					{@render number(point.tolerance, `Waypoint ${i + 1} tolerance`, (value) =>
+						setCoordinate(point, 'tolerance', value)
+					)}
+					{@render chips(point.actions)}
+
+					<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+					<span class="flex justify-end" onclick={(event) => event.stopPropagation()}>
 						<button
-							class="px-1"
-							title="Move down"
-							disabled={i === waypoints.length - 1}
-							onclick={() => move(i, 1)}>↓</button
+							class="grid h-6 w-6 place-items-center rounded-sm {point.intake
+								? 'bg-yellow-300/20 text-yellow-300'
+								: 'text-text-700 hover:text-text-300'}"
+							aria-label="Collect while driving to waypoint {i + 1}"
+							aria-pressed={point.intake}
+							title="Collect on the way"
+							onclick={() => (point.intake = !point.intake)}
 						>
-						<button class="px-1 text-red-400" title="Delete" onclick={() => remove(i)}>✕</button>
-					</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+							<Icon name="intake" size={14} />
+						</button>
+						<span class="flex opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
+							<button
+								class={rowButton}
+								aria-label="Move up"
+								disabled={i === 0}
+								onclick={() => move(i, -1)}
+							>
+								<Icon name="chevronUp" size={14} />
+							</button>
+							<button
+								class={rowButton}
+								aria-label="Move down"
+								disabled={i === waypoints.length - 1}
+								onclick={() => move(i, 1)}
+							>
+								<Icon name="chevronDown" size={14} />
+							</button>
+							<button
+								class="{rowButton} hover:text-red-400"
+								aria-label="Remove waypoint {i + 1}"
+								onclick={() => remove(i)}
+							>
+								<Icon name="x" size={14} />
+							</button>
+						</span>
+					</span>
+				</div>
 
-	<button
-		class="{btn} self-start"
-		onclick={() => {
-			const last = waypoints.at(-1) ?? program.start;
-			waypoints.push({
-				x: last.x,
-				y: last.y,
-				tolerance: waypoints.at(-1)?.tolerance ?? DEFAULT_TOLERANCE,
-				actions: []
-			});
-			selected = waypoints.length - 1;
-		}}
-	>
-		Add waypoint
-	</button>
+				{#if selected === i}
+					<div class="ml-10 pr-2 pb-3">
+						<ActionList bind:actions={point.actions} />
+					</div>
+				{/if}
+			</div>
+		{/each}
 
-	{#if selected === 'start'}
-		<div class="flex flex-col gap-2 border-t border-primary-500 pt-4">
-			<h2 class="text-lg text-text-400">Actions at start (before moving)</h2>
-			<ActionList bind:actions={program.startActions} {btn} />
-		</div>
-	{:else if selected !== null && waypoints[selected]}
-		<div class="flex flex-col gap-2 border-t border-primary-500 pt-4">
-			<h2 class="text-lg text-text-400">Actions at waypoint {selected + 1}</h2>
-			<ActionList bind:actions={waypoints[selected].actions} {btn} />
-		</div>
-	{:else}
-		<p class="border-t border-primary-500 pt-4 text-text-700">
-			Select the start or a waypoint to edit its actions.
-		</p>
-	{/if}
+		<button
+			class="mt-2 grid h-8 place-items-center rounded-sm border border-dashed border-accent-500/30 text-text-600 hover:border-accent-400 hover:text-text-200"
+			aria-label="Add waypoint"
+			title="Add waypoint"
+			onclick={addWaypoint}
+		>
+			<Icon name="plus" />
+		</button>
+	</div>
 </div>
