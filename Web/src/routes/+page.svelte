@@ -6,7 +6,13 @@
 	import Robot from '$lib/components/board/Robot.svelte';
 	import PathOverlay from '$lib/components/autonomous/PathOverlay.svelte';
 	import PathEditor from '$lib/components/autonomous/PathEditor.svelte';
-	import { loadLocalPath, saveLocalPath, type Alliance, type Waypoint } from '$lib/autonomous';
+	import {
+		emptyProgram,
+		loadLocalProgram,
+		saveLocalProgram,
+		type Alliance,
+		type Selection
+	} from '$lib/autonomous';
 
 	let healthy = $state(false);
 	let ws: WebSocket | undefined = $state();
@@ -14,19 +20,20 @@
 
 	let mode = $state<'live' | 'autonomous'>('live');
 
-	let path = $state<Waypoint[]>([]);
-	let selected = $state<number | null>(null);
+	let program = $state(emptyProgram());
+	let selected = $state<Selection>(null);
 	let alliance = $state<Alliance>('red');
-	let pathLoaded = false;
+	let programLoaded = false;
 
 	$effect(() => {
-		const snapshot = $state.snapshot(path);
-		if (pathLoaded) saveLocalPath(snapshot);
+		const snapshot = $state.snapshot(program);
+		if (programLoaded) saveLocalProgram(snapshot);
 	});
 
 	onMount(() => {
-		path = loadLocalPath();
-		pathLoaded = true;
+		program = loadLocalProgram();
+		alliance = program.start.x < 50 ? 'red' : 'blue';
+		programLoaded = true;
 
 		healthInterval = setInterval(async () => {
 			try {
@@ -147,7 +154,7 @@
 				<Robot bind:x={robot.x} bind:y={robot.y} bind:rotation={robot.rotation} />
 
 				{#if mode === 'autonomous'}
-					<PathOverlay bind:path bind:selected {alliance} />
+					<PathOverlay bind:program bind:selected {alliance} />
 				{/if}
 			</Board>
 		</div>
@@ -161,7 +168,7 @@
 					</h1>
 				</div>
 				{#if mode === 'autonomous'}
-					<PathEditor bind:path bind:selected bind:alliance />
+					<PathEditor bind:program bind:selected bind:alliance />
 				{:else}
 					<div class="p-4">
 						<table class="mr-0 whitespace-nowrap">

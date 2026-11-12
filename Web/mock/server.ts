@@ -39,7 +39,8 @@ const subscribers = new Set<ServerWebSocket<unknown>>();
 const subscriptions = new WeakMap<ServerWebSocket<unknown>, Set<string>>();
 
 let healthy = process.env.MOCK_UNHEALTHY !== '1';
-let autonomousPath: { x: number; y: number; tolerance: number }[] = [];
+// Mirrors AutonomousProgram.java: stored as-is once validated
+let autonomousProgram: unknown = { start: null, startActions: [], waypoints: [] };
 let positionOverride: (Position & { until: number }) | null = null;
 
 const startedAt = Date.now();
@@ -275,7 +276,7 @@ const httpServer = Bun.serve({
 		}
 
 		if (pathname === `${ROUTE_PREFIX}/api/autonomous/get-path`) {
-			return jsonResponse(autonomousPath);
+			return jsonResponse(autonomousProgram);
 		}
 
 		if (pathname === `${ROUTE_PREFIX}/api/autonomous/set-path`) {
@@ -288,28 +289,15 @@ const httpServer = Bun.serve({
 				return textResponse('Invalid path: body is not JSON', 400);
 			}
 
-			if (!Array.isArray(body)) return textResponse('Invalid path: expected an array', 400);
+			const error = programError(body);
+			if (error) return textResponse(`Invalid path: ${error}`, 400);
 
-			const path = [];
-			for (const [i, point] of body.entries()) {
-				const { x, y, tolerance } = (point ?? {}) as Record<string, unknown>;
-				const valid =
-					[x, y, tolerance].every((n) => typeof n === 'number' && Number.isFinite(n)) &&
-					(x as number) >= 0 &&
-					(x as number) <= 100 &&
-					(y as number) >= 0 &&
-					(y as number) <= 100 &&
-					(tolerance as number) > 0;
-
-				if (!valid) return textResponse(`Invalid path: Point ${i} is out of range`, 400);
-				path.push({ x: x as number, y: y as number, tolerance: tolerance as number });
-			}
-
-			autonomousPath = path;
+			autonomousProgram = body;
+			const count = (body as { waypoints: unknown[] }).waypoints.length;
 			sendLog({
 				type: 'info',
 				tag: 'Autonomous',
-				msg: `Autonomous path updated with ${path.length} points`
+				msg: `Autonomous program updated with ${count} waypoints`
 			});
 			return textResponse('ok');
 		}
@@ -452,6 +440,61 @@ function namespaceOf(message: Record<string, unknown>): string | undefined {
 	if (typeof message.namespace === 'string') return message.namespace;
 
 	return undefined;
+}
+
+/** Same rules as `AutonomousProgram.fromJson`, returning the first problem found. */
+function programError(body: unknown): string | null {
+	const isNumber = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
+	const inRange = (n: unknown, min: number, max: number) => isNumber(n) && n >= min && n <= max;
+
+	if (!body || typeof body !== 'object') return 'expected an object';
+	const program = body as Record<string, unknown>;
+
+	const start = program.start as Record<string, unknown> | null | undefined;
+	if (start != null && !(inRange(start.x, 0, 100) && inRange(start.y, 0, 100))) {
+		return 'start is out of range';
+	}
+
+	const actionsError = (actions: unknown, where: string): string | null => {
+		if (actions == null) return null;
+		if (!Array.isArray(actions)) return `${where} actions must be an array`;
+
+		for (const action of actions as Record<string, unknown>[]) {
+			const valid =
+				(action?.type === 'intake' && ['in', 'out', 'off'].includes(action.mode as string)) ||
+				(action?.type === 'launcher' &&
+					typeof action.enabled === 'boolean' &&
+					inRange(action.angle, 0, 180)) ||
+				(action?.type === 'feed' &&
+					['pollen', 'nectar'].includes(action.piece as string) &&
+					inRange(action.duration, 0, 30000)) ||
+				(action?.type === 'wait' && inRange(action.duration, 0, 30000));
+
+			if (!valid) return `${where} has an invalid action ${JSON.stringify(action)}`;
+		}
+
+		return null;
+	};
+
+	const startError = actionsError(program.startActions, 'start');
+	if (startError) return startError;
+
+	if (!Array.isArray(program.waypoints)) return 'waypoints must be an array';
+
+	for (const [i, point] of (program.waypoints as Record<string, unknown>[]).entries()) {
+		const where = `waypoint ${i + 1}`;
+
+		if (!(inRange(point?.x, 0, 100) && inRange(point?.y, 0, 100)))
+			return `${where} is out of range`;
+		if (!(isNumber(point.tolerance) && point.tolerance > 0 && point.tolerance <= 50)) {
+			return `${where} tolerance is out of range`;
+		}
+
+		const error = actionsError(point.actions, where);
+		if (error) return error;
+	}
+
+	return null;
 }
 
 function isLogType(value: unknown): value is LogType {

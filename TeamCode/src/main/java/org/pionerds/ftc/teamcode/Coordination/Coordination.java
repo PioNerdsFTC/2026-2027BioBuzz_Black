@@ -54,6 +54,17 @@ public class Coordination {
         });
     }
 
+    /**
+     * Override the starting position, e.g. with one programmed from the dashboard. Call after init.
+     */
+    public static void setStart(double x, double y) {
+        Coordination.x = x;
+        Coordination.y = y;
+
+        startX = x;
+        startY = y;
+    }
+
     private static void updateRemotes() {
         Scheduler.trigger("coordination:update-position", null);
 

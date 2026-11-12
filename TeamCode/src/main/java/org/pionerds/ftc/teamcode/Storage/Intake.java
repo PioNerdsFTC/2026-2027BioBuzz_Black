@@ -41,7 +41,7 @@ public class Intake {
         });
     }
 
-    private static void setPower(double power) {
+    public static void setPower(double power) {
         if (intake0 != null) intake0.setPower(power);
         if (intake1 != null) intake1.setPower(power);
     }

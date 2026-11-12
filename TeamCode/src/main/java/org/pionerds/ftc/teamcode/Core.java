@@ -21,10 +21,9 @@ import org.firstinspires.ftc.robotcore.internal.webserver.websockets.FtcWebSocke
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.FtcWebSocketMessage;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.WebSocketManager;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.WebSocketNamespaceHandler;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.pionerds.ftc.teamcode.Autonomous.Autonomous;
+import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
@@ -32,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -113,20 +111,10 @@ public class Core {
             }
         );
 
-        manager.register(ROUTE_PREFIX + "/api/autonomous/get-path", session -> {
-            StringBuilder json = new StringBuilder("[");
-            List<double[]> path = Autonomous.getProgrammedPath();
-
-            for (int i = 0; i < path.size(); i++) {
-                double[] xyT = path.get(i);
-                if (i > 0) json.append(", ");
-                json.append("{ \"x\": ").append(jsonNumber(xyT[0]))
-                        .append(", \"y\": ").append(jsonNumber(xyT[1]))
-                        .append(", \"tolerance\": ").append(jsonNumber(xyT[2])).append(" }");
-            }
-
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", json.append("]").toString());
-        });
+        manager.register(ROUTE_PREFIX + "/api/autonomous/get-path", session ->
+                NanoHTTPD.newFixedLengthResponse(
+                        NanoHTTPD.Response.Status.OK, "application/json", Autonomous.getProgram().toJson())
+        );
 
         manager.register(ROUTE_PREFIX + "/api/autonomous/set-path", session -> {
             if (session.getMethod() != NanoHTTPD.Method.POST) {
@@ -138,27 +126,12 @@ public class Core {
             session.parseBody(body);
 
             try {
-                JSONArray points = new JSONArray(body.get("postData"));
-                ArrayList<double[]> path = new ArrayList<>();
-
-                for (int i = 0; i < points.length(); i++) {
-                    JSONObject point = points.getJSONObject(i);
-                    double x = point.getDouble("x");
-                    double y = point.getDouble("y");
-                    double tolerance = point.getDouble("tolerance");
-
-                    if (x < 0 || x > 100 || y < 0 || y > 100 || tolerance <= 0) {
-                        throw new JSONException("Point " + i + " is out of range");
-                    }
-
-                    path.add(new double[] { x, y, tolerance });
-                }
-
-                Autonomous.setProgrammedPath(path);
-                Log.i(TAG, "Autonomous path updated with " + path.size() + " points");
+                AutonomousProgram program = AutonomousProgram.fromJson(body.get("postData"));
+                Autonomous.setProgram(program);
+                Log.i(TAG, "Autonomous program updated with " + program.steps.size() + " waypoints");
 
                 return NanoHTTPD.newFixedLengthResponse("ok");
-            } catch (JSONException | NullPointerException e) {
+            } catch (JSONException e) {
                 return NanoHTTPD.newFixedLengthResponse(
                         NanoHTTPD.Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, "Invalid path: " + e.getMessage());
             }

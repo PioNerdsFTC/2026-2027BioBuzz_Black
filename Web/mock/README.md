@@ -38,14 +38,40 @@ Use `bun run mock:watch` to restart the server when it changes.
 | ------ | ------------------------------------ | ----------------------------------------------------- |
 | `GET`  | `/dashboard/api/get-health`          | Returns `ok` (200) or `unhealthy` (503).              |
 | `GET`  | `/dashboard/api/trigger-init`        | Returns `ok`, matching the robot controller.          |
-| `GET`  | `/dashboard/api/autonomous/get-path` | Returns the uploaded autonomous path as JSON.         |
-| `POST` | `/dashboard/api/autonomous/set-path` | Body `[{ "x": 20, "y": 80, "tolerance": 2 }]`.        |
+| `GET`  | `/dashboard/api/autonomous/get-path` | Returns the uploaded autonomous program as JSON.      |
+| `POST` | `/dashboard/api/autonomous/set-path` | Body is an autonomous program (see below).            |
 | `POST` | `/dashboard/api/mock/health`         | Body `{ "healthy": false }` to simulate an outage.    |
 | `POST` | `/dashboard/api/mock/log`            | Body `{ "type": "warn", "tag": "Test", "msg": "…" }`. |
 | `POST` | `/dashboard/api/mock/position`       | Body `{ "x": 50, "y": 50, "rotation": 1.57 }`.        |
 
 The robot position otherwise follows a looping path, and log messages are emitted
 every few seconds.
+
+An autonomous program, as stored by `AutonomousProgram.java` (positions in
+Coordination units, 0–100):
+
+```json
+{
+	"start": { "x": 6.25, "y": 91.5 },
+	"startActions": [{ "type": "launcher", "enabled": true, "angle": 45 }],
+	"waypoints": [
+		{
+			"x": 30,
+			"y": 60,
+			"tolerance": 2,
+			"actions": [
+				{ "type": "intake", "mode": "in" },
+				{ "type": "wait", "duration": 1000 },
+				{ "type": "feed", "piece": "pollen", "duration": 500 }
+			]
+		}
+	]
+}
+```
+
+Action types: `intake` (`mode`: `in`, `out`, `off`), `launcher` (`enabled`, hood
+`angle` 0–180°), `feed` (`piece`: `pollen`, `nectar`; `duration` ms) and `wait`
+(`duration` ms, at most 30000).
 
 ## WebSocket protocol
 
