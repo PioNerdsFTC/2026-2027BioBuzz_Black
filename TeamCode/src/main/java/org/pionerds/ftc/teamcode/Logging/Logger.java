@@ -86,7 +86,7 @@ public class Logger {
             Logger.logs.add((String) info);
             Logger.level.add(LogType.INFO);
 
-            Log.i(TAG, (String) info);
+            Log.i(TAG, String.valueOf(info));
 
             if (telemetry == null) return;
 
@@ -98,7 +98,7 @@ public class Logger {
             logs.add((String) info);
             level.add(LogType.WARNING);
 
-            Log.w(TAG, (String) info);
+            Log.w(TAG, String.valueOf(info));
 
             if (telemetry == null) return;
 
@@ -116,7 +116,7 @@ public class Logger {
                 Logger.log("STOPPING EXECUTION DUE TO ERROR");
             }
 
-            Log.e(TAG, (String) info);
+            Log.e(TAG, String.valueOf(info));
 
             if (telemetry == null) return;
 
@@ -125,7 +125,8 @@ public class Logger {
         });
 
         Scheduler.addTask("log:clear", (info) -> {
-            while (!logs.isEmpty()) logs.remove(0);
+            logs.clear();
+            level.clear();
 
             if (telemetry == null) return;
 

@@ -1,13 +1,10 @@
 package org.pionerds.ftc.teamcode.Autonomous;
 
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
-import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
 import org.pionerds.ftc.teamcode.Drivetrain.OmniDrivetrain;
-import org.pionerds.ftc.teamcode.Hardware.Hardware;
-import org.pionerds.ftc.teamcode.Hardware.Odometer;
+import org.pionerds.ftc.teamcode.Environment;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
 
@@ -29,9 +26,29 @@ public class Autonomous {
 
     static{
         OmniDrivetrain.OVERRIDE_DRIVER(puppet);
+
+        Scheduler.addTask((obj) -> {
+            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.AUTO) return;
+            if (!Scheduler.running) return;
+
+            if (positionQueue.isEmpty()) {
+                stop();
+                return;
+            }
+
+            moveToPositionTick(positionQueue.get(0));
+        });
+
+        Scheduler.addTask("exit", (obj) -> {
+            positionQueue.clear();
+            stop();
+        });
     }
 
 
+    /**
+     * Queue a movement to {x, y, tolerance} in Coordination units
+     */
     public static void requestMovement(double[] xyT){
         positionQueue.add(xyT);
     }
@@ -39,20 +56,19 @@ public class Autonomous {
     public static void moveToPositionTick(double[] position){
         cacheTarget(position);
 
-        double[] driveForces = {0.00,0.00};
-
-        // set the rightward-force
-        driveForces[0] = calculateSpeedForceX();
-
-        // set the forward-force
-        driveForces[1] = calculateSpeedForceY();
-
         if(isWithinTolerance()){
-            requestMovement(positionQueue.get(0)); // request next in queue
-            positionQueue.remove(0); // remove said request from queue
-        } else {
-            OmniDrivetrain.fieldCentricDrive();
+            positionQueue.remove(position);
+            stop();
+            return;
         }
+
+        puppet.setX(calculateSpeedForceX());
+        puppet.setY(-calculateSpeedForceY());
+    }
+
+    private static void stop(){
+        puppet.setX(0.00);
+        puppet.setY(0.00);
     }
 
 
@@ -75,16 +91,20 @@ public class Autonomous {
     }
 
     private static double calculateSpeedForceX(){
-        if(getΔ(xf,x) >= 20) return maxSpeed;
-        else if(getΔ(xf,x) >= 10) return mediumSpeed;
-        else return slowSpeed;
+        return calculateSpeedForce(xf, x);
     }
 
     private static double calculateSpeedForceY(){
-        if(getΔ(yf,y) >= 20) return maxSpeed;
-        else if(getΔ(yf,y) >= 10) return mediumSpeed;
-        else return slowSpeed;
+        return calculateSpeedForce(yf, y);
     }
 
+    private static double calculateSpeedForce(double target, double current){
+        double Δ = getΔ(target, current);
+        double direction = Math.signum(target - current);
 
+        if(Δ <= t) return 0.00;
+        else if(Δ >= 20) return direction * maxSpeed;
+        else if(Δ >= 10) return direction * mediumSpeed;
+        else return direction * slowSpeed;
+    }
 }

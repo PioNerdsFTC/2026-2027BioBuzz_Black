@@ -36,6 +36,8 @@ public final class Hardware {
             try {
                 HardwareMap hardwareMap = Globals.depend("hardware-map");
 
+                Hardware.mapping.init(hardwareMap);
+
                 if (Environment.Capabilities.vision) {
                     webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
                 }
@@ -45,7 +47,6 @@ public final class Hardware {
                     Hardware.odometer.init(otos);
                 }
 
-                Hardware.mapping.init(hardwareMap);
                 Hardware.gyro.init();
 
                 List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -56,7 +57,7 @@ public final class Hardware {
 
                 Logger.log("Initialized Hardware");
             } catch (Exception e) {
-                Logger.error(e.getMessage());
+                Logger.error(e);
             }
 
             tick.set(Scheduler.addTask((obj) -> {

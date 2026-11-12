@@ -18,11 +18,5 @@ public enum DriverInput {
     DPAD_UP,
     DPAD_DOWN,
     DPAD_RIGHT,
-    DPAD_LEFT;
-
-    public boolean isToggle = false;
-
-    public void setToggle() {
-        this.isToggle = true;
-    }
+    DPAD_LEFT
 }

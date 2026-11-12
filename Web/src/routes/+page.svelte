@@ -11,14 +11,13 @@
 
 	onMount(() => {
 		healthInterval = setInterval(async () => {
-			const response = await fetch('/dashboard/api/get-health');
-
-			if (response.ok) {
-				healthy = true;
-				return;
+			try {
+				const response = await fetch('/dashboard/api/get-health');
+				healthy = response.ok;
+			} catch {
+				// fetch rejects (rather than returning a failed response) when the robot is unreachable
+				healthy = false;
 			}
-
-			healthy = false;
 		}, 500);
 
 		ws = new WebSocket('ws://' + location.hostname + ':8081');
@@ -43,15 +42,23 @@
 				);
 
 			ws!.onmessage = (e) => {
-				const json = JSON.parse(e.data);
+				let json;
 
-				if (json.type === 'log') {
-					const object = JSON.parse(json.payload);
-					logs.push({ tag: object.tag, content: object.msg, type: object.type });
-				}
+				try {
+					json = JSON.parse(e.data);
 
-				if (json.type === 'position') {
-					robot = JSON.parse(json.payload);
+					if (json.type === 'log') {
+						const object = JSON.parse(json.payload);
+						logs.push({ tag: object.tag, content: object.msg, type: object.type });
+
+						if (logs.length > MAX_LOGS) logs.splice(0, logs.length - MAX_LOGS);
+					}
+
+					if (json.type === 'position') {
+						robot = JSON.parse(json.payload);
+					}
+				} catch (error) {
+					console.warn('Ignoring malformed dashboard message', e.data, error);
 				}
 			};
 
@@ -67,6 +74,8 @@
 			clearInterval(healthInterval);
 		};
 	});
+
+	const MAX_LOGS = 500;
 
 	const logs: {
 		tag: string;

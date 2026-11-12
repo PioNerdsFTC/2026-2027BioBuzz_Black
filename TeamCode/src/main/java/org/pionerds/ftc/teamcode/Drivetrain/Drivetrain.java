@@ -1,17 +1,14 @@
 package org.pionerds.ftc.teamcode.Drivetrain;
 
-import org.pionerds.ftc.teamcode.Driver.Driver;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
-import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Drivetrain {
-    static Driver driver;
     public static OmniDrivetrain omni = new OmniDrivetrain();
 
     private static boolean permitDriving = true;
@@ -57,8 +54,6 @@ public class Drivetrain {
         Scheduler.addTask("init", (obj) -> {
             if (!Environment.Capabilities.drivetrain) return;
 
-            driver = Globals.depend("driver1");
-
             OmniDrivetrain.setMotors(
                Hardware.mapping.getMotor("motor0"),
                Hardware.mapping.getMotor("motor1"),
@@ -67,10 +62,19 @@ public class Drivetrain {
             );
 
             tick.set(Scheduler.addTask((obj2) -> {
+                if (!Scheduler.running) return;
+
                 OmniDrivetrain.fieldCentricDrive();
             }));
 
             Logger.log("Initialized drivetrain");
+        });
+
+        Scheduler.addTask("exit", (obj) -> {
+            if (tick.get() != null) Scheduler.removeTask(tick.get());
+            tick.set(null);
+
+            OmniDrivetrain.nonEmergencyStop();
         });
     }
 }

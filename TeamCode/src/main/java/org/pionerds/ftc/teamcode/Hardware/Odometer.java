@@ -20,6 +20,8 @@ public class Odometer {
 
         otos.setLinearUnit(DistanceUnit.CM);
         otos.setAngularUnit(AngleUnit.RADIANS);
+
+        otos.resetTracking();
     }
 
     public void tick() {

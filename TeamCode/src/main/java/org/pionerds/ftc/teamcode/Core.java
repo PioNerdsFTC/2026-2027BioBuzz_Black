@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.Menu;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import android.webkit.MimeTypeMap;
 
 import com.qualcomm.ftccommon.FtcEventLoop;
@@ -49,19 +48,19 @@ public class Core {
         Log.i(TAG, "Initializing hooks");
 
         Scheduler.addTask("log:new:info", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+            Core.broadcast("log", "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
         });
 
         Scheduler.addTask("log:new:warn", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+            Core.broadcast("log", "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
         });
 
         Scheduler.addTask("log:new:error", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+            Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
         });
 
         Scheduler.addTask("coordination:update-position", (str) -> {
-            Core.broadcast("position", "{ \"x\": \"" + Coordination.x + "\", \"" + "\"y\": \"" + Coordination.y + "\", \"rotation\": \"" + 0 + "\"");
+            Core.broadcast("position", "{ \"x\": " + jsonNumber(Coordination.x) + ", \"y\": " + jsonNumber(Coordination.y) + ", \"rotation\": " + jsonNumber(Coordination.rotation) + " }");
         });
     }
 
@@ -69,7 +68,9 @@ public class Core {
     public static void stop(Context context) {}
 
     @OnCreateMenu
-    public static void populateMenu(Context context, Menu menu) { }
+    public static void populateMenu(Context context, Menu menu) {
+        Core.menu = menu;
+    }
 
     @WebHandlerRegistrar
     public static void attachWebServer(Context context, WebHandlerManager manager) {
@@ -97,8 +98,7 @@ public class Core {
         manager.register(ROUTE_PREFIX + "/api/trigger-init", session -> {
                 String menuItems = "";
 
-                for (int i = 0;; i++) {
-                    if (menu.getItem(i) == null) break;
+                for (int i = 0; menu != null && i < menu.size(); i++) {
                     menuItems += "," + menu.getItem(i);
                 }
 
@@ -148,6 +148,32 @@ public class Core {
 //            webSocket.send(new FtcWebSocketMessage(WS_NAMESPACE, "echo", message.getPayload()));
             return true;
         }
+    }
+
+    private static String jsonString(Object value) {
+        String str = String.valueOf(value);
+        StringBuilder out = new StringBuilder(str.length() + 2).append('"');
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+
+            switch (c) {
+                case '"': out.append("\\\""); break;
+                case '\\': out.append("\\\\"); break;
+                case '\n': out.append("\\n"); break;
+                case '\r': out.append("\\r"); break;
+                case '\t': out.append("\\t"); break;
+                default:
+                    if (c < 0x20) out.append(String.format(Locale.US, "\\u%04x", (int) c));
+                    else out.append(c);
+            }
+        }
+
+        return out.append('"').toString();
+    }
+
+    private static String jsonNumber(double value) {
+        return Double.isFinite(value) ? Double.toString(value) : "null";
     }
 
     private static WebHandler assetHandler(AssetManager assets, String assetPath, String mimeType) {

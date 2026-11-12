@@ -15,6 +15,9 @@ public class Coordination {
 
     public static double UNIT = ((double) 1 / 100 * 365.75);
 
+    private static double startX = -1;
+    private static double startY = -1;
+
     static {
         Scheduler.addTask("init", (obj) -> {
             // TODO: implement robot starting positions
@@ -29,6 +32,9 @@ public class Coordination {
 
             Coordination.rotation = 0;
 
+            startX = Coordination.x;
+            startY = Coordination.y;
+
             Scheduler.addTask(200, (obj2) -> {
                 updateRemotes();
             });
@@ -36,8 +42,9 @@ public class Coordination {
 
         Scheduler.addTask((obj) -> {
             if (Environment.Capabilities.otos) {
-                Coordination.x = 50 + Hardware.odometer.x;
-                Coordination.y = 50 + Hardware.odometer.y;
+                Coordination.x = startX + Hardware.odometer.x / UNIT;
+                Coordination.y = startY + Hardware.odometer.y / UNIT;
+                Coordination.rotation = Hardware.odometer.h;
             }
         });
 
