@@ -7,6 +7,8 @@ import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Autonomous {
 
@@ -22,6 +24,12 @@ public class Autonomous {
     private static PuppetDriver puppet = new PuppetDriver();
 
     private static ArrayList<double[]> positionQueue = new ArrayList<>();
+
+    /**
+     * Path uploaded from the dashboard. Loaded into the queue when an autonomous run starts.
+     * Replaced wholesale (never mutated) since it is written from the web server thread.
+     */
+    private static volatile List<double[]> programmedPath = Collections.emptyList();
 
 
     static{
@@ -39,6 +47,16 @@ public class Autonomous {
             moveToPositionTick(positionQueue.get(0));
         });
 
+        Scheduler.addTask("pre-run", (obj) -> {
+            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.AUTO) return;
+
+            positionQueue.clear();
+
+            for (double[] xyT : programmedPath) {
+                requestMovement(xyT.clone());
+            }
+        });
+
         Scheduler.addTask("exit", (obj) -> {
             positionQueue.clear();
             stop();
@@ -51,6 +69,20 @@ public class Autonomous {
      */
     public static void requestMovement(double[] xyT){
         positionQueue.add(xyT);
+    }
+
+    /**
+     * Replace the programmed path, each entry being {x, y, tolerance} in Coordination units
+     */
+    public static void setProgrammedPath(List<double[]> path) {
+        ArrayList<double[]> copy = new ArrayList<>();
+        for (double[] xyT : path) copy.add(xyT.clone());
+
+        programmedPath = Collections.unmodifiableList(copy);
+    }
+
+    public static List<double[]> getProgrammedPath() {
+        return programmedPath;
     }
 
     public static void moveToPositionTick(double[] position){

@@ -39,6 +39,7 @@ const subscribers = new Set<ServerWebSocket<unknown>>();
 const subscriptions = new WeakMap<ServerWebSocket<unknown>, Set<string>>();
 
 let healthy = process.env.MOCK_UNHEALTHY !== '1';
+let autonomousPath: { x: number; y: number; tolerance: number }[] = [];
 let positionOverride: (Position & { until: number }) | null = null;
 
 const startedAt = Date.now();
@@ -270,6 +271,46 @@ const httpServer = Bun.serve({
 		}
 
 		if (pathname === `${ROUTE_PREFIX}/api/trigger-init`) {
+			return textResponse('ok');
+		}
+
+		if (pathname === `${ROUTE_PREFIX}/api/autonomous/get-path`) {
+			return jsonResponse(autonomousPath);
+		}
+
+		if (pathname === `${ROUTE_PREFIX}/api/autonomous/set-path`) {
+			if (request.method !== 'POST') return textResponse('POST only', 405);
+
+			let body: unknown;
+			try {
+				body = await request.json();
+			} catch {
+				return textResponse('Invalid path: body is not JSON', 400);
+			}
+
+			if (!Array.isArray(body)) return textResponse('Invalid path: expected an array', 400);
+
+			const path = [];
+			for (const [i, point] of body.entries()) {
+				const { x, y, tolerance } = (point ?? {}) as Record<string, unknown>;
+				const valid =
+					[x, y, tolerance].every((n) => typeof n === 'number' && Number.isFinite(n)) &&
+					(x as number) >= 0 &&
+					(x as number) <= 100 &&
+					(y as number) >= 0 &&
+					(y as number) <= 100 &&
+					(tolerance as number) > 0;
+
+				if (!valid) return textResponse(`Invalid path: Point ${i} is out of range`, 400);
+				path.push({ x: x as number, y: y as number, tolerance: tolerance as number });
+			}
+
+			autonomousPath = path;
+			sendLog({
+				type: 'info',
+				tag: 'Autonomous',
+				msg: `Autonomous path updated with ${path.length} points`
+			});
 			return textResponse('ok');
 		}
 
