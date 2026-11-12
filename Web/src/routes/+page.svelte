@@ -112,7 +112,22 @@
 	<div
 		class="flex flex-row justify-between border-b border-primary-600 p-4 font-mono text-text-400"
 	>
-		<h1 class="text-2xl">Dashboard</h1>
+		<div class="flex items-center gap-6">
+			<h1 class="text-2xl">Dashboard</h1>
+
+			<div class="flex overflow-hidden rounded-sm border border-accent-500">
+				{#each [['live', 'Live'], ['autonomous', 'Autonomous']] as const as [value, label]}
+					<button
+						class="px-3 py-0.5 {mode === value
+							? 'bg-accent-500/30 text-text-200'
+							: 'hover:bg-accent-500/10'}"
+						onclick={() => (mode = value)}
+					>
+						{label}
+					</button>
+				{/each}
+			</div>
+		</div>
 
 		<div class="mr-4 flex items-center justify-center">
 			{#if healthy}
@@ -141,40 +156,46 @@
 				class="absolute top-0 right-0 bottom-0 left-0 flex min-w-[40vw] flex-col gap-0 pl-2 text-text-500"
 			>
 				<div class="sticky top-0 border-b border-primary-500 bg-background-950 py-2 pl-3">
-					<h1 class="ml-4 text-2xl text-text-500">Logs</h1>
+					<h1 class="ml-4 text-2xl text-text-500">
+						{mode === 'live' ? 'Logs' : 'Autonomous Path'}
+					</h1>
 				</div>
-				<div class="p-4">
-					<table class="mr-0 whitespace-nowrap">
-						<tbody>
-							{#each logs as log}
-								<tr in:fade class="border-b border-accent-500/20">
-									<td class="py-1 pr-1 pl-2">
-										<span
-											class="h-full rounded-md px-1.25 py-0.5 text-black
+				{#if mode === 'autonomous'}
+					<PathEditor bind:path bind:selected bind:alliance />
+				{:else}
+					<div class="p-4">
+						<table class="mr-0 whitespace-nowrap">
+							<tbody>
+								{#each logs as log}
+									<tr in:fade class="border-b border-accent-500/20">
+										<td class="py-1 pr-1 pl-2">
+											<span
+												class="h-full rounded-md px-1.25 py-0.5 text-black
                                        {log.type === 'debug' ? 'bg-blue-300' : ''}
                                        {log.type === 'info' ? 'bg-blue-500' : ''}
                                        {log.type === 'warn' ? 'bg-yellow-500' : ''}
                                        {log.type === 'error' ? 'bg-red-500' : ''}
                                    "
-										>
-											{log.type.charAt(0).toUpperCase()}
-										</span>
-										<span class="mx-4 my-1 rounded-sm border border-accent-500 px-1 py-0.5">
-											{log.tag}
-										</span>
-									</td>
-									<td
-										class="px-1 py-1
+											>
+												{log.type.charAt(0).toUpperCase()}
+											</span>
+											<span class="mx-4 my-1 rounded-sm border border-accent-500 px-1 py-0.5">
+												{log.tag}
+											</span>
+										</td>
+										<td
+											class="px-1 py-1
 								{log.type === 'debug' ? 'text-text-700' : ''}
 								{log.type === 'error' ? 'text-red-500' : ''}"
-									>
-										{log.content}
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
+										>
+											{log.content}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>
