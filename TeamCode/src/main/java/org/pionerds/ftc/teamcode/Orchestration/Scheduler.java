@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.pionerds.ftc.teamcode.Autonomous.Autonomous;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.DriverConfigurations;
 import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
@@ -297,6 +298,7 @@ public class Scheduler {
     static Coordination coordination = new Coordination();
     static DriverConfigurations driverConfigurations = new DriverConfigurations();
     static Drivetrain drivetrain = new Drivetrain();
+    static Autonomous autonomous = new Autonomous();
     static Intake intake = new Intake();
     static Storage storage = new Storage(); // Yes, don't worry about it :/
     static StorageInitializer storageInitializer = new StorageInitializer();

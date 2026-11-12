@@ -11,6 +11,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 public class OmniDrivetrain {
 
     private static Driver driver;
+    private static Driver overrideDriver;
     private static DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
     private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
     private static final double rotationSpeed = 1.0;
@@ -20,12 +21,13 @@ public class OmniDrivetrain {
 
     static {
         Scheduler.addTask("init", (obj) -> {
-            driver = Globals.depend("driver1");
+            // driver1 only exists in tele, otherwise fall back to auto puppet 
+            driver = Globals.has("driver1") ? Globals.depend("driver1") : overrideDriver;
         });
     }
 
-    // Used for Autonomous
     public static void OVERRIDE_DRIVER(Driver driver){
+        OmniDrivetrain.overrideDriver = driver;
         OmniDrivetrain.driver = driver;
     }
 
@@ -39,50 +41,32 @@ public class OmniDrivetrain {
     }
 
     public static void fieldCentricDrive(){
+        if (driver == null) {
+            nonEmergencyStop();
+            return;
+        }
+
         double x = driver.leftStickX();
         double y = driver.leftStickY();
         double gyroAngle = Hardware.yaw;
 
-        // Tolerance-Dead Zone
-        if (Math.abs(x) < 0.05 && Math.abs(y) < 0.05) {
-            //Logger.log("Inside Dead Zone (Driving)");
+        double F = 0.00;
+        double S = 0.00;
+        double T = turning ? rotationSpeed * (flipDirection ? -1.00 : 1.00) : 0.00;
 
-            for(int i = 0; i< motors.length; i++){
-                motorSpeed[i] = 0.00;
-            }
-
-            if(!turning) {
-                updateMotors();
-                return;
-            }
-        } else {
-
+        if (Math.abs(x) >= 0.05 || Math.abs(y) >= 0.05) {
             double[] fieldCentricPositionRequest = getFieldCentricPositionRequest(x, y, gyroAngle);
 
-            x = fieldCentricPositionRequest[0];
-            y = fieldCentricPositionRequest[1];
+            double magnitude = Math.min(fieldCentricPositionRequest[2], 1.00);
 
-            double magnitude = fieldCentricPositionRequest[2];
-
-            double F = y;
-            double S = x;
-            double T = rotationSpeed * (flipDirection ? -1.00 : 1.00);
-
-            motorSpeed[0] = F - S - T;  // front right
-            motorSpeed[1] = F + S + T;  // front left
-            motorSpeed[2] = F - S + T;  // back left
-            motorSpeed[3] = F + S - T;  // back right
-
-            boolean useOmniDrive = false;
-            if(useOmniDrive){
-                motorSpeed[0] = (x + y) + rotationSpeed;   // front right
-                motorSpeed[1] = (x - y) + rotationSpeed;   // front left
-                motorSpeed[2] = (-x - y) +rotationSpeed;  // back left
-                motorSpeed[3] = (-x + y) + rotationSpeed;  // back right
-            }
-
+            S = fieldCentricPositionRequest[0] * magnitude;
+            F = fieldCentricPositionRequest[1] * magnitude;
         }
 
+        motorSpeed[0] = F - S - T;  // front right
+        motorSpeed[1] = F + S + T;  // front left
+        motorSpeed[2] = F - S + T;  // back left
+        motorSpeed[3] = F + S - T;  // back right
 
         normalizeMotors();
         updateMotors();
@@ -122,6 +106,8 @@ public class OmniDrivetrain {
 
     public static void updateMotors() {
         for (int i = 0; i < 4; i++) {
+            if (motors[i] == null) continue;
+
             motors[i].setPower(motorSpeed[i]);
         }
     }

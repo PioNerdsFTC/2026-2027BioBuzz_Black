@@ -14,16 +14,6 @@ public enum DriverAction {
 
 
     public String toString() {
-        String string = this.name();
-
-        string = string.toLowerCase();
-
-        int index = string.indexOf("_");
-
-        while (string.contains("_")) {
-            string = string.substring(0, index) + "-" + string.substring(index + 1);
-        }
-
-        return string;
+        return this.name().toLowerCase().replace('_', '-');
     }
 }

@@ -10,6 +10,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Launcher {
     private String name;
@@ -20,7 +21,7 @@ public class Launcher {
         launchMotor = Hardware.mapping.getMotor(motorName);
         hoodServo = Hardware.mapping.getServoMotor(launchServoName);
 
-        launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        if (launchMotor != null) launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         UUID rightTrigger = Scheduler.addTask("right-trigger", (trigger) -> {
             setLaunchAngle((Float) trigger * 180);
@@ -35,14 +36,20 @@ public class Launcher {
             launcherToggled[0] = !launcherToggled[0];
         });
 
-        Scheduler.addTask("exit", (obj) -> {
+        AtomicReference<UUID> exit = new AtomicReference<>();
+
+        exit.set(Scheduler.addTask("exit", (obj) -> {
             Scheduler.removeTask(rightTrigger);
             Scheduler.removeTask(toggleLauncher);
-        });
+            Scheduler.removeTask(exit.get());
+        }));
     }
 
-    public void setLaunchAngle(double theta) { hoodServo.setPosition(theta - 180); }
+    /**
+     * @param theta hood angle in degrees, 0-180. Servo positions are 0-1.
+     */
+    public void setLaunchAngle(double theta) { if (hoodServo != null) hoodServo.setPosition(theta / 180); }
 
-    public void enableLauncher() { launchMotor.setPower(1.0); }
-    public void disableLauncher() { launchMotor.setPower(0.0); }
+    public void enableLauncher() { if (launchMotor != null) launchMotor.setPower(1.0); }
+    public void disableLauncher() { if (launchMotor != null) launchMotor.setPower(0.0); }
 }

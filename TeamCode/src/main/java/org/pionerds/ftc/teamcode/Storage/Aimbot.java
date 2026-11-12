@@ -7,12 +7,10 @@ public class Aimbot {
     public static double getCalculatedAngle(double xi, double xf, double yf, double v){
         double[] experimentalAngles = calculateLaunchAnglesTheoretical(xi, xf, yf, v);
 
+        // Both angles hit the target, averaging them does not. Use the flatter (faster) shot.
         double minAngle = experimentalAngles[0];
-        double maxAngle = experimentalAngles[1];
 
-        double averageAngle = (minAngle+maxAngle)/2.0;
-
-        return empericalCorrection(averageAngle);
+        return empericalCorrection(minAngle);
     }
 
     private static double empericalCorrection(double angle){
@@ -22,6 +20,10 @@ public class Aimbot {
     public static double[] calculateLaunchAnglesTheoretical(double xi, double xf, double yf, double v){
         double Δx = xf - xi;
         double Δy = yf;
+
+        if (Δx == 0) {
+            throw new IllegalArgumentException("Target must not be directly above the launcher!");
+        }
 
         double ΔxSq = Δx * Δx;
         double vv = v * v;

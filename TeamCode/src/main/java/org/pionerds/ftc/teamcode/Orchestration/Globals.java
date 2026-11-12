@@ -1,7 +1,6 @@
 package org.pionerds.ftc.teamcode.Orchestration;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Globals {
 
@@ -22,20 +21,32 @@ public class Globals {
         globals.add(new Global<T>(name, object));
     }
 
+    /**
+     * @return the most recently added global with this name
+     * @throws NullPointerException if no global with this name exists
+     */
     public static <T> T depend(String name) {
-        Global<T> global = null;
-
-        for (int i = 0; i < globals.size(); i++) {
-            global = (Global<T>) globals.get(i);
+        for (int i = globals.size() - 1; i >= 0; i--) {
+            Global<T> global = (Global<T>) globals.get(i);
 
             if (global == null) continue;
 
             if (global.name.equals(name)) {
-                break;
+                return global.object;
             }
         }
 
-        return Objects.requireNonNull(global).object;
+        throw new NullPointerException("Global '" + name + "' does not exist");
+    }
+
+    public static boolean has(String name) {
+        for (int i = 0; i < globals.size(); i++) {
+            Global<?> global = globals.get(i);
+
+            if (global != null && global.name.equals(name)) return true;
+        }
+
+        return false;
     }
 
     static {

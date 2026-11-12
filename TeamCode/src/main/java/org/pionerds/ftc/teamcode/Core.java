@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.Menu;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import android.webkit.MimeTypeMap;
 
 import com.qualcomm.ftccommon.FtcEventLoop;
@@ -22,13 +21,20 @@ import org.firstinspires.ftc.robotcore.internal.webserver.websockets.FtcWebSocke
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.FtcWebSocketMessage;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.WebSocketManager;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.WebSocketNamespaceHandler;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.pionerds.ftc.teamcode.Autonomous.Autonomous;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -49,19 +55,19 @@ public class Core {
         Log.i(TAG, "Initializing hooks");
 
         Scheduler.addTask("log:new:info", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+            Core.broadcast("log", "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
         });
 
         Scheduler.addTask("log:new:warn", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+            Core.broadcast("log", "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
         });
 
         Scheduler.addTask("log:new:error", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\":\"" + str + "\" }");
+            Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
         });
 
         Scheduler.addTask("coordination:update-position", (str) -> {
-            Core.broadcast("position", "{ \"x\": \"" + Coordination.x + "\", \"" + "\"y\": \"" + Coordination.y + "\", \"rotation\": \"" + 0 + "\"");
+            Core.broadcast("position", "{ \"x\": " + jsonNumber(Coordination.x) + ", \"y\": " + jsonNumber(Coordination.y) + ", \"rotation\": " + jsonNumber(Coordination.rotation) + " }");
         });
     }
 
@@ -69,7 +75,9 @@ public class Core {
     public static void stop(Context context) {}
 
     @OnCreateMenu
-    public static void populateMenu(Context context, Menu menu) { }
+    public static void populateMenu(Context context, Menu menu) {
+        Core.menu = menu;
+    }
 
     @WebHandlerRegistrar
     public static void attachWebServer(Context context, WebHandlerManager manager) {
@@ -97,14 +105,64 @@ public class Core {
         manager.register(ROUTE_PREFIX + "/api/trigger-init", session -> {
                 String menuItems = "";
 
-                for (int i = 0;; i++) {
-                    if (menu.getItem(i) == null) break;
+                for (int i = 0; menu != null && i < menu.size(); i++) {
                     menuItems += "," + menu.getItem(i);
                 }
 
                 return NanoHTTPD.newFixedLengthResponse("ok");
             }
         );
+
+        manager.register(ROUTE_PREFIX + "/api/autonomous/get-path", session -> {
+            StringBuilder json = new StringBuilder("[");
+            List<double[]> path = Autonomous.getProgrammedPath();
+
+            for (int i = 0; i < path.size(); i++) {
+                double[] xyT = path.get(i);
+                if (i > 0) json.append(", ");
+                json.append("{ \"x\": ").append(jsonNumber(xyT[0]))
+                        .append(", \"y\": ").append(jsonNumber(xyT[1]))
+                        .append(", \"tolerance\": ").append(jsonNumber(xyT[2])).append(" }");
+            }
+
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", json.append("]").toString());
+        });
+
+        manager.register(ROUTE_PREFIX + "/api/autonomous/set-path", session -> {
+            if (session.getMethod() != NanoHTTPD.Method.POST) {
+                return NanoHTTPD.newFixedLengthResponse(
+                        NanoHTTPD.Response.Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "POST only");
+            }
+
+            Map<String, String> body = new HashMap<>();
+            session.parseBody(body);
+
+            try {
+                JSONArray points = new JSONArray(body.get("postData"));
+                ArrayList<double[]> path = new ArrayList<>();
+
+                for (int i = 0; i < points.length(); i++) {
+                    JSONObject point = points.getJSONObject(i);
+                    double x = point.getDouble("x");
+                    double y = point.getDouble("y");
+                    double tolerance = point.getDouble("tolerance");
+
+                    if (x < 0 || x > 100 || y < 0 || y > 100 || tolerance <= 0) {
+                        throw new JSONException("Point " + i + " is out of range");
+                    }
+
+                    path.add(new double[] { x, y, tolerance });
+                }
+
+                Autonomous.setProgrammedPath(path);
+                Log.i(TAG, "Autonomous path updated with " + path.size() + " points");
+
+                return NanoHTTPD.newFixedLengthResponse("ok");
+            } catch (JSONException | NullPointerException e) {
+                return NanoHTTPD.newFixedLengthResponse(
+                        NanoHTTPD.Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, "Invalid path: " + e.getMessage());
+            }
+        });
 
         WebSocketManager sockets = manager.getWebServer().getWebSocketManager();
 
@@ -148,6 +206,32 @@ public class Core {
 //            webSocket.send(new FtcWebSocketMessage(WS_NAMESPACE, "echo", message.getPayload()));
             return true;
         }
+    }
+
+    private static String jsonString(Object value) {
+        String str = String.valueOf(value);
+        StringBuilder out = new StringBuilder(str.length() + 2).append('"');
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+
+            switch (c) {
+                case '"': out.append("\\\""); break;
+                case '\\': out.append("\\\\"); break;
+                case '\n': out.append("\\n"); break;
+                case '\r': out.append("\\r"); break;
+                case '\t': out.append("\\t"); break;
+                default:
+                    if (c < 0x20) out.append(String.format(Locale.US, "\\u%04x", (int) c));
+                    else out.append(c);
+            }
+        }
+
+        return out.append('"').toString();
+    }
+
+    private static String jsonNumber(double value) {
+        return Double.isFinite(value) ? Double.toString(value) : "null";
     }
 
     private static WebHandler assetHandler(AssetManager assets, String assetPath, String mimeType) {

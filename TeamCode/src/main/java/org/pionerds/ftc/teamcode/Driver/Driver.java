@@ -11,12 +11,14 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Driver {
 
     private Gamepad gamepad;
     private ArrayList<DriverInput> inputList = new ArrayList<>();
     private ArrayList<String> actionList = new ArrayList<>();
+    private ArrayList<Boolean> toggleList = new ArrayList<>();
 
     private HashMap<DriverInput, Boolean> past = new HashMap<>();
     private HashMap<DriverInput, Boolean> current = new HashMap<>();
@@ -25,23 +27,27 @@ public class Driver {
         this.gamepad = gamepad;
 
         UUID tick = Scheduler.addTask((obj) -> {
+            if (!Scheduler.running) return;
+
             this.tickControls();
         });
 
-        Scheduler.addTask("exit", (obj) -> {
+        AtomicReference<UUID> exit = new AtomicReference<>();
+
+        exit.set(Scheduler.addTask("exit", (obj) -> {
             Scheduler.removeTask(tick);
-        });
+            Scheduler.removeTask(exit.get());
+        }));
     }
 
     public Driver addControl(DriverInput input, DriverAction action, boolean isToggle) {
         inputList.add(input);
         actionList.add(action.toString());
+        toggleList.add(isToggle);
 
         if (isToggle) {
             past.put(input, false);
             current.put(input, false);
-
-            input.setToggle();
         }
 
         return this;
@@ -49,12 +55,14 @@ public class Driver {
 
     @SuppressLint("UseValueOf")
     public void tickControls() {
+        if (gamepad == null) return;
+
         DriverInput currentInput;
 
         for (int i = 0; i < inputList.size(); i++) {
             currentInput = inputList.get(i);
 
-            if (currentInput.isToggle) {
+            if (toggleList.get(i)) {
                 past.put(currentInput, current.get(currentInput));
                 current.put(currentInput, getMappedInput(currentInput));
 

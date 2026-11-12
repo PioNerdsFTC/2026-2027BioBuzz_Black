@@ -20,7 +20,6 @@ public class DeprecatedSwerveDrivetrain {
         }
     }
 
-    // Needs implementation once the IMUs are added to the robot
     private void fetchServoAngles(){
 
     }
@@ -35,7 +34,6 @@ public class DeprecatedSwerveDrivetrain {
 
     }
 
-    // Physically checks the current rotation of the swervo and moves it accordingly
     private void rotateSwervoThetaTick(int servoIndex, double thetaAbs, DcMotorSimple.Direction direction){
         servos[servoIndex].setDirection(direction);
 

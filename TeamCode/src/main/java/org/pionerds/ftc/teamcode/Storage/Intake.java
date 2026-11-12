@@ -20,28 +20,29 @@ public class Intake {
         Scheduler.addTask("trigger-intake:down", (obj) -> {
             if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) return;
 
-            intake0.setPower(1);
-            intake1.setPower(1);
+            setPower(1);
         });
         Scheduler.addTask("trigger-intake:up", (obj) -> {
             if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) return;
 
-            intake0.setPower(0);
-            intake1.setPower(0);
+            setPower(0);
         });
 
 
         Scheduler.addTask("trigger-ejection-intake:down", (obj) -> {
             if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) return;
 
-            intake0.setPower(-1);
-            intake1.setPower(-1);
+            setPower(-1);
         });
-        Scheduler.addTask("trigger-intake:up", (obj) -> {
+        Scheduler.addTask("trigger-ejection-intake:up", (obj) -> {
             if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) return;
 
-            intake0.setPower(0);
-            intake1.setPower(0);
+            setPower(0);
         });
+    }
+
+    private static void setPower(double power) {
+        if (intake0 != null) intake0.setPower(power);
+        if (intake1 != null) intake1.setPower(power);
     }
 }

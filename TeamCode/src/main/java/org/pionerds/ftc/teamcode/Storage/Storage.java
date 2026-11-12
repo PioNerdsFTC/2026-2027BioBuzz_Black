@@ -17,16 +17,20 @@ public class Storage {
     private static CRServo servoNectar2;
 
     static {
+        final boolean[] toggledIntake = { false };
+        final boolean[] toggledPollenServo = { false };
+        final boolean[] toggledNectar = { false };
+
         Scheduler.addTask("init", (obj) -> {
             motorBottomInv = Hardware.mapping.getMotor("motorBottomInv");
             servoPollen = Hardware.mapping.getContinuousServo("servoPollen", DcMotorSimple.Direction.FORWARD);
             servoNectar1 = Hardware.mapping.getContinuousServo("servoNectar1", DcMotorSimple.Direction.FORWARD);
             servoNectar2 = Hardware.mapping.getContinuousServo("servoNectar2", DcMotorSimple.Direction.REVERSE);
-        });
 
-        final boolean[] toggledIntake = { false };
-        final boolean[] toggledPollenServo = { false };
-        final boolean[] toggledNectar = { false };
+            toggledIntake[0] = false;
+            toggledPollenServo[0] = false;
+            toggledNectar[0] = false;
+        });
 
         Scheduler.addTask("toggle-intake:down", (obj) -> {
             if (toggledIntake[0]) disableIntake();
@@ -53,12 +57,17 @@ public class Storage {
 
     private final ArrayList<GamePiece> currentInventory = new ArrayList<>();
 
-    public static void enableIntake() { motorBottomInv.setPower(1.0); }
-    public static void disableIntake() { motorBottomInv.setPower(0.0); }
-    public static void enablePollenServo() { servoPollen.setPower(1.0); }
-    public static void disablePollenServo() { servoPollen.setPower(1.0); }
-    public static void enableNectarServo() { servoNectar1.setPower(1.0); servoNectar2.setPower(1.0); }
-    public static void disableNectarServo() { servoNectar1.setPower(0.0); servoNectar2.setPower(0.0); }
+    public static void enableIntake() { if (motorBottomInv != null) motorBottomInv.setPower(1.0); }
+    public static void disableIntake() { if (motorBottomInv != null) motorBottomInv.setPower(0.0); }
+    public static void enablePollenServo() { if (servoPollen != null) servoPollen.setPower(1.0); }
+    public static void disablePollenServo() { if (servoPollen != null) servoPollen.setPower(0.0); }
+    public static void enableNectarServo() { setNectarPower(1.0); }
+    public static void disableNectarServo() { setNectarPower(0.0); }
+
+    private static void setNectarPower(double power) {
+        if (servoNectar1 != null) servoNectar1.setPower(power);
+        if (servoNectar2 != null) servoNectar2.setPower(power);
+    }
 
 
     // Currently Unused

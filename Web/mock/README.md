@@ -34,13 +34,15 @@ Use `bun run mock:watch` to restart the server when it changes.
 
 ## Endpoints
 
-| Method | Path                           | Description                                           |
-| ------ | ------------------------------ | ----------------------------------------------------- |
-| `GET`  | `/dashboard/api/get-health`    | Returns `ok` (200) or `unhealthy` (503).              |
-| `GET`  | `/dashboard/api/trigger-init`  | Returns `ok`, matching the robot controller.          |
-| `POST` | `/dashboard/api/mock/health`   | Body `{ "healthy": false }` to simulate an outage.    |
-| `POST` | `/dashboard/api/mock/log`      | Body `{ "type": "warn", "tag": "Test", "msg": "…" }`. |
-| `POST` | `/dashboard/api/mock/position` | Body `{ "x": 50, "y": 50, "rotation": 1.57 }`.        |
+| Method | Path                                 | Description                                           |
+| ------ | ------------------------------------ | ----------------------------------------------------- |
+| `GET`  | `/dashboard/api/get-health`          | Returns `ok` (200) or `unhealthy` (503).              |
+| `GET`  | `/dashboard/api/trigger-init`        | Returns `ok`, matching the robot controller.          |
+| `GET`  | `/dashboard/api/autonomous/get-path` | Returns the uploaded autonomous path as JSON.         |
+| `POST` | `/dashboard/api/autonomous/set-path` | Body `[{ "x": 20, "y": 80, "tolerance": 2 }]`.        |
+| `POST` | `/dashboard/api/mock/health`         | Body `{ "healthy": false }` to simulate an outage.    |
+| `POST` | `/dashboard/api/mock/log`            | Body `{ "type": "warn", "tag": "Test", "msg": "…" }`. |
+| `POST` | `/dashboard/api/mock/position`       | Body `{ "x": 50, "y": 50, "rotation": 1.57 }`.        |
 
 The robot position otherwise follows a looping path, and log messages are emitted
 every few seconds.
