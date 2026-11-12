@@ -18,6 +18,9 @@ public class Coordination {
     private static double startX = -1;
     private static double startY = -1;
 
+    /** Maps the gyro's reset heading to the heading programmed for the start of the run. */
+    private static double rotationOffset = 0;
+
     static {
         Scheduler.addTask("init", (obj) -> {
             // TODO: implement robot starting positions
@@ -31,6 +34,7 @@ public class Coordination {
             }
 
             Coordination.rotation = 0;
+            rotationOffset = 0;
 
             startX = Coordination.x;
             startY = Coordination.y;
@@ -41,6 +45,8 @@ public class Coordination {
         });
 
         Scheduler.addTask((obj) -> {
+            Coordination.rotation = normalizeAngle(Hardware.yaw + rotationOffset);
+
             if (Environment.Capabilities.otos) {
                 Coordination.x = 50 + Hardware.odometer.x;
                 Coordination.y = 50 + Hardware.odometer.y;
@@ -51,6 +57,7 @@ public class Coordination {
             Coordination.x = -1;
             Coordination.y = -1;
             Coordination.rotation = -1;
+            rotationOffset = 0;
         });
     }
 
@@ -58,11 +65,32 @@ public class Coordination {
      * Override the starting position, e.g. with one programmed from the dashboard. Call after init.
      */
     public static void setStart(double x, double y) {
+        setStart(x, y, null);
+    }
+
+    /**
+     * Override the starting position and heading, e.g. with one programmed from the dashboard.
+     * The heading is in radians and is mapped onto the gyro's reset heading.
+     */
+    public static void setStart(double x, double y, Double rotation) {
         Coordination.x = x;
         Coordination.y = y;
 
+        rotationOffset = rotation == null ? 0 : rotation - Hardware.yaw;
+        Coordination.rotation = rotation == null ? 0 : rotation;
+
         startX = x;
         startY = y;
+    }
+
+    private static double normalizeAngle(double angle) {
+        double twoPi = 2 * Math.PI;
+
+        angle %= twoPi;
+        if (angle > Math.PI) angle -= twoPi;
+        if (angle < -Math.PI) angle += twoPi;
+
+        return angle;
     }
 
     private static void updateRemotes() {

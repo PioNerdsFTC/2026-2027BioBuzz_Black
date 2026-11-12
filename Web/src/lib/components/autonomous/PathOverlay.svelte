@@ -130,6 +130,40 @@
 				/>
 			{/if}
 		{/each}
+
+		{#if program.start.rotation !== undefined}
+			<g
+				transform="translate({program.start.x} {program.start.y}) rotate({(program.start.rotation *
+					180) /
+					Math.PI})"
+			>
+				<line
+					x1="0"
+					y1="0"
+					x2={ROBOT_SIZE / 2}
+					y2="0"
+					class="stroke-accent-100"
+					stroke-width="0.6"
+					stroke-linecap="round"
+				/>
+			</g>
+		{/if}
+
+		{#each program.waypoints as point}
+			{#if point.rotation !== undefined}
+				<g transform="translate({point.x} {point.y}) rotate({(point.rotation * 180) / Math.PI})">
+					<line
+						x1="0"
+						y1="0"
+						x2="3"
+						y2="0"
+						class="stroke-accent-100"
+						stroke-width="0.45"
+						stroke-linecap="round"
+					/>
+				</g>
+			{/if}
+		{/each}
 	</svg>
 
 	<!-- Starting position, the 18 in. robot footprint -->

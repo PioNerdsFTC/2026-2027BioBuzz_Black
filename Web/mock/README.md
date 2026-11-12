@@ -52,26 +52,29 @@ Coordination units, 0–100):
 
 ```json
 {
-	"start": { "x": 6.25, "y": 91.5 },
-	"startActions": [{ "type": "launcher", "enabled": true, "angle": 45 }],
+	"start": { "x": 6.25, "y": 91.5, "rotation": 0 },
+	"startActions": [{ "type": "shoot", "piece": "pollen", "count": 1, "angle": 45 }],
 	"waypoints": [
 		{
 			"x": 30,
 			"y": 60,
 			"tolerance": 2,
+			"rotation": 1.57,
+			"intake": true,
 			"actions": [
-				{ "type": "intake", "mode": "in" },
+				{ "type": "intake", "duration": 1000 },
 				{ "type": "wait", "duration": 1000 },
-				{ "type": "feed", "piece": "pollen", "duration": 500 }
+				{ "type": "shoot", "piece": "pollen", "count": 3, "angle": 45 }
 			]
 		}
 	]
 }
 ```
 
-Action types: `intake` (`mode`: `in`, `out`, `off`), `launcher` (`enabled`, hood
-`angle` 0–180°), `feed` (`piece`: `pollen`, `nectar`; `duration` ms) and `wait`
-(`duration` ms, at most 30000).
+Action types: `shoot` (`piece`: `pollen`, `nectar`; `count` 1–8; hood
+`angle` 0–180°), `intake` (`duration` ms) and `wait` (`duration` ms, at most
+30000). The start and each waypoint may also have an optional `rotation`
+heading in radians; omit it to keep the current heading.
 
 ## WebSocket protocol
 

@@ -21,13 +21,15 @@ export type Waypoint = {
 	x: number;
 	y: number;
 	tolerance: number;
+	/** Target heading in radians, or undefined to keep the current heading. */
+	rotation?: number;
 	/** Run the intake while driving to this waypoint. */
 	intake: boolean;
 	actions: Action[];
 };
 
 export type Program = {
-	start: { x: number; y: number };
+	start: { x: number; y: number; rotation?: number };
 	startActions: Action[];
 	waypoints: Waypoint[];
 };
@@ -84,6 +86,12 @@ export function clampStart(value: number): number {
 export function round(value: number, digits = 2): number {
 	const factor = 10 ** digits;
 	return Math.round(value * factor) / factor;
+}
+
+/** Wrap an angle to [-pi, pi]. */
+export function normalizeAngle(angle: number): number {
+	const twoPi = 2 * Math.PI;
+	return ((((angle + Math.PI) % twoPi) + twoPi) % twoPi) - Math.PI;
 }
 
 export function defaultAction(type: ActionType, previous?: Action): Action {
@@ -152,6 +160,7 @@ function parseWaypoint(value: unknown): Waypoint | null {
 		x: point.x,
 		y: point.y,
 		tolerance: point.tolerance,
+		rotation: isNumber(point.rotation) ? normalizeAngle(point.rotation) : undefined,
 		intake: point.intake === true,
 		actions: parseActions(point.actions)
 	};
@@ -175,7 +184,11 @@ export function parseProgram(value: unknown, alliance: Alliance = 'red'): Progra
 	return {
 		start:
 			start && isNumber(start.x) && isNumber(start.y)
-				? { x: clampStart(start.x), y: clampStart(start.y) }
+				? {
+						x: clampStart(start.x),
+						y: clampStart(start.y),
+						rotation: isNumber(start.rotation) ? normalizeAngle(start.rotation) : undefined
+					}
 				: { ...START_POSITIONS[alliance] },
 		startActions: parseActions(json.startActions),
 		waypoints: json.waypoints.map(parseWaypoint).filter((point) => point !== null)

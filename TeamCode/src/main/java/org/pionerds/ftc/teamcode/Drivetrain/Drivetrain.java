@@ -19,6 +19,43 @@ public class Drivetrain {
 
     private static boolean isLeftRotationNegative = true;
 
+    /** Rotation error wrapped to [-pi, pi]. Positive means the target is to the robot's left. */
+    public static double getRotationError(double target, double current){
+        double twoPi = 2 * Math.PI;
+        double error = (target - current) % twoPi;
+
+        if (error > Math.PI) error -= twoPi;
+        if (error < -Math.PI) error += twoPi;
+
+        return error;
+    }
+
+    /**
+     * Turn toward a target heading, slowing down as the robot approaches it.
+     * Uses the same stepped speeds as Autonomous's translation.
+     */
+    public static void rotateToward(double target, double current, double tolerance){
+        double error = getRotationError(target, current);
+        double magnitude = Math.abs(error);
+
+        if (magnitude <= tolerance) {
+            stopRotating();
+            return;
+        }
+
+        if (magnitude >= 0.50) OmniDrivetrain.rotationSpeed = 0.50;
+        else if (magnitude >= 0.20) OmniDrivetrain.rotationSpeed = 0.20;
+        else OmniDrivetrain.rotationSpeed = 0.10;
+
+        OmniDrivetrain.flipDirection = error > 0;
+        OmniDrivetrain.turning = true;
+    }
+
+    public static void stopRotating(){
+        OmniDrivetrain.turning = false;
+        OmniDrivetrain.rotationSpeed = OmniDrivetrain.DEFAULT_ROTATION_SPEED;
+    }
+
 //    public static void driveRobot() {
 //        if (permitRotating) {
 //            return;
@@ -34,6 +71,7 @@ public class Drivetrain {
         AtomicReference<UUID> tick = new AtomicReference<>();
 
         Scheduler.addTask("turn-left:down", (obj2) -> {
+            OmniDrivetrain.rotationSpeed = OmniDrivetrain.DEFAULT_ROTATION_SPEED;
             OmniDrivetrain.flipDirection = isLeftRotationNegative;
             OmniDrivetrain.turning = true;
         });
@@ -43,6 +81,7 @@ public class Drivetrain {
         });
 
         Scheduler.addTask("turn-right:down", (obj2) -> {
+            OmniDrivetrain.rotationSpeed = OmniDrivetrain.DEFAULT_ROTATION_SPEED;
             OmniDrivetrain.flipDirection = !isLeftRotationNegative;
             OmniDrivetrain.turning = true;
         });

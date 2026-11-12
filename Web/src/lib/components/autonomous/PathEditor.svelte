@@ -8,6 +8,7 @@
 		fetchProgram,
 		parseProgram,
 		uploadProgram,
+		normalizeAngle,
 		ACTION_ICONS,
 		DEFAULT_TOLERANCE,
 		START_POSITIONS,
@@ -92,7 +93,7 @@
 		if (value === alliance) return;
 
 		alliance = value;
-		program.start = { ...START_POSITIONS[value] };
+		program.start = { ...START_POSITIONS[value], rotation: program.start.rotation };
 	}
 
 	function move(index: number, offset: number) {
@@ -115,6 +116,7 @@
 			x: last?.x ?? program.start.x,
 			y: last?.y ?? program.start.y,
 			tolerance: last?.tolerance ?? DEFAULT_TOLERANCE,
+			rotation: last?.rotation,
 			intake: last?.intake ?? false,
 			actions: []
 		});
@@ -124,6 +126,10 @@
 	function setCoordinate(point: Waypoint, key: 'x' | 'y' | 'tolerance', value: number) {
 		if (!Number.isFinite(value)) return;
 		point[key] = key === 'tolerance' ? clamp(value, 0.1, 50) : clamp(value);
+	}
+
+	function setRotation(point: { rotation?: number }, value: number) {
+		point.rotation = Number.isFinite(value) ? normalizeAngle(value) : undefined;
 	}
 
 	function setStart(key: 'x' | 'y', value: number) {
@@ -153,6 +159,19 @@
 		class={field}
 		aria-label={label}
 		{value}
+		onclick={(event) => event.stopPropagation()}
+		onchange={(event) => onchange(event.currentTarget.valueAsNumber)}
+	/>
+{/snippet}
+
+{#snippet angle(value: number | undefined, label: string, onchange: (value: number) => void)}
+	<input
+		type="number"
+		step="0.1"
+		class={field}
+		aria-label={label}
+		title="Heading in radians, blank to keep the current heading"
+		value={value ?? ''}
 		onclick={(event) => event.stopPropagation()}
 		onchange={(event) => onchange(event.currentTarget.valueAsNumber)}
 	/>
@@ -218,12 +237,12 @@
 
 	<div class="flex flex-col">
 		<div
-			class="grid grid-cols-[2rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] gap-2 px-2 pb-1 text-xs text-text-700"
+			class="grid grid-cols-[2rem_4.5rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] gap-2 px-2 pb-1 text-xs text-text-700"
 		>
 			<span></span><span class="text-right">x</span><span class="text-right">y</span><span
 				class="text-right"
 				title="Tolerance">±</span
-			>
+			><span class="text-right" title="Heading in radians">θ</span>
 		</div>
 
 		<!-- Start -->
@@ -234,7 +253,7 @@
 		>
 			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 			<div
-				class="grid cursor-pointer grid-cols-[2rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] items-center gap-2 px-2 py-1"
+				class="grid cursor-pointer grid-cols-[2rem_4.5rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] items-center gap-2 px-2 py-1"
 				onclick={() => (selected = selected === 'start' ? null : 'start')}
 				onfocusin={() => (selected = 'start')}
 			>
@@ -247,6 +266,9 @@
 				{@render number(program.start.x, 'Start x', (value) => setStart('x', value))}
 				{@render number(program.start.y, 'Start y', (value) => setStart('y', value))}
 				<span></span>
+				{@render angle(program.start.rotation, 'Start heading', (value) =>
+					setRotation(program.start, value)
+				)}
 				{@render chips(program.startActions)}
 				<span></span>
 			</div>
@@ -266,7 +288,7 @@
 			>
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 				<div
-					class="grid cursor-pointer grid-cols-[2rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] items-center gap-2 px-2 py-1"
+					class="grid cursor-pointer grid-cols-[2rem_4.5rem_4.5rem_4.5rem_4.5rem_1fr_4.5rem] items-center gap-2 px-2 py-1"
 					onclick={() => (selected = selected === i ? null : i)}
 					onfocusin={() => (selected = i)}
 				>
@@ -284,6 +306,9 @@
 					)}
 					{@render number(point.tolerance, `Waypoint ${i + 1} tolerance`, (value) =>
 						setCoordinate(point, 'tolerance', value)
+					)}
+					{@render angle(point.rotation, `Waypoint ${i + 1} heading`, (value) =>
+						setRotation(point, value)
 					)}
 					{@render chips(point.actions)}
 
