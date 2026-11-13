@@ -86,11 +86,19 @@ public class Driver {
         Scheduler.trigger("right-trigger", gamepad.right_trigger);
     }
 
+    // Left stick is scaled radially (magnitude squared, direction preserved) so diagonals aren't bent toward the axes
     public double leftStickX() {
-        return nonLinearScaleStick(gamepad.left_stick_x);
+        return gamepad.left_stick_x * leftStickMagnitude();
     }
     public double leftStickY() {
-        return nonLinearScaleStick(gamepad.left_stick_y);
+        return gamepad.left_stick_y * leftStickMagnitude();
+    }
+    public double rightStickX() {
+        return nonLinearScaleStick(gamepad.right_stick_x);
+    }
+
+    private double leftStickMagnitude() {
+        return Math.min(Math.hypot(gamepad.left_stick_x, gamepad.left_stick_y), 1.00);
     }
 
     public double nonLinearScaleStick(double input){

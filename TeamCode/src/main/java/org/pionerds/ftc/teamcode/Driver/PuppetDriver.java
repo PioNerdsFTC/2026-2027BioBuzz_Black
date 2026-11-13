@@ -6,6 +6,7 @@ public class PuppetDriver extends Driver {
 
     double x = 0.00;
     double y = 0.00;
+    double rotation = 0.00;
 
 
     public PuppetDriver() {
@@ -20,6 +21,15 @@ public class PuppetDriver extends Driver {
     @Override
     public double leftStickY() {
         return y;
+    }
+
+    @Override
+    public double rightStickX() {
+        return rotation;
+    }
+
+    public void setRotation(double rotation) {
+        this.rotation = rotation;
     }
 
     public void setX(double x) {

@@ -52,7 +52,16 @@ public class OmniDrivetrain {
 
         double F = 0.00;
         double S = 0.00;
-        double T = turning ? rotationSpeed * (flipDirection ? -1.00 : 1.00) : 0.00;
+        double T = 0.00;
+
+        // Bumper turning (full speed) takes priority over proportional right stick turning
+        if (turning) {
+            T = rotationSpeed * (flipDirection ? -1.00 : 1.00);
+        } else {
+            double r = driver.rightStickX();
+
+            if (Math.abs(r) >= 0.05) T = r * rotationSpeed;
+        }
 
         if (Math.abs(x) >= 0.05 || Math.abs(y) >= 0.05) {
             double[] fieldCentricPositionRequest = getFieldCentricPositionRequest(x, y, gyroAngle);
@@ -60,7 +69,8 @@ public class OmniDrivetrain {
             double magnitude = Math.min(fieldCentricPositionRequest[2], 1.00);
 
             S = fieldCentricPositionRequest[0] * magnitude;
-            F = fieldCentricPositionRequest[1] * magnitude;
+            // Gamepad y is negative when pushed forward, so flip it to make F positive = forward
+            F = -fieldCentricPositionRequest[1] * magnitude;
         }
 
         motorSpeed[0] = F - S - T;  // front right
