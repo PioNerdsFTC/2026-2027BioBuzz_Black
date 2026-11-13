@@ -19,7 +19,7 @@ public class Drivetrain {
 
     private static boolean isLeftRotationNegative = true;
 
-    /** Rotation error wrapped to [-pi, pi]. Positive means the target is to the robot's left. */
+    /** Rotation error wrapped to [-pi, pi]. Positive means the target is clockwise from the current heading. */
     public static double getRotationError(double target, double current){
         double twoPi = 2 * Math.PI;
         double error = (target - current) % twoPi;
@@ -47,7 +47,8 @@ public class Drivetrain {
         else if (magnitude >= 0.20) OmniDrivetrain.rotationSpeed = 0.20;
         else OmniDrivetrain.rotationSpeed = 0.10;
 
-        OmniDrivetrain.flipDirection = error > 0;
+        // Headings are clockwise-positive, so a negative error means the target is to the left.
+        OmniDrivetrain.flipDirection = error < 0;
         OmniDrivetrain.turning = true;
     }
 

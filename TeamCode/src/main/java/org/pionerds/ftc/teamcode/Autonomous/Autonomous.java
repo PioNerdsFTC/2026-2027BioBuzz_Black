@@ -31,6 +31,7 @@ public class Autonomous {
 
     private static double r = 0.00;
     private static Double rf = null;
+    private static Double lastLoggedRotation = null;
 
     /** How close the robot has to be to a waypoint's heading, in radians. */
     private static final double ROTATION_TOLERANCE = Math.toRadians(2);
@@ -105,7 +106,16 @@ public class Autonomous {
             if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.AUTO) return;
 
             double[] start = program.start;
-            if (start != null) Coordination.setStart(start[0], start[1], program.startRotation);
+            if (start != null) {
+                Double startRotation = program.startRotation;
+                if (startRotation == null) {
+                    // Face the center of the field from the start position.
+                    startRotation = Math.atan2(50 - start[1], 50 - start[0]);
+                }
+
+                Coordination.setStart(start[0], start[1], startRotation);
+                Logger.log("Autonomous: start heading " + startRotation + " rad");
+            }
         });
 
         Scheduler.addTask("pre-run", (obj) -> {
@@ -116,6 +126,13 @@ public class Autonomous {
             clearQueues();
             opQueue.addAll(expand(current.startActions));
             stepQueue.addAll(current.steps);
+
+            Logger.log("Autonomous: loaded " + current.steps.size() + " waypoints");
+            for (Step step : current.steps) {
+                if (step.rotation != null) {
+                    Logger.log("Autonomous: waypoint (" + step.x + ", " + step.y + ") heading " + step.rotation + " rad");
+                }
+            }
         });
 
         Scheduler.addTask("exit", (obj) -> {
@@ -151,11 +168,16 @@ public class Autonomous {
             setIntake(step.intake);
 
             puppet.setX(calculateSpeedForceX());
-            puppet.setY(-calculateSpeedForceY());
+            puppet.setY(calculateSpeedForceY());
             return;
         }
 
         if(!isRotationWithinTolerance()){
+            if (rf != null && !rf.equals(lastLoggedRotation)) {
+                Logger.log("Autonomous: rotating to " + rf + " rad from " + r + " rad");
+                lastLoggedRotation = rf;
+            }
+
             setIntake(false);
 
             puppet.setX(0.00);
@@ -166,6 +188,7 @@ public class Autonomous {
         }
 
         stepQueue.remove(step);
+        lastLoggedRotation = null;
         setIntake(false);
         opQueue.addAll(expand(step.actions));
         stop();
@@ -289,6 +312,7 @@ public class Autonomous {
         opQueue.clear();
         stepQueue.clear();
         opsResumeAt = 0;
+        lastLoggedRotation = null;
 
         Drivetrain.stopRotating();
 

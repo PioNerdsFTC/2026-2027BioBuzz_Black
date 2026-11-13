@@ -45,7 +45,8 @@ public class Coordination {
         });
 
         Scheduler.addTask((obj) -> {
-            Coordination.rotation = normalizeAngle(Hardware.yaw + rotationOffset);
+            // Gyro yaw is positive counter-clockwise; the dashboard/field heading is positive clockwise.
+            Coordination.rotation = normalizeAngle(rotationOffset - Hardware.yaw);
 
             if (Environment.Capabilities.otos) {
                 Coordination.x = 50 + Hardware.odometer.x;
@@ -76,7 +77,7 @@ public class Coordination {
         Coordination.x = x;
         Coordination.y = y;
 
-        rotationOffset = rotation == null ? 0 : rotation - Hardware.yaw;
+        rotationOffset = rotation == null ? 0 : rotation + Hardware.yaw;
         Coordination.rotation = rotation == null ? 0 : rotation;
 
         startX = x;

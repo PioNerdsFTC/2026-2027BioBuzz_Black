@@ -9,6 +9,7 @@
 		parseProgram,
 		uploadProgram,
 		normalizeAngle,
+		defaultStartRotation,
 		ACTION_ICONS,
 		DEFAULT_TOLERANCE,
 		START_POSITIONS,
@@ -93,7 +94,7 @@
 		if (value === alliance) return;
 
 		alliance = value;
-		program.start = { ...START_POSITIONS[value], rotation: program.start.rotation };
+		program.start = { ...START_POSITIONS[value], rotation: defaultStartRotation(value) };
 	}
 
 	function move(index: number, offset: number) {

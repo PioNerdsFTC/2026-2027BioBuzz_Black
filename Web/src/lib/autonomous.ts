@@ -59,6 +59,16 @@ export const START_POSITIONS: Record<Alliance, { x: number; y: number }> = {
 
 export const DEFAULT_TOLERANCE = 2;
 
+/** Default start heading: face the center of the field from the given position. */
+export function headingToCenter(x: number, y: number): number {
+	return normalizeAngle(Math.atan2(50 - y, 50 - x));
+}
+
+export function defaultStartRotation(alliance: Alliance): number {
+	const start = START_POSITIONS[alliance];
+	return headingToCenter(start.x, start.y);
+}
+
 export const ACTION_LABELS: Record<ActionType, string> = {
 	shoot: 'Shoot',
 	intake: 'Intake',
@@ -109,7 +119,11 @@ export function defaultAction(type: ActionType, previous?: Action): Action {
 }
 
 export function emptyProgram(alliance: Alliance = 'red'): Program {
-	return { start: { ...START_POSITIONS[alliance] }, startActions: [], waypoints: [] };
+	return {
+		start: { ...START_POSITIONS[alliance], rotation: defaultStartRotation(alliance) },
+		startActions: [],
+		waypoints: []
+	};
 }
 
 export function describeAction(action: Action): string {
@@ -187,9 +201,11 @@ export function parseProgram(value: unknown, alliance: Alliance = 'red'): Progra
 				? {
 						x: clampStart(start.x),
 						y: clampStart(start.y),
-						rotation: isNumber(start.rotation) ? normalizeAngle(start.rotation) : undefined
+						rotation: isNumber(start.rotation)
+							? normalizeAngle(start.rotation)
+							: headingToCenter(clampStart(start.x), clampStart(start.y))
 					}
-				: { ...START_POSITIONS[alliance] },
+				: { ...START_POSITIONS[alliance], rotation: defaultStartRotation(alliance) },
 		startActions: parseActions(json.startActions),
 		waypoints: json.waypoints.map(parseWaypoint).filter((point) => point !== null)
 	};
