@@ -5,7 +5,7 @@ public class Environment {
         public static boolean vision = false;
         public static boolean drivetrain = true;
         public static boolean otos = false;
-        public static boolean launchers = false;
+        public static boolean launchers = true;
     }
 
     public static class Parameters {

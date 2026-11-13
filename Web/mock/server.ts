@@ -454,6 +454,9 @@ function programError(body: unknown): string | null {
 	if (start != null && !(inRange(start.x, 0, 100) && inRange(start.y, 0, 100))) {
 		return 'start is out of range';
 	}
+	if (start != null && start.rotation != null && !isNumber(start.rotation)) {
+		return 'start rotation is not a number';
+	}
 
 	const actionsError = (actions: unknown, where: string): string | null => {
 		if (actions == null) return null;
@@ -461,13 +464,11 @@ function programError(body: unknown): string | null {
 
 		for (const action of actions as Record<string, unknown>[]) {
 			const valid =
-				(action?.type === 'intake' && ['in', 'out', 'off'].includes(action.mode as string)) ||
-				(action?.type === 'launcher' &&
-					typeof action.enabled === 'boolean' &&
-					inRange(action.angle, 0, 180)) ||
-				(action?.type === 'feed' &&
+				(action?.type === 'shoot' &&
 					['pollen', 'nectar'].includes(action.piece as string) &&
-					inRange(action.duration, 0, 30000)) ||
+					inRange(action.count, 1, 8) &&
+					inRange(action.angle, 0, 180)) ||
+				(action?.type === 'intake' && inRange(action.duration, 0, 30000)) ||
 				(action?.type === 'wait' && inRange(action.duration, 0, 30000));
 
 			if (!valid) return `${where} has an invalid action ${JSON.stringify(action)}`;
@@ -488,6 +489,9 @@ function programError(body: unknown): string | null {
 			return `${where} is out of range`;
 		if (!(isNumber(point.tolerance) && point.tolerance > 0 && point.tolerance <= 50)) {
 			return `${where} tolerance is out of range`;
+		}
+		if (point.rotation != null && !isNumber(point.rotation)) {
+			return `${where} rotation is not a number`;
 		}
 
 		const error = actionsError(point.actions, where);

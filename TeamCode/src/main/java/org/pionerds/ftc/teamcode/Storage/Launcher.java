@@ -2,6 +2,7 @@ package org.pionerds.ftc.teamcode.Storage;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.pionerds.ftc.teamcode.Environment;
@@ -17,9 +18,12 @@ public class Launcher {
     private DcMotorEx launchMotor;
     private Servo hoodServo;
 
-    public Launcher(String name, String motorName, String launchServoName){
+    public Launcher(String name, String motorName, String launchServoName, boolean reverseDirection){
         launchMotor = Hardware.mapping.getMotor(motorName);
+        if(reverseDirection) launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         hoodServo = Hardware.mapping.getServoMotor(launchServoName);
+
 
         if (launchMotor != null) launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 

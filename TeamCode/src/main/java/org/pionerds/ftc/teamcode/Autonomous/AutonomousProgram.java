@@ -11,14 +11,15 @@ import java.util.List;
 /**
  * An autonomous routine built in the dashboard: a starting position, actions to run before moving,
  * and an ordered list of waypoints, each with actions that run once the robot reaches it.
- * All positions are in Coordination units (0-100). Immutable, so it is safe to share across threads.
+ * All positions are in Coordination units (0-100); headings are in radians. Immutable, so it is
+ * safe to share across threads.
  */
 public class AutonomousProgram {
     public static final double MAX_DURATION_MS = 30000;
     public static final int MAX_SHOTS = 8;
 
     public static final AutonomousProgram EMPTY =
-            new AutonomousProgram(null, Collections.emptyList(), Collections.emptyList());
+            new AutonomousProgram(null, null, Collections.emptyList(), Collections.emptyList());
 
     /**
      * What the robot should do, not how: Autonomous turns these into motor and servo commands,
@@ -55,14 +56,18 @@ public class AutonomousProgram {
         public final double y;
         public final double tolerance;
 
+        /** Target heading in radians, or null to keep the current heading. */
+        public final Double rotation;
+
         /** Run the intake while driving to this waypoint. */
         public final boolean intake;
         public final List<Action> actions;
 
-        public Step(double x, double y, double tolerance, boolean intake, List<Action> actions) {
+        public Step(double x, double y, double tolerance, Double rotation, boolean intake, List<Action> actions) {
             this.x = x;
             this.y = y;
             this.tolerance = tolerance;
+            this.rotation = rotation;
             this.intake = intake;
             this.actions = Collections.unmodifiableList(new ArrayList<>(actions));
         }
@@ -70,11 +75,16 @@ public class AutonomousProgram {
 
     /** {x, y}, or null to keep Coordination's default starting position. */
     public final double[] start;
+
+    /** Target heading in radians, or null to use the gyro's reset heading. */
+    public final Double startRotation;
+
     public final List<Action> startActions;
     public final List<Step> steps;
 
-    AutonomousProgram(double[] start, List<Action> startActions, List<Step> steps) {
+    AutonomousProgram(double[] start, Double startRotation, List<Action> startActions, List<Step> steps) {
         this.start = start == null ? null : start.clone();
+        this.startRotation = startRotation;
         this.startActions = Collections.unmodifiableList(new ArrayList<>(startActions));
         this.steps = Collections.unmodifiableList(new ArrayList<>(steps));
     }
@@ -85,9 +95,14 @@ public class AutonomousProgram {
         JSONObject json = new JSONObject(body);
 
         double[] start = null;
+        Double startRotation = null;
         if (json.has("start") && !json.isNull("start")) {
             JSONObject point = json.getJSONObject("start");
             start = new double[] { coordinate(point, "x", "start"), coordinate(point, "y", "start") };
+
+            if (point.has("rotation") && !point.isNull("rotation")) {
+                startRotation = rotation(point, "start");
+            }
         }
 
         List<Action> startActions = parseActions(json.optJSONArray("startActions"), "start");
@@ -102,16 +117,21 @@ public class AutonomousProgram {
             double tolerance = point.getDouble("tolerance");
             if (!(tolerance > 0 && tolerance <= 50)) throw new JSONException(where + " tolerance is out of range");
 
+            Double rotation = point.has("rotation") && !point.isNull("rotation")
+                    ? rotation(point, where)
+                    : null;
+
             steps.add(new Step(
                     coordinate(point, "x", where),
                     coordinate(point, "y", where),
                     tolerance,
+                    rotation,
                     point.optBoolean("intake", false),
                     parseActions(point.optJSONArray("actions"), where)
             ));
         }
 
-        return new AutonomousProgram(start, startActions, steps);
+        return new AutonomousProgram(start, startRotation, startActions, steps);
     }
 
     public String toJson() {
@@ -119,7 +139,10 @@ public class AutonomousProgram {
             JSONObject json = new JSONObject();
 
             if (start != null) {
-                json.put("start", new JSONObject().put("x", start[0]).put("y", start[1]));
+                JSONObject startJson = new JSONObject().put("x", start[0]).put("y", start[1]);
+                if (startRotation != null) startJson.put("rotation", startRotation);
+
+                json.put("start", startJson);
             } else {
                 json.put("start", JSONObject.NULL);
             }
@@ -128,12 +151,16 @@ public class AutonomousProgram {
 
             JSONArray waypoints = new JSONArray();
             for (Step step : steps) {
-                waypoints.put(new JSONObject()
+                JSONObject waypoint = new JSONObject()
                         .put("x", step.x)
                         .put("y", step.y)
                         .put("tolerance", step.tolerance)
                         .put("intake", step.intake)
-                        .put("actions", actionsToJson(step.actions)));
+                        .put("actions", actionsToJson(step.actions));
+
+                if (step.rotation != null) waypoint.put("rotation", step.rotation);
+
+                waypoints.put(waypoint);
             }
 
             return json.put("waypoints", waypoints).toString();
@@ -146,6 +173,12 @@ public class AutonomousProgram {
     private static double coordinate(JSONObject point, String key, String where) throws JSONException {
         double value = point.getDouble(key);
         if (!(value >= 0 && value <= 100)) throw new JSONException(where + " " + key + " is out of range");
+        return value;
+    }
+
+    private static double rotation(JSONObject point, String where) throws JSONException {
+        double value = point.getDouble("rotation");
+        if (!Double.isFinite(value)) throw new JSONException(where + " rotation is not finite");
         return value;
     }
 

@@ -14,7 +14,8 @@ public class OmniDrivetrain {
     private static Driver overrideDriver;
     private static DcMotorEx[] motors = {null, null, null, null}; //front right, front left, back left, back right
     private static final double[] motorSpeed = {0.0, 0.0, 0.0, 0.0};
-    private static final double rotationSpeed = 1.0;
+    public static final double DEFAULT_ROTATION_SPEED = 1.0;
+    public static double rotationSpeed = DEFAULT_ROTATION_SPEED;
 
     public static boolean flipDirection = false;
     public static boolean turning = false;

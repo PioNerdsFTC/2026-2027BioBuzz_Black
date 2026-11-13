@@ -10,11 +10,11 @@ public class StorageInitializer {
             if (Environment.Capabilities.launchers) {
                 Globals.add(
                     "Launcher0",
-                    new Launcher("Launcher0", "launcher0", "launchHood0")
+                    new Launcher("Launcher0", "bigLauncher", "bigHoodAdjust",false)
                 );
                 Globals.add(
                     "Launcher1",
-                    new Launcher("Launcher1", "launcher1", "launchHood1")
+                    new Launcher("Launcher1", "littleLauncher", "littleHoodAdjust",true)
                 );
             }
         });

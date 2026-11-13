@@ -20,9 +20,10 @@ public class DriverConfigurations {
             }
 
             driver1 = new Driver(Globals.depend("gamepad1"))
-                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TOGGLE_INTAKE, true)
+                    .addControl(DriverInput.X, DriverAction.TOGGLE_INTAKE, true)
                     .addControl(DriverInput.A, DriverAction.TRIGGER_INTAKE, true)
-                    .addControl(DriverInput.Y, DriverAction.TRIGGER_EJECTION_INTAKE, true);
+                    .addControl(DriverInput.Y, DriverAction.TRIGGER_EJECTION_INTAKE, true)
+                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TOGGLE_LAUNCHER, true);
 
 //                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, true)
 //                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, true);
@@ -34,12 +35,7 @@ public class DriverConfigurations {
 
         });
 
-        UUID onLaunch = Scheduler.addTask("launch", (obj) -> {
-            Logger.log("LAUNCH");
-        });
-
         Scheduler.addTask("exit", (obj) -> {
-            Scheduler.removeTask(onLaunch);
             driver1 = null;
             driver2 = null;
         });
