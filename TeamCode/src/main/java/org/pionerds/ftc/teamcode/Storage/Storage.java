@@ -24,7 +24,9 @@ public class Storage {
         Scheduler.addTask("init", obj -> {
             intake0 = Hardware.mapping.getMotor("intake0");
             intake1 = Hardware.mapping.getMotor("intake1");
-            intake1.setDirection(DcMotorSimple.Direction.REVERSE);
+            if (intake1 != null) intake1.setDirection(
+                DcMotorSimple.Direction.REVERSE
+            );
             servoPollen0 = Hardware.mapping.getContinuousServo(
                 "littleLaunchFeed0",
                 DcMotorSimple.Direction.FORWARD
@@ -72,45 +74,33 @@ public class Storage {
     private final ArrayList<GamePiece> currentInventory = new ArrayList<>();
 
     public static void enableIntake() {
-        if (intake0 != null && intake1 != null) {
-            intake0.setPower(1.0);
-            intake1.setPower(1.0);
-        }
+        if (intake0 != null) intake0.setPower(1.0);
+        if (intake1 != null) intake1.setPower(1.0);
     }
 
     public static void disableIntake() {
-        if (intake0 != null && intake1 != null) {
-            intake0.setPower(0.0);
-            intake1.setPower(0.0);
-        }
+        if (intake0 != null) intake0.setPower(0.0);
+        if (intake1 != null) intake1.setPower(0.0);
     }
 
     public static void enablePollenServo() {
-        if (servoPollen0 != null && servoPollen1 != null) {
-            servoPollen0.setPower(1.0);
-            servoPollen1.setPower(1.0);
-        }
+        if (servoPollen0 != null) servoPollen0.setPower(1.0);
+        if (servoPollen1 != null) servoPollen1.setPower(1.0);
     }
 
     public static void disablePollenServo() {
-        if (servoPollen0 != null && servoPollen1 != null) {
-            servoPollen0.setPower(0.0);
-            servoPollen1.setPower(0.0);
-        }
+        if (servoPollen0 != null) servoPollen0.setPower(0.0);
+        if (servoPollen1 != null) servoPollen1.setPower(0.0);
     }
 
     public static void enableNectarServo() {
-        if (servoNectar0 != null && servoNectar1 != null) {
-            servoNectar0.setPower(1.0);
-            servoNectar1.setPower(1.0);
-        }
+        if (servoNectar0 != null) servoNectar0.setPower(1.0);
+        if (servoNectar1 != null) servoNectar1.setPower(1.0);
     }
 
     public static void disableNectarServo() {
-        if (servoNectar0 != null && servoNectar1 != null) {
-            servoNectar0.setPower(0.0);
-            servoNectar1.setPower(0.0);
-        }
+        if (servoNectar0 != null) servoNectar0.setPower(0.0);
+        if (servoNectar1 != null) servoNectar1.setPower(0.0);
     }
 
     // Currently Unused

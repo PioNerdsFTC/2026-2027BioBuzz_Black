@@ -24,7 +24,7 @@ public class Launcher {
         boolean reverseDirection
     ) {
         launchMotor = Hardware.mapping.getMotor(motorName);
-        if (reverseDirection) launchMotor.setDirection(
+        if (launchMotor != null && reverseDirection) launchMotor.setDirection(
             DcMotorSimple.Direction.REVERSE
         );
 

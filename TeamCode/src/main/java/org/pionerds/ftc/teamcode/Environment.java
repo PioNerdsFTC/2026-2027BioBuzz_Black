@@ -26,7 +26,7 @@ public class Environment {
 
         public static OperatingEnvironment operatingEnvironment =
             OperatingEnvironment.NONE;
-        public static boolean exitOnError = true; // Should be set to false in actual operation
+        public static boolean exitOnError = false; // Should be set to false in actual operation
         public static boolean competing = false;
 
         // Runtime parameters

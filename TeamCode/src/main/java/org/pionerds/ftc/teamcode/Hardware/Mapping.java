@@ -84,7 +84,9 @@ public class Mapping {
 
         try {
             continuousServo = this.map.get(CRServoImplEx.class, servoName);
-            continuousServo.setDirection(servoDirection);
+            if (continuousServo != null) continuousServo.setDirection(
+                servoDirection
+            );
         } catch (Exception e) {
             Logger.warn("Cannot map continuous servo: " + servoName);
         }

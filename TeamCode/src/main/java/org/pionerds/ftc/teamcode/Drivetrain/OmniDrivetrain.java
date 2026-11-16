@@ -21,7 +21,8 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
  * </ul>
  * {@link Hardware#yaw} is counter-clockwise positive while {@link Coordination#rotation} is
  * clockwise positive, so positive turn power increases {@code Coordination.rotation} and
- * decreases {@code Hardware.yaw}. Mixing those two up is how the robot ends up turning the wrong way.
+ * decreases {@code Hardware.yaw}. The field-centric joystick angle is rotated into the robot
+ * frame by subtracting {@code Hardware.yaw} before mixing.
  */
 public class OmniDrivetrain {
 
@@ -266,7 +267,8 @@ public class OmniDrivetrain {
         double mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 
         double joystickAngle = Math.atan2(y, x);
-        double finalAngle = joystickAngle + robotOrientation;
+        // The joystick vector is field-relative; subtract the robot's heading to bring it into the robot frame
+        double finalAngle = joystickAngle - robotOrientation;
 
         x = Math.cos(finalAngle);
         y = Math.sin(finalAngle);

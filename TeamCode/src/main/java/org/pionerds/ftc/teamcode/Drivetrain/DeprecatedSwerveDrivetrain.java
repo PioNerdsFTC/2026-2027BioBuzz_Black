@@ -14,8 +14,11 @@ public class DeprecatedSwerveDrivetrain {
     public DeprecatedSwerveDrivetrain() {
         motors = new DcMotorEx[servoCount];
         servos = new CRServoImplEx[servoCount];
+        servoAngles = new double[servoCount];
         for (int i = 0; i < servoCount; i++) {
-            servos[i].setDirection(DcMotorSimple.Direction.FORWARD);
+            if (servos[i] != null) servos[i].setDirection(
+                DcMotorSimple.Direction.FORWARD
+            );
             servoAngles[i] = 0.00;
         }
     }
@@ -41,6 +44,8 @@ public class DeprecatedSwerveDrivetrain {
         double thetaAbs,
         DcMotorSimple.Direction direction
     ) {
+        if (servos[servoIndex] == null) return;
+
         servos[servoIndex].setDirection(direction);
 
         double tolerance1 = Math.PI / 8.00;
