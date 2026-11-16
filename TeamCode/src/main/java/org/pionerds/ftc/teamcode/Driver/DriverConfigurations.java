@@ -1,41 +1,51 @@
 package org.pionerds.ftc.teamcode.Driver;
 
+import java.util.UUID;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
-import java.util.UUID;
-
 public class DriverConfigurations {
+
     public static Driver driver1;
     public static Driver driver2;
 
     static {
-        Scheduler.addTask("init", (obj) -> {
+        Scheduler.addTask("init", obj -> {
             Logger.log("Initializing DriverConfigurations");
 
-            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.TELE) {
+            if (
+                Environment.Parameters.operatingEnvironment !=
+                Environment.Parameters.OperatingEnvironment.TELE
+            ) {
                 return;
             }
 
             driver1 = new Driver(Globals.depend("gamepad1"))
-                    .addControl(DriverInput.X, DriverAction.TOGGLE_INTAKE, true)
-                    .addControl(DriverInput.A, DriverAction.TRIGGER_INTAKE, true)
-                    .addControl(DriverInput.Y, DriverAction.TRIGGER_EJECTION_INTAKE, true)
-                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TOGGLE_LAUNCHER, true);
+                .addControl(DriverInput.X, DriverAction.TOGGLE_INTAKE, true)
+                .addControl(DriverInput.A, DriverAction.TRIGGER_INTAKE, true)
+                .addControl(
+                    DriverInput.Y,
+                    DriverAction.TRIGGER_EJECTION_INTAKE,
+                    true
+                )
+                .addControl(
+                    DriverInput.RIGHT_BUMPER,
+                    DriverAction.TOGGLE_LAUNCHER,
+                    true
+                );
 
-//                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, true)
-//                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, true);
+            //                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, true)
+            //                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, true);
 
             driver2 = new Driver(Globals.depend("gamepad2"));
 
             Globals.add("driver1", driver1);
             Globals.add("driver2", driver2);
-
         });
 
-        Scheduler.addTask("exit", (obj) -> {
+        Scheduler.addTask("exit", obj -> {
             driver1 = null;
             driver2 = null;
         });

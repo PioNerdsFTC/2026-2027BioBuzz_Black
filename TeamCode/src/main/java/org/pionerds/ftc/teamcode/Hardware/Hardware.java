@@ -2,7 +2,6 @@ package org.pionerds.ftc.teamcode.Hardware;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -12,8 +11,6 @@ import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Manages reading & writing for servos, motors and sensors.
@@ -30,7 +27,10 @@ public final class Hardware {
     public static double roll = 0;
 
     static {
-        AtomicReference<UUID> tick = new AtomicReference<>();
+        // Registered here rather than inside "init" so the sensor tick is always ahead of every
+        // consumer (Coordination and the drivetrain) in the scheduler's task list. tick() itself
+        // bails out until the scheduler is running, so it is safe before init.
+        Scheduler.addTask((obj) -> Hardware.tick());
 
         Scheduler.addTask("init", (o) -> {
             try {
@@ -43,8 +43,15 @@ public final class Hardware {
                 }
 
                 if (Environment.Capabilities.otos) {
-                    otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
-                    Hardware.odometer.init(otos);
+                    try {
+                        otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+                        Hardware.odometer.init(otos);
+                    } catch (Exception e) {
+                        // A missing OTOS must not take the rest of init (gyro, bulk caching) down
+                        otos = null;
+                        Environment.Capabilities.otos = false;
+                        Logger.warn("OTOS not available, odometry disabled");
+                    }
                 }
 
                 Hardware.gyro.init();
@@ -59,14 +66,6 @@ public final class Hardware {
             } catch (Exception e) {
                 Logger.error(e);
             }
-
-            tick.set(Scheduler.addTask((obj) -> {
-                Hardware.tick();
-            }));
-        });
-
-        Scheduler.addTask("exit", (obj) -> {
-            if (tick.get() != null) Scheduler.removeTask(tick.get());
         });
     }
 
@@ -79,6 +78,6 @@ public final class Hardware {
         Hardware.pitch = angles[1];
         Hardware.roll = angles[2];
 
-        if (Environment.Capabilities.otos) odometer.tick();
+        if (Environment.Capabilities.otos && otos != null) odometer.tick();
     }
 }

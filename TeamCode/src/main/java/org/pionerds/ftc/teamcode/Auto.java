@@ -2,16 +2,17 @@ package org.pionerds.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
-@Autonomous(name="Auto")
+@Autonomous(name = "Auto")
 public class Auto extends LinearOpMode {
+
     @Override
     public void runOpMode() {
-        Environment.Parameters.operatingEnvironment = Environment.Parameters.OperatingEnvironment.AUTO;
+        Environment.Parameters.operatingEnvironment =
+            Environment.Parameters.OperatingEnvironment.AUTO;
 
         Scheduler.trigger("pre-init", null);
 
@@ -36,6 +37,7 @@ public class Auto extends LinearOpMode {
         Logger.log("--- Exiting ---");
         Scheduler.trigger("exit", null);
 
-        Environment.Parameters.operatingEnvironment = Environment.Parameters.OperatingEnvironment.NONE;
+        Environment.Parameters.operatingEnvironment =
+            Environment.Parameters.OperatingEnvironment.NONE;
     }
 }

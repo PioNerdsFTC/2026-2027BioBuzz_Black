@@ -2,7 +2,6 @@ package org.pionerds.ftc.teamcode.Hardware;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -13,7 +12,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -52,18 +50,18 @@ public class Mapping {
      * @return The motor object.
      */
     public DcMotorImplEx getMotor(
-            String motorName
-//            Double gearRatio,
-//            DcMotorSimple.Direction motorDirection,
-//            DcMotor.ZeroPowerBehavior motorZeroPowerBehavior
+        String motorName
+        //            Double gearRatio,
+        //            DcMotorSimple.Direction motorDirection,
+        //            DcMotor.ZeroPowerBehavior motorZeroPowerBehavior
     ) {
         DcMotorImplEx motor = null;
 
         try {
             motor = this.map.get(DcMotorImplEx.class, motorName);
-//            motor.setDirection(motorDirection);
-//            motor.setZeroPowerBehavior(motorZeroPowerBehavior);
-//            motor.getMotorType().setGearing(gearRatio);
+            //            motor.setDirection(motorDirection);
+            //            motor.setZeroPowerBehavior(motorZeroPowerBehavior);
+            //            motor.getMotorType().setGearing(gearRatio);
         } catch (Exception e) {
             Logger.warn("Cannot map motor: " + motorName);
         }
@@ -79,8 +77,8 @@ public class Mapping {
      * @return The servo
      */
     public CRServo getContinuousServo(
-            String servoName,
-            CRServoImplEx.Direction servoDirection
+        String servoName,
+        CRServoImplEx.Direction servoDirection
     ) {
         CRServoImplEx continuousServo = null;
 
@@ -104,7 +102,7 @@ public class Mapping {
 
         try {
             imu = this.map.get(IMU.class, "imu");
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {}
 
         return imu;
     }

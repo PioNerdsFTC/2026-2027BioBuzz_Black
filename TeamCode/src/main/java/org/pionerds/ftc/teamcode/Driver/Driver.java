@@ -2,16 +2,13 @@ package org.pionerds.ftc.teamcode.Driver;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
-
 import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.pionerds.ftc.teamcode.Logging.Logger;
-import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.pionerds.ftc.teamcode.Logging.Logger;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 public class Driver {
 
@@ -26,7 +23,7 @@ public class Driver {
     public Driver(Gamepad gamepad) {
         this.gamepad = gamepad;
 
-        UUID tick = Scheduler.addTask((obj) -> {
+        UUID tick = Scheduler.addTask(obj -> {
             if (!Scheduler.running) return;
 
             this.tickControls();
@@ -34,13 +31,19 @@ public class Driver {
 
         AtomicReference<UUID> exit = new AtomicReference<>();
 
-        exit.set(Scheduler.addTask("exit", (obj) -> {
-            Scheduler.removeTask(tick);
-            Scheduler.removeTask(exit.get());
-        }));
+        exit.set(
+            Scheduler.addTask("exit", obj -> {
+                Scheduler.removeTask(tick);
+                Scheduler.removeTask(exit.get());
+            })
+        );
     }
 
-    public Driver addControl(DriverInput input, DriverAction action, boolean isToggle) {
+    public Driver addControl(
+        DriverInput input,
+        DriverAction action,
+        boolean isToggle
+    ) {
         inputList.add(input);
         actionList.add(action.toString());
         toggleList.add(isToggle);
@@ -90,19 +93,24 @@ public class Driver {
     public double leftStickX() {
         return gamepad.left_stick_x * leftStickMagnitude();
     }
+
     public double leftStickY() {
         return gamepad.left_stick_y * leftStickMagnitude();
     }
+
     public double rightStickX() {
         return nonLinearScaleStick(gamepad.right_stick_x);
     }
 
     private double leftStickMagnitude() {
-        return Math.min(Math.hypot(gamepad.left_stick_x, gamepad.left_stick_y), 1.00);
+        return Math.min(
+            Math.hypot(gamepad.left_stick_x, gamepad.left_stick_y),
+            1.00
+        );
     }
 
-    public double nonLinearScaleStick(double input){
-        return Math.pow(input,2)*Math.signum(input);
+    public double nonLinearScaleStick(double input) {
+        return Math.pow(input, 2) * Math.signum(input);
     }
 
     private boolean getMappedInput(DriverInput input) {

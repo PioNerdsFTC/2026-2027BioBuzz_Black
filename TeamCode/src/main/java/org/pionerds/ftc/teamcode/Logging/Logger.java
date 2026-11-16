@@ -1,16 +1,13 @@
-
 package org.pionerds.ftc.teamcode.Logging;
 
 import android.util.Log;
-
+import java.util.ArrayList;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
-
-import java.util.ArrayList;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Unified Logging method. Reports to the Dashboard
@@ -24,7 +21,7 @@ public class Logger {
         DEBUG,
         INFO,
         WARNING,
-        ERROR
+        ERROR,
     }
 
     // Unless we have a way to get a tuple type, this is *a* solution.
@@ -73,16 +70,16 @@ public class Logger {
         Logger.logs.clear();
         Logger.level.clear();
 
-        Scheduler.addTask("init", (obj2) -> {
+        Scheduler.addTask("init", obj2 -> {
             telemetry = Globals.depend("telemetry");
             telemetry.setAutoClear(false);
         });
 
-        Scheduler.addTask("exit", (obj3) -> {
+        Scheduler.addTask("exit", obj3 -> {
             telemetry = null;
         });
 
-        Scheduler.addTask("log:new:info", (info) -> {
+        Scheduler.addTask("log:new:info", info -> {
             Logger.logs.add((String) info);
             Logger.level.add(LogType.INFO);
 
@@ -94,7 +91,7 @@ public class Logger {
             telemetry.update();
         });
 
-        Scheduler.addTask("log:new:warn", (info) -> {
+        Scheduler.addTask("log:new:warn", info -> {
             logs.add((String) info);
             level.add(LogType.WARNING);
 
@@ -106,7 +103,7 @@ public class Logger {
             telemetry.update();
         });
 
-        Scheduler.addTask("log:new:error", (info) -> {
+        Scheduler.addTask("log:new:error", info -> {
             logs.add((String) info);
             level.add(LogType.ERROR);
 
@@ -124,7 +121,7 @@ public class Logger {
             telemetry.update();
         });
 
-        Scheduler.addTask("log:clear", (info) -> {
+        Scheduler.addTask("log:clear", info -> {
             logs.clear();
             level.clear();
 

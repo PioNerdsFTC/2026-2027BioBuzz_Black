@@ -8,7 +8,6 @@ public class PuppetDriver extends Driver {
     double y = 0.00;
     double rotation = 0.00;
 
-
     public PuppetDriver() {
         super(null);
     }

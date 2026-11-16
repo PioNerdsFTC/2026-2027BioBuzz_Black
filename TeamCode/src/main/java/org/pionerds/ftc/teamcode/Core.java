@@ -5,12 +5,17 @@ import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.Menu;
 import android.webkit.MimeTypeMap;
-
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.util.WebHandlerManager;
-
+import fi.iki.elonen.NanoHTTPD;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import org.firstinspires.ftc.ftccommon.external.OnCreate;
 import org.firstinspires.ftc.ftccommon.external.OnCreateEventLoop;
 import org.firstinspires.ftc.ftccommon.external.OnCreateMenu;
@@ -27,16 +32,8 @@ import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
-import fi.iki.elonen.NanoHTTPD;
-
 public class Core {
+
     private static final String TAG = "PioCore";
     private static final String ASSET_ROOT = "web";
     private static final String ROUTE_PREFIX = "/dashboard";
@@ -52,20 +49,44 @@ public class Core {
     public static void start(Context context) {
         Log.i(TAG, "Initializing hooks");
 
-        Scheduler.addTask("log:new:info", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
+        Scheduler.addTask("log:new:info", str -> {
+            Core.broadcast(
+                "log",
+                "{ \"type\": \"info\", \"tag\": \"Core\", \"msg\": " +
+                    jsonString(str) +
+                    " }"
+            );
         });
 
-        Scheduler.addTask("log:new:warn", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
+        Scheduler.addTask("log:new:warn", str -> {
+            Core.broadcast(
+                "log",
+                "{ \"type\": \"warn\", \"tag\": \"Core\", \"msg\": " +
+                    jsonString(str) +
+                    " }"
+            );
         });
 
-        Scheduler.addTask("log:new:error", (str) -> {
-            Core.broadcast("log", "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\": " + jsonString(str) + " }");
+        Scheduler.addTask("log:new:error", str -> {
+            Core.broadcast(
+                "log",
+                "{ \"type\": \"error\", \"tag\": \"Core\", \"msg\": " +
+                    jsonString(str) +
+                    " }"
+            );
         });
 
-        Scheduler.addTask("coordination:update-position", (str) -> {
-            Core.broadcast("position", "{ \"x\": " + jsonNumber(Coordination.x) + ", \"y\": " + jsonNumber(Coordination.y) + ", \"rotation\": " + jsonNumber(Coordination.rotation) + " }");
+        Scheduler.addTask("coordination:update-position", str -> {
+            Core.broadcast(
+                "position",
+                "{ \"x\": " +
+                    jsonNumber(Coordination.x) +
+                    ", \"y\": " +
+                    jsonNumber(Coordination.y) +
+                    ", \"rotation\": " +
+                    jsonNumber(Coordination.rotation) +
+                    " }"
+            );
         });
     }
 
@@ -78,7 +99,10 @@ public class Core {
     }
 
     @WebHandlerRegistrar
-    public static void attachWebServer(Context context, WebHandlerManager manager) {
+    public static void attachWebServer(
+        Context context,
+        WebHandlerManager manager
+    ) {
         try {
             AssetManager assets = context.getAssets();
 
@@ -88,52 +112,80 @@ public class Core {
                 String relative = assetPath.substring(ASSET_ROOT.length() + 1);
                 String route = ROUTE_PREFIX + "/" + relative;
 
-                manager.register(route, assetHandler(assets, assetPath, guessMimeType(relative)));
+                manager.register(
+                    route,
+                    assetHandler(assets, assetPath, guessMimeType(relative))
+                );
             }
 
-            manager.register(ROUTE_PREFIX, session -> redirect(ROUTE_PREFIX + "/"));
-            manager.register(ROUTE_PREFIX + "/",
-                    assetHandler(assets, ASSET_ROOT + "/" + INDEX_FILE, guessMimeType(INDEX_FILE)));
+            manager.register(ROUTE_PREFIX, session ->
+                redirect(ROUTE_PREFIX + "/")
+            );
+            manager.register(
+                ROUTE_PREFIX + "/",
+                assetHandler(
+                    assets,
+                    ASSET_ROOT + "/" + INDEX_FILE,
+                    guessMimeType(INDEX_FILE)
+                )
+            );
         } catch (Exception e) {
             Log.e(TAG, "Failed to register dashboard assets", e);
         }
 
-        manager.register(ROUTE_PREFIX + "/api/get-health", session -> NanoHTTPD.newFixedLengthResponse("ok"));
-
-        manager.register(ROUTE_PREFIX + "/api/trigger-init", session -> {
-                String menuItems = "";
-
-                for (int i = 0; menu != null && i < menu.size(); i++) {
-                    menuItems += "," + menu.getItem(i);
-                }
-
-                return NanoHTTPD.newFixedLengthResponse("ok");
-            }
+        manager.register(ROUTE_PREFIX + "/api/get-health", session ->
+            NanoHTTPD.newFixedLengthResponse("ok")
         );
 
+        manager.register(ROUTE_PREFIX + "/api/trigger-init", session -> {
+            String menuItems = "";
+
+            for (int i = 0; menu != null && i < menu.size(); i++) {
+                menuItems += "," + menu.getItem(i);
+            }
+
+            return NanoHTTPD.newFixedLengthResponse("ok");
+        });
+
         manager.register(ROUTE_PREFIX + "/api/autonomous/get-path", session ->
-                NanoHTTPD.newFixedLengthResponse(
-                        NanoHTTPD.Response.Status.OK, "application/json", Autonomous.getProgram().toJson())
+            NanoHTTPD.newFixedLengthResponse(
+                NanoHTTPD.Response.Status.OK,
+                "application/json",
+                Autonomous.getProgram().toJson()
+            )
         );
 
         manager.register(ROUTE_PREFIX + "/api/autonomous/set-path", session -> {
             if (session.getMethod() != NanoHTTPD.Method.POST) {
                 return NanoHTTPD.newFixedLengthResponse(
-                        NanoHTTPD.Response.Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "POST only");
+                    NanoHTTPD.Response.Status.METHOD_NOT_ALLOWED,
+                    NanoHTTPD.MIME_PLAINTEXT,
+                    "POST only"
+                );
             }
 
             Map<String, String> body = new HashMap<>();
             session.parseBody(body);
 
             try {
-                AutonomousProgram program = AutonomousProgram.fromJson(body.get("postData"));
+                AutonomousProgram program = AutonomousProgram.fromJson(
+                    body.get("postData")
+                );
                 Autonomous.setProgram(program);
-                Log.i(TAG, "Autonomous program updated with " + program.steps.size() + " waypoints");
+                Log.i(
+                    TAG,
+                    "Autonomous program updated with " +
+                        program.steps.size() +
+                        " waypoints"
+                );
 
                 return NanoHTTPD.newFixedLengthResponse("ok");
             } catch (JSONException e) {
                 return NanoHTTPD.newFixedLengthResponse(
-                        NanoHTTPD.Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, "Invalid path: " + e.getMessage());
+                    NanoHTTPD.Response.Status.BAD_REQUEST,
+                    NanoHTTPD.MIME_PLAINTEXT,
+                    "Invalid path: " + e.getMessage()
+                );
             }
         });
 
@@ -156,27 +208,34 @@ public class Core {
     public static int broadcast(String type, String payload) {
         WebSocketManager sockets = webSocketManager;
         if (sockets == null) return 0;
-        return sockets.broadcastToNamespace(WS_NAMESPACE, new FtcWebSocketMessage(WS_NAMESPACE, type, payload));
+        return sockets.broadcastToNamespace(
+            WS_NAMESPACE,
+            new FtcWebSocketMessage(WS_NAMESPACE, type, payload)
+        );
     }
 
-    private static final class DashboardSocketHandler extends WebSocketNamespaceHandler {
+    private static final class DashboardSocketHandler
+        extends WebSocketNamespaceHandler
+    {
+
         DashboardSocketHandler() {
             super(WS_NAMESPACE);
         }
 
         @Override
-        public void onSubscribe(FtcWebSocket webSocket) {
-        }
+        public void onSubscribe(FtcWebSocket webSocket) {}
 
         @Override
-        public void onUnsubscribe(FtcWebSocket webSocket) {
-        }
+        public void onUnsubscribe(FtcWebSocket webSocket) {}
 
         @Override
-        public boolean onMessage(FtcWebSocketMessage message, FtcWebSocket webSocket) {
+        public boolean onMessage(
+            FtcWebSocketMessage message,
+            FtcWebSocket webSocket
+        ) {
             if (super.onMessage(message, webSocket)) return true;
 
-//            webSocket.send(new FtcWebSocketMessage(WS_NAMESPACE, "echo", message.getPayload()));
+            //            webSocket.send(new FtcWebSocketMessage(WS_NAMESPACE, "echo", message.getPayload()));
             return true;
         }
     }
@@ -189,13 +248,25 @@ public class Core {
             char c = str.charAt(i);
 
             switch (c) {
-                case '"': out.append("\\\""); break;
-                case '\\': out.append("\\\\"); break;
-                case '\n': out.append("\\n"); break;
-                case '\r': out.append("\\r"); break;
-                case '\t': out.append("\\t"); break;
+                case '"':
+                    out.append("\\\"");
+                    break;
+                case '\\':
+                    out.append("\\\\");
+                    break;
+                case '\n':
+                    out.append("\\n");
+                    break;
+                case '\r':
+                    out.append("\\r");
+                    break;
+                case '\t':
+                    out.append("\\t");
+                    break;
                 default:
-                    if (c < 0x20) out.append(String.format(Locale.US, "\\u%04x", (int) c));
+                    if (c < 0x20) out.append(
+                        String.format(Locale.US, "\\u%04x", (int) c)
+                    );
                     else out.append(c);
             }
         }
@@ -207,32 +278,53 @@ public class Core {
         return Double.isFinite(value) ? Double.toString(value) : "null";
     }
 
-    private static WebHandler assetHandler(AssetManager assets, String assetPath, String mimeType) {
+    private static WebHandler assetHandler(
+        AssetManager assets,
+        String assetPath,
+        String mimeType
+    ) {
         return session -> {
             try {
                 InputStream stream = assets.open(assetPath);
-                return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, mimeType, stream);
+                return NanoHTTPD.newChunkedResponse(
+                    NanoHTTPD.Response.Status.OK,
+                    mimeType,
+                    stream
+                );
             } catch (IOException e) {
                 return NanoHTTPD.newFixedLengthResponse(
-                        NanoHTTPD.Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found");
+                    NanoHTTPD.Response.Status.NOT_FOUND,
+                    NanoHTTPD.MIME_PLAINTEXT,
+                    "Not Found"
+                );
             }
         };
     }
 
     private static NanoHTTPD.Response redirect(String location) {
-        NanoHTTPD.Response response =
-                NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.REDIRECT, NanoHTTPD.MIME_PLAINTEXT, "");
+        NanoHTTPD.Response response = NanoHTTPD.newFixedLengthResponse(
+            NanoHTTPD.Response.Status.REDIRECT,
+            NanoHTTPD.MIME_PLAINTEXT,
+            ""
+        );
         response.addHeader("Location", location);
         return response;
     }
 
-    private static ArrayList<String> walkAssets(AssetManager assets, String path) throws IOException {
+    private static ArrayList<String> walkAssets(
+        AssetManager assets,
+        String path
+    ) throws IOException {
         ArrayList<String> output = new ArrayList<>();
         walkAssets(assets, path, output);
         return output;
     }
 
-    private static void walkAssets(AssetManager assets, String path, ArrayList<String> output) throws IOException {
+    private static void walkAssets(
+        AssetManager assets,
+        String path,
+        ArrayList<String> output
+    ) throws IOException {
         String[] children = assets.list(path);
 
         if (children == null || children.length == 0) {
@@ -252,14 +344,18 @@ public class Core {
 
             if (extension.equals("js")) return "text/javascript";
 
-            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            String mimeType =
+                MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (mimeType != null) return mimeType;
         }
         return "application/octet-stream";
     }
 
     @OnCreateEventLoop
-    public static void attachEventLoop(Context context, FtcEventLoop eventLoop) {}
+    public static void attachEventLoop(
+        Context context,
+        FtcEventLoop eventLoop
+    ) {}
 
     @OpModeRegistrar
     public static void registerOpMode(OpModeManager manager) {}

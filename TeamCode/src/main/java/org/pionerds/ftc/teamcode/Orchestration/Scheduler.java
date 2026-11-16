@@ -1,9 +1,11 @@
 package org.pionerds.ftc.teamcode.Orchestration;
 
 import android.util.Log;
-
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.UUID;
+import java.util.function.Consumer;
 import org.pionerds.ftc.teamcode.Autonomous.Autonomous;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.DriverConfigurations;
@@ -14,11 +16,6 @@ import org.pionerds.ftc.teamcode.Storage.Intake;
 import org.pionerds.ftc.teamcode.Storage.Storage;
 import org.pionerds.ftc.teamcode.Storage.StorageInitializer;
 import org.pionerds.ftc.teamcode.Vision.Vision;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
     This is the core Scheduler of the Pionerds BioBuzz Robot.
@@ -70,10 +67,11 @@ public class Scheduler {
     public enum ExecutionType {
         CONTINUOUS,
         CONDITIONAL,
-        TIMED
+        TIMED,
     }
 
     public static class Task<T> {
+
         Consumer<T> consumer;
         ExecutionType type;
         Double timestamp;
@@ -207,7 +205,10 @@ public class Scheduler {
             while (iterator.hasNext()) {
                 Task<T> task = (Task<T>) iterator.next();
 
-                if (task.type == ExecutionType.CONDITIONAL && task.event.equals(event)) {
+                if (
+                    task.type == ExecutionType.CONDITIONAL &&
+                    task.event.equals(event)
+                ) {
                     try {
                         task.consumer.accept(val);
                     } catch (Exception e) {
@@ -269,7 +270,10 @@ public class Scheduler {
             if (iterateDepth == 0) flushQueues();
 
             if (x == 500) {
-                Log.d("SCHEDULER", "Took " + (time.milliseconds() - now) + " ms");
+                Log.d(
+                    "SCHEDULER",
+                    "Took " + (time.milliseconds() - now) + " ms"
+                );
                 x = 0;
             }
         }
@@ -296,7 +300,8 @@ public class Scheduler {
     static Hardware hardware = new Hardware();
     static Vision vision = new Vision();
     static Coordination coordination = new Coordination();
-    static DriverConfigurations driverConfigurations = new DriverConfigurations();
+    static DriverConfigurations driverConfigurations =
+        new DriverConfigurations();
     static Drivetrain drivetrain = new Drivetrain();
     static Autonomous autonomous = new Autonomous();
     static Intake intake = new Intake();
@@ -304,19 +309,19 @@ public class Scheduler {
     static StorageInitializer storageInitializer = new StorageInitializer();
 
     static {
-         Scheduler.addTask("pre-init", (obj) -> {
-             Scheduler.continueRunning = true;
+        Scheduler.addTask("pre-init", obj -> {
+            Scheduler.continueRunning = true;
 
-             for (Task<?> task : tasks) {
-                 if (task.type == ExecutionType.TIMED) removeTask(task.id);
-             }
+            for (Task<?> task : tasks) {
+                if (task.type == ExecutionType.TIMED) removeTask(task.id);
+            }
 
             time.reset();
 
             Scheduler.running = false;
         });
 
-         Scheduler.addTask("pre-run", (obj) -> {
+        Scheduler.addTask("pre-run", obj -> {
             Scheduler.running = true;
 
             for (Task<?> task : tasks) {
@@ -324,7 +329,7 @@ public class Scheduler {
             }
         });
 
-        Scheduler.addTask("exit", (obj) -> {
+        Scheduler.addTask("exit", obj -> {
             Scheduler.running = false;
         });
     }

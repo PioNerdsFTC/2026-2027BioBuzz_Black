@@ -8,6 +8,7 @@ public class Globals {
     private static final ArrayList<Global<?>> globals = new ArrayList<>();
 
     public static class Global<T> {
+
         public T object;
         public String name;
 
@@ -50,7 +51,7 @@ public class Globals {
     }
 
     static {
-        Scheduler.addTask("exit", (obj) -> {
+        Scheduler.addTask("exit", obj -> {
             while (!globals.isEmpty()) globals.remove(0);
         });
     }

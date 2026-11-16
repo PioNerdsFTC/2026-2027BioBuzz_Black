@@ -12,7 +12,6 @@ public enum DriverAction {
     TRIGGER_EJECTION_INTAKE,
     TURN_RIGHT;
 
-
     public String toString() {
         return this.name().toLowerCase().replace('_', '-');
     }

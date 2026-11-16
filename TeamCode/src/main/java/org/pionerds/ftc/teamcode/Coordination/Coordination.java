@@ -8,24 +8,37 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
  * Field dimensions are 365.75 cm x 365.75 cm, however we convert to a 0-100 unit.
  */
 public class Coordination {
+
     public static double x = -1;
     public static double y = -1;
 
     public static double rotation = 0;
 
-    public static double UNIT = ((double) 1 / 100 * 365.75);
+    public static double UNIT = ((double) 1 / 100) * 365.75;
 
     private static double startX = -1;
     private static double startY = -1;
+    /** Field heading at the start pose; the odometer's axes are the robot's axes at that moment. */
+    private static double startHeading = 0;
 
     /** Maps the gyro's reset heading to the heading programmed for the start of the run. */
     private static double rotationOffset = 0;
 
+    /**
+     * Odometer reading at the start pose. The OTOS reports centimetres in the robot's axes as they
+     * were when tracking was reset (x to the right, y forward), not field coordinates.
+     */
+    private static double odomXOrigin = 0;
+    private static double odomYOrigin = 0;
+
     static {
-        Scheduler.addTask("init", (obj) -> {
+        Scheduler.addTask("init", obj -> {
             // TODO: implement robot starting positions
 
-            if (Environment.Parameters.alliance == Environment.Parameters.Side.RED) {
+            if (
+                Environment.Parameters.alliance ==
+                Environment.Parameters.Side.RED
+            ) {
                 Coordination.x = 0;
                 Coordination.y = 85;
             } else {
@@ -35,31 +48,53 @@ public class Coordination {
 
             Coordination.rotation = 0;
             rotationOffset = 0;
+            startHeading = 0;
+            odomXOrigin = Hardware.odometer.x;
+            odomYOrigin = Hardware.odometer.y;
 
             startX = Coordination.x;
             startY = Coordination.y;
 
-            Scheduler.addTask(200, (obj2) -> {
+            Scheduler.addTask(200, obj2 -> {
                 updateRemotes();
             });
         });
 
-        Scheduler.addTask((obj) -> {
-            // Gyro yaw is positive counter-clockwise; the dashboard/field heading is positive clockwise.
-            Coordination.rotation = normalizeAngle(rotationOffset - Hardware.yaw);
+        Scheduler.addTask(obj -> {
+            Coordination.rotation = normalizeAngle(
+                rotationOffset - Hardware.yaw
+            );
 
-            if (Environment.Capabilities.otos) {
-                Coordination.x = 50 + Hardware.odometer.x;
-                Coordination.y = 50 + Hardware.odometer.y;
-            }
+            if (Environment.Capabilities.otos) updatePosition();
         });
 
-        Scheduler.addTask("exit", (obj) -> {
+        Scheduler.addTask("exit", obj -> {
             Coordination.x = -1;
             Coordination.y = -1;
             Coordination.rotation = -1;
             rotationOffset = 0;
+            startHeading = 0;
+            odomXOrigin = 0;
+            odomYOrigin = 0;
         });
+    }
+
+    /**
+     * Converts the odometer's displacement into field coordinates.
+     *
+     * <p>The OTOS resets to the robot's pose, so its readings are in centimetres along the robot's
+     * axes at the start: +x is the robot's right, +y is its front. Rotating that by the start
+     * heading gives a field displacement, which is added to the programmed start position.
+     */
+    private static void updatePosition() {
+        double right = (Hardware.odometer.x - odomXOrigin) / UNIT;
+        double forward = (Hardware.odometer.y - odomYOrigin) / UNIT;
+
+        double cos = Math.cos(startHeading);
+        double sin = Math.sin(startHeading);
+
+        Coordination.x = startX - right * sin + forward * cos;
+        Coordination.y = startY + right * cos + forward * sin;
     }
 
     /**
@@ -82,6 +117,10 @@ public class Coordination {
 
         startX = x;
         startY = y;
+        startHeading = rotation == null ? 0 : rotation;
+
+        odomXOrigin = Hardware.odometer.x;
+        odomYOrigin = Hardware.odometer.y;
     }
 
     private static double normalizeAngle(double angle) {
@@ -97,7 +136,7 @@ public class Coordination {
     private static void updateRemotes() {
         Scheduler.trigger("coordination:update-position", null);
 
-        Scheduler.addTask(200, (obj) -> {
+        Scheduler.addTask(200, obj -> {
             updateRemotes();
         });
     }

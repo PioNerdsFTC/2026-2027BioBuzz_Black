@@ -1,7 +1,10 @@
 package org.pionerds.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Action;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Step;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
@@ -15,11 +18,6 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Storage.Intake;
 import org.pionerds.ftc.teamcode.Storage.Launcher;
 import org.pionerds.ftc.teamcode.Storage.Storage;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Autonomous {
 
@@ -50,7 +48,16 @@ public class Autonomous {
 
     /** Hardware commands that actions are broken down into. */
     private static final class Op {
-        enum Kind { LAUNCHER_ON, LAUNCHER_OFF, FEED_ON, FEED_OFF, INTAKE_ON, INTAKE_OFF, DELAY }
+
+        enum Kind {
+            LAUNCHER_ON,
+            LAUNCHER_OFF,
+            FEED_ON,
+            FEED_OFF,
+            INTAKE_ON,
+            INTAKE_OFF,
+            DELAY,
+        }
 
         final Kind kind;
         final String piece;
@@ -62,7 +69,9 @@ public class Autonomous {
             this.value = value;
         }
 
-        Op(Kind kind) { this(kind, null, 0); }
+        Op(Kind kind) {
+            this(kind, null, 0);
+        }
     }
 
     private static final ArrayList<Step> stepQueue = new ArrayList<>();
@@ -78,15 +87,16 @@ public class Autonomous {
      */
     private static volatile AutonomousProgram program = AutonomousProgram.EMPTY;
 
-
-    static{
+    static {
         OmniDrivetrain.OVERRIDE_DRIVER(puppet);
 
-        Scheduler.addTask((obj) -> {
-            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.AUTO) return;
+        Scheduler.addTask(obj -> {
+            if (
+                Environment.Parameters.operatingEnvironment !=
+                Environment.Parameters.OperatingEnvironment.AUTO
+            ) return;
             if (!Scheduler.running) return;
 
-            // Actions run with the robot stationary, before moving on to the next waypoint
             if (!opQueue.isEmpty() || opTimer.milliseconds() < opsResumeAt) {
                 stop();
                 tickOps();
@@ -101,25 +111,31 @@ public class Autonomous {
             moveToPositionTick(stepQueue.get(0));
         });
 
-        // Runs after Coordination's own init (it is registered earlier), so this overrides its default start
-        Scheduler.addTask("init", (obj) -> {
-            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.AUTO) return;
+        Scheduler.addTask("init", obj -> {
+            if (
+                Environment.Parameters.operatingEnvironment !=
+                Environment.Parameters.OperatingEnvironment.AUTO
+            ) return;
 
             double[] start = program.start;
             if (start != null) {
                 Double startRotation = program.startRotation;
                 if (startRotation == null) {
-                    // Face the center of the field from the start position.
                     startRotation = Math.atan2(50 - start[1], 50 - start[0]);
                 }
 
                 Coordination.setStart(start[0], start[1], startRotation);
-                Logger.log("Autonomous: start heading " + startRotation + " rad");
+                Logger.log(
+                    "Autonomous: start heading " + startRotation + " rad"
+                );
             }
         });
 
-        Scheduler.addTask("pre-run", (obj) -> {
-            if (Environment.Parameters.operatingEnvironment != Environment.Parameters.OperatingEnvironment.AUTO) return;
+        Scheduler.addTask("pre-run", obj -> {
+            if (
+                Environment.Parameters.operatingEnvironment !=
+                Environment.Parameters.OperatingEnvironment.AUTO
+            ) return;
 
             AutonomousProgram current = program;
 
@@ -127,28 +143,53 @@ public class Autonomous {
             opQueue.addAll(expand(current.startActions));
             stepQueue.addAll(current.steps);
 
-            Logger.log("Autonomous: loaded " + current.steps.size() + " waypoints");
+            Logger.log(
+                "Autonomous: loaded " + current.steps.size() + " waypoints"
+            );
+
+            if (!Environment.Capabilities.otos && !current.steps.isEmpty()) {
+                Logger.warn(
+                    "Autonomous: no odometry, waypoints will never be reached"
+                );
+            }
+
             for (Step step : current.steps) {
                 if (step.rotation != null) {
-                    Logger.log("Autonomous: waypoint (" + step.x + ", " + step.y + ") heading " + step.rotation + " rad");
+                    Logger.log(
+                        "Autonomous: waypoint (" +
+                            step.x +
+                            ", " +
+                            step.y +
+                            ") heading " +
+                            step.rotation +
+                            " rad"
+                    );
                 }
             }
         });
 
-        Scheduler.addTask("exit", (obj) -> {
+        Scheduler.addTask("exit", obj -> {
             clearQueues();
             stop();
         });
     }
 
-
     /**
      * Queue a movement to {x, y, tolerance} in Coordination units, optionally
      * {x, y, tolerance, rotation} where rotation is a target heading in radians.
      */
-    public static void requestMovement(double[] xyT){
+    public static void requestMovement(double[] xyT) {
         Double rotation = xyT.length > 3 ? xyT[3] : null;
-        stepQueue.add(new Step(xyT[0], xyT[1], xyT[2], rotation, false, Collections.emptyList()));
+        stepQueue.add(
+            new Step(
+                xyT[0],
+                xyT[1],
+                xyT[2],
+                rotation,
+                false,
+                Collections.emptyList()
+            )
+        );
     }
 
     public static void setProgram(AutonomousProgram program) {
@@ -159,26 +200,31 @@ public class Autonomous {
         return program;
     }
 
-    public static void moveToPositionTick(Step step){
+    public static void moveToPositionTick(Step step) {
         cacheTarget(step);
 
-        // Drive to the waypoint first, then rotate in place before running its actions
-        if(!isWithinTolerance()){
+        if (!isWithinTolerance()) {
             Drivetrain.stopRotating();
             setIntake(step.intake);
 
-            puppet.setX(calculateSpeedForceX());
-            puppet.setY(calculateSpeedForceY());
+            OmniDrivetrain.setFieldVector(
+                calculateSpeedForceX(),
+                calculateSpeedForceY()
+            );
             return;
         }
 
-        if(!isRotationWithinTolerance()){
+        if (!isRotationWithinTolerance()) {
             if (rf != null && !rf.equals(lastLoggedRotation)) {
-                Logger.log("Autonomous: rotating to " + rf + " rad from " + r + " rad");
+                Logger.log(
+                    "Autonomous: rotating to " + rf + " rad from " + r + " rad"
+                );
                 lastLoggedRotation = rf;
             }
 
             setIntake(false);
+
+            OmniDrivetrain.clearFieldVector();
 
             puppet.setX(0.00);
             puppet.setY(0.00);
@@ -208,7 +254,9 @@ public class Autonomous {
             switch (action.type) {
                 case SHOOT:
                     ops.add(new Op(Op.Kind.LAUNCHER_ON, null, action.value));
-                    if (!spinning) ops.add(new Op(Op.Kind.DELAY, null, LAUNCHER_SPIN_UP_MS));
+                    if (!spinning) ops.add(
+                        new Op(Op.Kind.DELAY, null, LAUNCHER_SPIN_UP_MS)
+                    );
                     spinning = true;
 
                     for (int shot = 0; shot < action.count; shot++) {
@@ -218,19 +266,19 @@ public class Autonomous {
                         ops.add(new Op(Op.Kind.DELAY, null, FEED_GAP_MS));
                     }
 
-                    boolean nextIsShot = i + 1 < actions.size() && actions.get(i + 1).type == Action.Type.SHOOT;
+                    boolean nextIsShot =
+                        i + 1 < actions.size() &&
+                        actions.get(i + 1).type == Action.Type.SHOOT;
                     if (!nextIsShot) {
                         ops.add(new Op(Op.Kind.LAUNCHER_OFF));
                         spinning = false;
                     }
                     break;
-
                 case INTAKE:
                     ops.add(new Op(Op.Kind.INTAKE_ON));
                     ops.add(new Op(Op.Kind.DELAY, null, action.value));
                     ops.add(new Op(Op.Kind.INTAKE_OFF));
                     break;
-
                 case WAIT:
                     ops.add(new Op(Op.Kind.DELAY, null, action.value));
                     break;
@@ -241,7 +289,6 @@ public class Autonomous {
     }
 
     private static void tickOps() {
-        // Instant commands all run in the same tick, delays hold the queue until they pass
         while (!opQueue.isEmpty()) {
             if (opTimer.milliseconds() < opsResumeAt) return;
 
@@ -249,7 +296,9 @@ public class Autonomous {
 
             switch (op.kind) {
                 case LAUNCHER_ON:
-                    Logger.log("Autonomous: launcher on at " + op.value + " deg");
+                    Logger.log(
+                        "Autonomous: launcher on at " + op.value + " deg"
+                    );
                     setLaunchers(true, op.value);
                     break;
                 case LAUNCHER_OFF:
@@ -315,24 +364,25 @@ public class Autonomous {
         lastLoggedRotation = null;
 
         Drivetrain.stopRotating();
+        OmniDrivetrain.clearFieldVector();
 
         setFeed("pollen", false);
         setFeed("nectar", false);
         setLaunchers(false, -1);
 
-        intakeRunning = true; // force the update so the intake is definitely off
+        intakeRunning = true;
         setIntake(false);
     }
 
-    private static void stop(){
+    private static void stop() {
         Drivetrain.stopRotating();
+        OmniDrivetrain.clearFieldVector();
 
         puppet.setX(0.00);
         puppet.setY(0.00);
     }
 
-
-    private static void cacheTarget(Step target){
+    private static void cacheTarget(Step target) {
         x = Coordination.x;
         y = Coordination.y;
         r = Coordination.rotation;
@@ -343,35 +393,37 @@ public class Autonomous {
         rf = target.rotation;
     }
 
-    private static boolean isWithinTolerance(){
-        if(Math.abs(xf-x) <= t && Math.abs(yf-y) <= t) return true;
+    private static boolean isWithinTolerance() {
+        if (Math.abs(xf - x) <= t && Math.abs(yf - y) <= t) return true;
         return false;
     }
 
-    private static boolean isRotationWithinTolerance(){
-        if(rf == null) return true;
-        return Math.abs(Drivetrain.getRotationError(rf, r)) <= ROTATION_TOLERANCE;
+    private static boolean isRotationWithinTolerance() {
+        if (rf == null) return true;
+        return (
+            Math.abs(Drivetrain.getRotationError(rf, r)) <= ROTATION_TOLERANCE
+        );
     }
 
-    private static double getΔ(double p2, double p1){
-        return Math.abs(p2-p1);
+    private static double getΔ(double p2, double p1) {
+        return Math.abs(p2 - p1);
     }
 
-    private static double calculateSpeedForceX(){
+    private static double calculateSpeedForceX() {
         return calculateSpeedForce(xf, x);
     }
 
-    private static double calculateSpeedForceY(){
+    private static double calculateSpeedForceY() {
         return calculateSpeedForce(yf, y);
     }
 
-    private static double calculateSpeedForce(double target, double current){
+    private static double calculateSpeedForce(double target, double current) {
         double Δ = getΔ(target, current);
         double direction = Math.signum(target - current);
 
-        if(Δ <= t) return 0.00;
-        else if(Δ >= 20) return direction * maxSpeed;
-        else if(Δ >= 10) return direction * mediumSpeed;
+        if (Δ <= t) return 0.00;
+        else if (Δ >= 20) return direction * maxSpeed;
+        else if (Δ >= 10) return direction * mediumSpeed;
         else return direction * slowSpeed;
     }
 }

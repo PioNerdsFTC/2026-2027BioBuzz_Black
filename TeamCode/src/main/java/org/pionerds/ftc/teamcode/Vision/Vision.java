@@ -1,15 +1,15 @@
 package org.pionerds.ftc.teamcode.Vision;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
+import android.util.Log;
 import android.util.Size;
-
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import android.util.Log;
-
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagClusterDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -24,11 +24,8 @@ import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class Vision {
+
     private static final int CAMERA_WIDTH = 640;
     private static final int CAMERA_HEIGHT = 480;
 
@@ -38,47 +35,48 @@ public class Vision {
     private static VisionPortal visionPortal;
 
     static {
-        Scheduler.addTask("init", (obj) -> {
+        Scheduler.addTask("init", obj -> {
             if (!Environment.Capabilities.vision) return;
 
             aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
 
             aprilTagProcessor = aprilTagProcessorBuilder
-                    .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
-                    .setDrawAxes(true)
-                    .setDrawTagOutline(true)
-                    .setDrawTagID(true)
-                    .build();
+                .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
+                .setDrawAxes(true)
+                .setDrawTagOutline(true)
+                .setDrawTagID(true)
+                .build();
 
-
-            Scheduler.addTask(0, (obj2) -> {
-
+            Scheduler.addTask(0, obj2 -> {
                 Logger.log("Webcam: " + Hardware.webcam);
 
                 if (Hardware.webcam == null) {
-                    Logger.error("Webcam is null - check the hardware config name 'Webcam 1'");
+                    Logger.error(
+                        "Webcam is null - check the hardware config name 'Webcam 1'"
+                    );
                     return;
                 }
 
                 visionPortal = new VisionPortal.Builder()
-                        .setCamera(Hardware.webcam)
-                        .setCameraResolution(new Size(CAMERA_WIDTH, CAMERA_HEIGHT))
-                        .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                        .enableLiveView(true)
-                        .addProcessor(aprilTagProcessor)
-                        .build();
+                    .setCamera(Hardware.webcam)
+                    .setCameraResolution(new Size(CAMERA_WIDTH, CAMERA_HEIGHT))
+                    .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
+                    .enableLiveView(true)
+                    .addProcessor(aprilTagProcessor)
+                    .build();
 
-                Scheduler.addTask(500, (obj3) -> {
+                Scheduler.addTask(500, obj3 -> {
                     Logger.log("Webcam: " + Hardware.webcam);
-                    Logger.log("Webcam-Name: " + Hardware.webcam.getDeviceName());
+                    Logger.log(
+                        "Webcam-Name: " + Hardware.webcam.getDeviceName()
+                    );
 
                     Vision.LogAllViewableTags();
                 });
-
             });
         });
 
-        Scheduler.addTask("exit", (obj) -> {
+        Scheduler.addTask("exit", obj -> {
             if (visionPortal != null) {
                 visionPortal.close();
                 visionPortal = null;
@@ -87,12 +85,16 @@ public class Vision {
     }
 
     private AprilTagSingleDetection getSingleTagByID(int id) {
-        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+        ArrayList<AprilTagDetection> detections =
+            aprilTagProcessor.getDetections();
 
-        for (int i = 0; i < detections.size(); i++){
-            if (!(detections.get(i) instanceof AprilTagSingleDetection)) continue;
+        for (int i = 0; i < detections.size(); i++) {
+            if (
+                !(detections.get(i) instanceof AprilTagSingleDetection)
+            ) continue;
 
-            AprilTagSingleDetection detection = (AprilTagSingleDetection) detections.get(i);
+            AprilTagSingleDetection detection =
+                (AprilTagSingleDetection) detections.get(i);
 
             Logger.log("Found a single-tag with ID: " + detection.metadata.id);
 
@@ -104,13 +106,17 @@ public class Vision {
         return null;
     }
 
-    private AprilTagClusterDetection getClusterTagByName(String name){
-        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+    private AprilTagClusterDetection getClusterTagByName(String name) {
+        ArrayList<AprilTagDetection> detections =
+            aprilTagProcessor.getDetections();
 
         for (int i = 0; i < detections.size(); i++) {
-            if (!(detections.get(i) instanceof AprilTagClusterDetection)) continue;
+            if (
+                !(detections.get(i) instanceof AprilTagClusterDetection)
+            ) continue;
 
-            AprilTagClusterDetection detection = (AprilTagClusterDetection) detections.get(i);
+            AprilTagClusterDetection detection =
+                (AprilTagClusterDetection) detections.get(i);
 
             Logger.log("Found a cluster named: " + detection.metadata.name);
 
@@ -122,23 +128,49 @@ public class Vision {
         return null;
     }
 
-    private static void LogAllViewableTags(){
+    private static void LogAllViewableTags() {
         if (visionPortal != null) {
-            Logger.log("Camera-State: " + visionPortal.getCameraState() + " FPS: " + visionPortal.getFps());
+            Logger.log(
+                "Camera-State: " +
+                    visionPortal.getCameraState() +
+                    " FPS: " +
+                    visionPortal.getFps()
+            );
         }
 
-        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+        ArrayList<AprilTagDetection> detections =
+            aprilTagProcessor.getDetections();
 
         for (int i = 0; i < detections.size(); i++) {
             if (detections.get(i) instanceof AprilTagClusterDetection) {
-                Logger.log("Bulk-Detection Metadata Found. Name: "+((AprilTagClusterDetection) detections.get(i)).metadata.name);
-                Logger.log("Bulk-Detection Metadata Found. Short-Name: "+((AprilTagClusterDetection) detections.get(i)).metadata.shortName);
-            } else if(detections.get(i) instanceof AprilTagSingleDetection) {
-                Logger.log("Bulk-Detection Metadata Found. ID: "+((AprilTagSingleDetection) detections.get(i)).metadata.id);
-                Logger.log("Bulk-Detection Metadata Found. Name: "+((AprilTagSingleDetection) detections.get(i)).metadata.name);
+                Logger.log(
+                    "Bulk-Detection Metadata Found. Name: " +
+                        (
+                            (AprilTagClusterDetection) detections.get(i)
+                        ).metadata.name
+                );
+                Logger.log(
+                    "Bulk-Detection Metadata Found. Short-Name: " +
+                        (
+                            (AprilTagClusterDetection) detections.get(i)
+                        ).metadata.shortName
+                );
+            } else if (detections.get(i) instanceof AprilTagSingleDetection) {
+                Logger.log(
+                    "Bulk-Detection Metadata Found. ID: " +
+                        (
+                            (AprilTagSingleDetection) detections.get(i)
+                        ).metadata.id
+                );
+                Logger.log(
+                    "Bulk-Detection Metadata Found. Name: " +
+                        (
+                            (AprilTagSingleDetection) detections.get(i)
+                        ).metadata.name
+                );
             }
         }
 
-        Scheduler.addTask(500, (obj2) -> LogAllViewableTags());
+        Scheduler.addTask(500, obj2 -> LogAllViewableTags());
     }
 }

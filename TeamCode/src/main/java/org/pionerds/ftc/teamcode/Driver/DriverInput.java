@@ -18,5 +18,5 @@ public enum DriverInput {
     DPAD_UP,
     DPAD_DOWN,
     DPAD_RIGHT,
-    DPAD_LEFT
+    DPAD_LEFT,
 }
