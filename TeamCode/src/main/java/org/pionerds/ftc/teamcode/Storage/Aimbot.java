@@ -4,6 +4,7 @@ public class Aimbot {
 
     private static final double g = 9.80665;
     private static final double flywheelRadius = 0.051;
+    private static final double ticksPerRotation = 28 * (1/1);
 
 
     public static double getAngularVelocity(
@@ -37,21 +38,19 @@ public class Aimbot {
 
         double v = coefficient * sqrt;
 
+
+
         // Divide by radius of flywheel to set ω_{LaunchMotor}
         double ω = v / r;
 
-        // Return
-        return ω;
+        // Calculate ticks/second for encoders
+        double γ = ω * (ticksPerRotation) / (2 * Math.PI);
+
+
+
+        // Return gamma (γ)
+        return γ;
     }
-
-
-
-
-
-
-
-
-
 
 
 

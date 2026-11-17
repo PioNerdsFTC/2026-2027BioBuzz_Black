@@ -37,9 +37,10 @@ public class Launcher {
 
         //hoodServo = Hardware.mapping.getServoMotor(launchServoName);
 
-        if (launchMotor != null) launchMotor.setZeroPowerBehavior(
-            DcMotor.ZeroPowerBehavior.FLOAT
-        );
+        if (launchMotor != null) {
+            launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            launchMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
 
         /*UUID rightTrigger = Scheduler.addTask("right-trigger", trigger -> {
             setLaunchAngle((Float) trigger * 180);
@@ -54,7 +55,7 @@ public class Launcher {
             launcherToggled[0] = !launcherToggled[0];
         });
 
-        UUID updateLauncher = Scheduler.addTask("tick", obj -> {
+        UUID updateLauncher = Scheduler.addTask(obj -> {
             this.updateLaunchVelocity(Environment.Capabilities.aimbotEnabled);
         });
 
@@ -82,40 +83,39 @@ public class Launcher {
     }
 
     public void enableLauncher() {
-        if (launchMotor != null) launchMotor.setPower(1.0);
+        isEnabled = true;
     }
 
     public void disableLauncher() {
-        if (launchMotor != null) launchMotor.setPower(0.0);
+        isEnabled = false;
     }
 
     public boolean isEnabled(){ return isEnabled; }
 
     public boolean updateLaunchVelocity(boolean useAimbot){
         if(isEnabled) {
-            if(
-                    Environment.Capabilities.vision &&
-                    useAimbot &&
-                    Vision.getClusterTagByName("BLUE SCORING") != null &&
-                    Vision.getClusterTagByName("BLUE SCORING").ftcPose != null
-            ){
+            if (Environment.Capabilities.vision && useAimbot) {
                 AprilTagClusterDetection clusterDetection = Vision.getClusterTagByName("BLUE SCORING");
+                if (clusterDetection != null && clusterDetection.ftcPose != null) {
 
-                double xi = launcherOffsetFromCamera[0];
-                double xf = clusterDetection.ftcPose.x;
-                double yi = launcherOffsetFromCamera[1];
-                double yf = clusterDetection.ftcPose.z;
-                double θ = 68 * Math.PI / 180;
 
-                launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
-                return true;
-            } else {
-                launchMotor.setVelocity(20000);
-                return true;
+                    double xi = launcherOffsetFromCamera[0];
+                    double xf = clusterDetection.ftcPose.x;
+                    double yi = launcherOffsetFromCamera[1];
+                    double yf = clusterDetection.ftcPose.z;
+                    double θ = 68 * Math.PI / 180;
+
+                    launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
+                    return true;
+                } else {
+                    launchMotor.setVelocity(20000);
+                    return true;
+                }
             }
         } else {
             launchMotor.setVelocity(0.00);
             return true;
         }
+        return false;
     }
 }
