@@ -94,6 +94,7 @@ public class Launcher {
     public boolean updateLaunchVelocity(boolean useAimbot){
         if(isEnabled) {
             if(
+                    Environment.Capabilities.vision &&
                     useAimbot &&
                     Vision.getClusterTagByName("BLUE SCORING") != null &&
                     Vision.getClusterTagByName("BLUE SCORING").ftcPose != null
