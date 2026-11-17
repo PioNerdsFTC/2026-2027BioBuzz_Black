@@ -23,16 +23,17 @@ public class Launcher {
     private boolean isEnabled = false;
 
     private double[] launcherOffsetFromCamera = new double[2];
+    private double hiveHeightMeters = 1.4605;
 
     public Launcher(
-        String name,
-        String motorName,
-        String launchServoName,
-        boolean reverseDirection
+            String name,
+            String motorName,
+            String launchServoName,
+            boolean reverseDirection
     ) {
         launchMotor = Hardware.mapping.getMotor(motorName);
         if (launchMotor != null && reverseDirection) launchMotor.setDirection(
-            DcMotorSimple.Direction.REVERSE
+                DcMotorSimple.Direction.REVERSE
         );
 
         //hoodServo = Hardware.mapping.getServoMotor(launchServoName);
@@ -46,7 +47,7 @@ public class Launcher {
             setLaunchAngle((Float) trigger * 180);
         });*/
 
-        final boolean[] launcherToggled = { false };
+        final boolean[] launcherToggled = {false};
 
         UUID toggleLauncher = Scheduler.addTask("toggle-launcher:down", obj -> {
             if (launcherToggled[0]) disableLauncher();
@@ -56,22 +57,22 @@ public class Launcher {
         });
 
         UUID updateLauncher = Scheduler.addTask(obj -> {
-            this.updateLaunchVelocity(Environment.Capabilities.aimbotEnabled);
+            this.updateLaunchVelocity();
         });
 
         AtomicReference<UUID> exit = new AtomicReference<>();
 
         exit.set(
-            Scheduler.addTask("exit", obj -> {
-                //Scheduler.removeTask(rightTrigger);
-                Scheduler.removeTask(toggleLauncher);
-                Scheduler.removeTask(updateLauncher);
-                Scheduler.removeTask(exit.get());
-            })
+                Scheduler.addTask("exit", obj -> {
+                    //Scheduler.removeTask(rightTrigger);
+                    Scheduler.removeTask(toggleLauncher);
+                    Scheduler.removeTask(updateLauncher);
+                    Scheduler.removeTask(exit.get());
+                })
         );
     }
 
-    public void setLauncherOffsetFromCamera(double[] launcherOffsetFromCamera){
+    public void setLauncherOffsetFromCamera(double[] launcherOffsetFromCamera) {
         this.launcherOffsetFromCamera = launcherOffsetFromCamera;
     }
 
@@ -90,11 +91,13 @@ public class Launcher {
         isEnabled = false;
     }
 
-    public boolean isEnabled(){ return isEnabled; }
+    public boolean isEnabled() {
+        return isEnabled;
+    }
 
-    public boolean updateLaunchVelocity(boolean useAimbot){
-        if(isEnabled) {
-            if (Environment.Capabilities.vision && useAimbot) {
+    public boolean updateLaunchVelocity() {
+        if (isEnabled && launchMotor != null) {
+            if (Environment.Capabilities.vision && Environment.Capabilities.aimbotEnabled) {
                 AprilTagClusterDetection clusterDetection = Vision.getClusterTagByName("BLUE SCORING");
                 if (clusterDetection != null && clusterDetection.ftcPose != null) {
 
@@ -102,15 +105,15 @@ public class Launcher {
                     double xi = launcherOffsetFromCamera[0];
                     double xf = clusterDetection.ftcPose.x;
                     double yi = launcherOffsetFromCamera[1];
-                    double yf = clusterDetection.ftcPose.z;
+                    double yf = hiveHeightMeters;
                     double θ = 68 * Math.PI / 180;
 
                     launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
                     return true;
-                } else {
-                    launchMotor.setVelocity(20000);
-                    return true;
                 }
+            } else {
+                launchMotor.setVelocity(20000);
+                return true;
             }
         } else {
             launchMotor.setVelocity(0.00);

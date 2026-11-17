@@ -85,6 +85,8 @@ public class Vision {
     }
 
     public static AprilTagSingleDetection getSingleTagByID(int id) {
+        if(aprilTagProcessor == null) return null;
+
         ArrayList<AprilTagDetection> detections =
             aprilTagProcessor.getDetections();
 
@@ -107,6 +109,8 @@ public class Vision {
     }
 
     public static AprilTagClusterDetection getClusterTagByName(String name) {
+        if(aprilTagProcessor == null) return null;
+
         ArrayList<AprilTagDetection> detections =
             aprilTagProcessor.getDetections();
 
@@ -129,6 +133,8 @@ public class Vision {
     }
 
     public static void LogAllViewableTags() {
+        if(aprilTagProcessor == null) return;
+
         if (visionPortal != null) {
             Logger.log(
                 "Camera-State: " +

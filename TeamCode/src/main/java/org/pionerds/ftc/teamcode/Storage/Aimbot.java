@@ -4,7 +4,7 @@ public class Aimbot {
 
     private static final double g = 9.80665;
     private static final double flywheelRadius = 0.051;
-    private static final double ticksPerRotation = 28 * (1/1);
+    private static final double ticksPerRotation = 28.0 * (1.0/1.0);
 
 
     public static double getAngularVelocity(
