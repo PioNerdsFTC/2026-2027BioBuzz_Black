@@ -3,6 +3,61 @@ package org.pionerds.ftc.teamcode.Storage;
 public class Aimbot {
 
     private static final double g = 9.80665;
+    private static final double flywheelRadius = 0.051;
+
+
+    public static double getAngularVelocity(
+            double xi,
+            double xf,
+            double yi,
+            double yf,
+            double θ
+    ){
+        double r = flywheelRadius;
+
+        double Δx = xf-xi;
+        double Δy = yf-yi;
+
+        double cosθ = Math.cos(θ);
+        double tanθ = Math.tan(θ);
+
+        double coefficient = (Δx / cosθ);
+
+
+        // Inside Sqrt() ======
+
+        double numerator = g;
+        double denominator = 2 * ( Δx * tanθ - Δy );
+
+        double fraction = numerator / denominator;
+
+        // ====================
+
+        double sqrt = Math.sqrt(fraction);
+
+        double v = coefficient * sqrt;
+
+        // Divide by radius of flywheel to set ω_{LaunchMotor}
+        double ω = v / r;
+
+        // Return
+        return ω;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public static double getCalculatedAngle(
         double xi,
@@ -20,10 +75,10 @@ public class Aimbot {
         // Both angles hit the target, averaging them does not. Use the flatter (faster) shot.
         double minAngle = experimentalAngles[0];
 
-        return empericalCorrection(minAngle);
+        return empericalCorrectionForAngle(minAngle);
     }
 
-    private static double empericalCorrection(double angle) {
+    private static double empericalCorrectionForAngle(double angle) {
         return angle + 0.00;
     }
 

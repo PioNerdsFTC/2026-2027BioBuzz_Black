@@ -4,10 +4,11 @@ public class Environment {
 
     public static class Capabilities {
 
-        public static boolean vision = false;
+        public static boolean vision = true;
         public static boolean drivetrain = true;
         public static boolean otos = false;
         public static boolean launchers = true;
+        public static boolean aimbotEnabled = true;
     }
 
     public static class Parameters {

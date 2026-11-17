@@ -84,7 +84,7 @@ public class Vision {
         });
     }
 
-    private AprilTagSingleDetection getSingleTagByID(int id) {
+    public static AprilTagSingleDetection getSingleTagByID(int id) {
         ArrayList<AprilTagDetection> detections =
             aprilTagProcessor.getDetections();
 
@@ -106,7 +106,7 @@ public class Vision {
         return null;
     }
 
-    private AprilTagClusterDetection getClusterTagByName(String name) {
+    public static AprilTagClusterDetection getClusterTagByName(String name) {
         ArrayList<AprilTagDetection> detections =
             aprilTagProcessor.getDetections();
 
@@ -128,7 +128,7 @@ public class Vision {
         return null;
     }
 
-    private static void LogAllViewableTags() {
+    public static void LogAllViewableTags() {
         if (visionPortal != null) {
             Logger.log(
                 "Camera-State: " +
