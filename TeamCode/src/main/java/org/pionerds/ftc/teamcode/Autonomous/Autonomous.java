@@ -9,8 +9,8 @@ import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Action;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Step;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
-import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
-import org.pionerds.ftc.teamcode.Drivetrain.OmniDrivetrain;
+import org.pionerds.ftc.teamcode.Drivetrain._Drivetrain;
+import org.pionerds.ftc.teamcode.Drivetrain._OmniDrivetrain;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
@@ -88,7 +88,7 @@ public class Autonomous {
     private static volatile AutonomousProgram program = AutonomousProgram.EMPTY;
 
     static {
-        OmniDrivetrain.OVERRIDE_DRIVER(puppet);
+        _OmniDrivetrain.OVERRIDE_DRIVER(puppet);
 
         Scheduler.addTask(obj -> {
             if (
@@ -204,10 +204,10 @@ public class Autonomous {
         cacheTarget(step);
 
         if (!isWithinTolerance()) {
-            Drivetrain.stopRotating();
+            _Drivetrain.stopRotating();
             setIntake(step.intake);
 
-            OmniDrivetrain.setFieldVector(
+            _OmniDrivetrain.setFieldVector(
                 calculateSpeedForceX(),
                 calculateSpeedForceY()
             );
@@ -224,12 +224,12 @@ public class Autonomous {
 
             setIntake(false);
 
-            OmniDrivetrain.clearFieldVector();
+            _OmniDrivetrain.clearFieldVector();
 
             puppet.setX(0.00);
             puppet.setY(0.00);
 
-            Drivetrain.rotateToward(rf, r, ROTATION_TOLERANCE);
+            _Drivetrain.rotateToward(rf, r, ROTATION_TOLERANCE);
             return;
         }
 
@@ -363,8 +363,8 @@ public class Autonomous {
         opsResumeAt = 0;
         lastLoggedRotation = null;
 
-        Drivetrain.stopRotating();
-        OmniDrivetrain.clearFieldVector();
+        _Drivetrain.stopRotating();
+        _OmniDrivetrain.clearFieldVector();
 
         setFeed("pollen", false);
         setFeed("nectar", false);
@@ -375,8 +375,8 @@ public class Autonomous {
     }
 
     private static void stop() {
-        Drivetrain.stopRotating();
-        OmniDrivetrain.clearFieldVector();
+        _Drivetrain.stopRotating();
+        _OmniDrivetrain.clearFieldVector();
 
         puppet.setX(0.00);
         puppet.setY(0.00);
@@ -401,7 +401,7 @@ public class Autonomous {
     private static boolean isRotationWithinTolerance() {
         if (rf == null) return true;
         return (
-            Math.abs(Drivetrain.getRotationError(rf, r)) <= ROTATION_TOLERANCE
+            Math.abs(_Drivetrain.getRotationError(rf, r)) <= ROTATION_TOLERANCE
         );
     }
 

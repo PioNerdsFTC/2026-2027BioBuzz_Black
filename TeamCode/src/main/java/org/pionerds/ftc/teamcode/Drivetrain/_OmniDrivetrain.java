@@ -24,7 +24,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
  * decreases {@code Hardware.yaw}. The field-centric joystick angle is rotated into the robot
  * frame by subtracting {@code Hardware.yaw} before mixing.
  */
-public class OmniDrivetrain {
+public class _OmniDrivetrain {
 
     private static Driver driver;
     private static Driver overrideDriver;
@@ -73,12 +73,12 @@ public class OmniDrivetrain {
     }
 
     public static void OVERRIDE_DRIVER(Driver newDriver) {
-        OmniDrivetrain.overrideDriver = newDriver;
-        OmniDrivetrain.driver = newDriver;
+        _OmniDrivetrain.overrideDriver = newDriver;
+        _OmniDrivetrain.driver = newDriver;
     }
 
     public static void clearDriver() {
-        OmniDrivetrain.driver = null;
+        _OmniDrivetrain.driver = null;
     }
 
     public static void setMotors(
@@ -107,7 +107,7 @@ public class OmniDrivetrain {
     }
 
     /**
-     * Called once per scheduler tick by {@link Drivetrain}. Picks whichever control source is
+     * Called once per scheduler tick by {@link _Drivetrain}. Picks whichever control source is
      * active and writes the motors, so there is exactly one writer per tick.
      */
     public static void tick() {

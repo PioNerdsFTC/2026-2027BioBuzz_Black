@@ -4,14 +4,14 @@ import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-public class DeprecatedSwerveDrivetrain {
+public class _SwerveDrivetrain {
 
     private int servoCount = 4;
     private DcMotorEx[] motors;
     private CRServoImplEx[] servos;
     private double[] servoAngles;
 
-    public DeprecatedSwerveDrivetrain() {
+    public _SwerveDrivetrain() {
         motors = new DcMotorEx[servoCount];
         servos = new CRServoImplEx[servoCount];
         servoAngles = new double[servoCount];
