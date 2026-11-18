@@ -7,9 +7,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagClusterDetection;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Vision.Vision;
@@ -108,14 +110,24 @@ public class Launcher {
                     double yf = hiveHeightMeters;
                     double θ = 68 * Math.PI / 180;
 
+                    Logger.log("xi = " + xi);
+                    Logger.log("xf = " + xf);
+                    Logger.log("yi = " + yi);
+                    Logger.log("fi = " + yf);
+                    Logger.log("theta = " + θ);
+
+                    Logger.warn("LAUNCH VELOCITY SET TO: "+Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
+                    Logger.warn("LAUNCH VELOCITY GET IS: "+ launchMotor.getVelocity());
                     launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
                     return true;
                 }
             } else if (launchMotor != null) {
-                launchMotor.setVelocity(20000);
+                Logger.log("LAUNCH VELOCITY SET TO: 20000.00");
+                launchMotor.setVelocity(20000.00);
                 return true;
             }
         } else if (launchMotor != null) {
+            Logger.log("LAUNCH VELOCITY SET TO: 0.00");
             launchMotor.setVelocity(0.00);
             return true;
         }
