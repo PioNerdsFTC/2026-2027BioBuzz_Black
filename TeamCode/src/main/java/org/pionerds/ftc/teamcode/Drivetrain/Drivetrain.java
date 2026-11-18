@@ -2,12 +2,16 @@ package org.pionerds.ftc.teamcode.Drivetrain;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.pionerds.ftc.teamcode.Driver.Driver;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
+
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Drivetrain {
     private static final DcMotorEx[] driveMotors = {null, null, null, null};
@@ -17,6 +21,8 @@ public class Drivetrain {
 
     // Initialization
     static {
+        AtomicReference<UUID> tick = new AtomicReference<>();
+
         Scheduler.addTask("init", obj -> {
             if(!Environment.Capabilities.useFieldCentricDriving) return;
 
@@ -24,6 +30,11 @@ public class Drivetrain {
             driveMotors[1] = Hardware.mapping.getMotor("drive1");
             driveMotors[2] = Hardware.mapping.getMotor("drive2");
             driveMotors[3] = Hardware.mapping.getMotor("drive3");
+
+            driveMotors[0].setDirection(DcMotorSimple.Direction.REVERSE);
+            driveMotors[1].setDirection(DcMotorSimple.Direction.FORWARD);
+            driveMotors[2].setDirection(DcMotorSimple.Direction.FORWARD);
+            driveMotors[3].setDirection(DcMotorSimple.Direction.FORWARD);
 
             for(DcMotorEx motor : driveMotors){
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -35,14 +46,28 @@ public class Drivetrain {
             driver = Globals.has("driver1")
                     ? Globals.depend("driver1") : null;
 
-
-            Scheduler.addTask(obj2 -> {
-                fetchRequestedMovement();
-                tickDrivetrain();
-            });
-
+            tick.set(
+                Scheduler.addTask(obj2 -> {
+                    if (!Scheduler.running || driver == null) return;
+                    fetchRequestedMovement();
+                    tickDrivetrain();
+                })
+            );
 
         });
+
+        Scheduler.addTask("exit", obj -> {
+            if (tick.get() != null) Scheduler.removeTask(tick.get());
+            tick.set(null);
+
+            drivePowers[0] = 0.00;
+            drivePowers[1] = 0.00;
+            drivePowers[2] = 0.00;
+            drivePowers[3] = 0.00;
+
+            updateMotors();
+        });
+
     }
 
     private static double axial = 0.00;
@@ -60,7 +85,7 @@ public class Drivetrain {
 
         double newX = Math.cos(headingAngle);
         double newY = Math.sin(headingAngle);
-        double magnitude = Math.sqrt(Math.pow(newX, 2) + Math.pow(newY, 2));
+        double magnitude = Math.sqrt(Math.pow(driver.leftStickX(), 2) + Math.pow(driver.leftStickY(), 2));
 
         axial = Math.signum(newX) * Math.pow(newX, 2) * magnitude;
         lateral = Math.signum(newY) * Math.pow(newY, 2) * magnitude;
@@ -74,8 +99,8 @@ public class Drivetrain {
 
     public static void tickDrivetrain(){
         drivePowers[0] = (axial - lateral) - yaw;
-        drivePowers[1] = (axial - lateral) + yaw;
-        drivePowers[2] = axial + lateral + yaw;
+        drivePowers[2] = (axial - lateral) + yaw;
+        drivePowers[1] = axial + lateral + yaw;
         drivePowers[3] = (axial + lateral) - yaw;
 
         normalizeMotors();
@@ -94,7 +119,7 @@ public class Drivetrain {
         double max = 0.00;
 
         for(int i = 0; i< driveMotors.length; i++){
-            if(drivePowers[i] > max) max = drivePowers[i];
+            if(Math.abs(drivePowers[i]) > max) max = Math.abs(drivePowers[i]);
         }
 
         if(max > 1.00){

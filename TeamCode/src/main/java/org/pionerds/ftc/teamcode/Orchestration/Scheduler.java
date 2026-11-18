@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import org.pionerds.ftc.teamcode.Autonomous.Autonomous;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.DriverConfigurations;
+import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
+import org.pionerds.ftc.teamcode.Drivetrain.RobotCentricDrivetrain;
 import org.pionerds.ftc.teamcode.Drivetrain._Drivetrain;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
@@ -302,7 +304,8 @@ public class Scheduler {
     static Coordination coordination = new Coordination();
     static DriverConfigurations driverConfigurations =
         new DriverConfigurations();
-    static _Drivetrain drivetrain = new _Drivetrain();
+    static Drivetrain drivetrain = new Drivetrain();
+    static RobotCentricDrivetrain robotCentricDrivetrain = new RobotCentricDrivetrain();
     static Autonomous autonomous = new Autonomous();
     static Intake intake = new Intake();
     static Storage storage = new Storage(); // Yes, don't worry about it :/
