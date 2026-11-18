@@ -103,7 +103,7 @@ public class Launcher {
 
 
                     double xi = launcherOffsetFromCamera[0];
-                    double xf = clusterDetection.ftcPose.x;
+                    double xf = clusterDetection.ftcPose.x * 0.0254;
                     double yi = launcherOffsetFromCamera[1];
                     double yf = hiveHeightMeters;
                     double θ = 68 * Math.PI / 180;
@@ -111,7 +111,7 @@ public class Launcher {
                     launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
                     return true;
                 }
-            } else {
+            } else if (launchMotor != null) {
                 launchMotor.setVelocity(20000);
                 return true;
             }
