@@ -30,6 +30,15 @@ public class Aimbot {
         double numerator = g;
         double denominator = 2 * ( Δx * tanθ - Δy );
 
+
+        if (Δx <= 0 || Math.abs(cosθ) < 1e-9 || denominator <= 0) {
+            throw new IllegalArgumentException(
+                    "Aimbot: target out of range at this angle (Δx=" + Δx +
+                            ", Δy=" + Δy + ", denom=" + denominator + ")"
+            );
+        }
+
+
         double fraction = numerator / denominator;
 
         // ====================
