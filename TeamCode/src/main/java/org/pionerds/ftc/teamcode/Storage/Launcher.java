@@ -103,7 +103,7 @@ public class Launcher {
 
 
                     double xi = launcherOffsetFromCamera[0];
-                    double xf = clusterDetection.ftcPose.x * 0.0254;
+                    double xf = clusterDetection.ftcPose.y * 0.0254;
                     double yi = launcherOffsetFromCamera[1];
                     double yf = hiveHeightMeters;
                     double θ = 68 * Math.PI / 180;
