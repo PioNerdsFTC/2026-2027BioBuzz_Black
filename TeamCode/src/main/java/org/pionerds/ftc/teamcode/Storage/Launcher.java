@@ -115,7 +115,7 @@ public class Launcher {
                 launchMotor.setVelocity(20000);
                 return true;
             }
-        } else {
+        } else if (launchMotor != null) {
             launchMotor.setVelocity(0.00);
             return true;
         }
