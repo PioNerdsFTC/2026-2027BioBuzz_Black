@@ -1,5 +1,7 @@
 package org.pionerds.ftc.teamcode.Autonomous;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -15,13 +17,15 @@ public class AutonomousActions {
     public static Launcher launcherNectar;
     public static Launcher launcherPollen;
 
+    public static ElapsedTime elapsedTime;
+
 
     static{
         Scheduler.addTask("init", object -> {
             launcherNectar = Globals.depend("launcherNectar");
             launcherPollen = Globals.depend("launcherPollen");
 
-
+            elapsedTime = Scheduler.time;
         });
     }
 
@@ -67,13 +71,23 @@ public class AutonomousActions {
         Storage.enablePollenServo();
     }
 
-
     public static void stopLaunchingPollen(){
         // Disable the nectar launcher
         launcherPollen.disableLauncher();
 
         // Disable the feeding servo for the nectar launcher
         Storage.disablePollenServo();
+    }
+
+    private static double delayStart = 0.00;
+    private static double delayTime = 0.00;
+    public static void delay(double milliseconds){
+        delayStart = elapsedTime.milliseconds();
+        delayTime = milliseconds;
+    }
+
+    public static boolean delay(){
+        return (elapsedTime.milliseconds() - delayStart >= delayTime);
     }
 
 

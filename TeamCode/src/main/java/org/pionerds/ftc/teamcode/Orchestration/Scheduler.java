@@ -50,7 +50,7 @@ import org.pionerds.ftc.teamcode.Vision.Vision;
 
 public class Scheduler {
 
-    private static final ElapsedTime time = new ElapsedTime();
+    public static final ElapsedTime time = new ElapsedTime();
     private static int iterateDepth = 0;
     private static int x = 0;
 
