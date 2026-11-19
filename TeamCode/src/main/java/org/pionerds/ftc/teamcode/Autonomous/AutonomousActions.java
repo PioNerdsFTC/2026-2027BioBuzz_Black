@@ -43,5 +43,22 @@ public class AutonomousActions {
         Storage.enableNectarServo();
     }
 
+    public static void launchPollen() {
+        // Enable the nectar launcher
+        launcherPollen.enableLauncher();
+
+        // Enable the feeding servo for the nectar launcher
+        Storage.enablePollenServo();
+    }
+
+
+    public static void launchPollen(double speed){
+        // Enable the nectar launcher
+        launcherPollen.enableLauncher(speed);
+
+        // Enable the feeding servo for the nectar launcher
+        Storage.enablePollenServo();
+    }
+
 
 }
