@@ -9,57 +9,47 @@ import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Action;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Step;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
-import org.pionerds.ftc.teamcode.Drivetrain._OmniDrivetrain;
+import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
+import org.pionerds.ftc.teamcode.Drivetrain.RobotCentricDrivetrain;
 import org.pionerds.ftc.teamcode.Environment;
+import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
-import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
-import org.pionerds.ftc.teamcode.Storage.Intake;
-import org.pionerds.ftc.teamcode.Storage.Storage;
 
+/**
+ * Runs the dashboard's {@link AutonomousProgram}: drives to each waypoint, then runs its actions.
+ * Hardware is driven through {@link AutonomousActions}; this class only sequences and times it.
+ */
 public class Autonomous {
-
-    private static double xf = 0.00;
-    private static double yf = 0.00;
-    private static double x = 0.00;
-    private static double y = 0.00;
-    private static double t = 0.00;
-
-    private static double r = 0.00;
-    private static Double rf = null;
-    private static Double lastLoggedRotation = null;
 
     /** How close the robot has to be to a waypoint's heading, in radians. */
     private static final double ROTATION_TOLERANCE = Math.toRadians(2);
 
-    private static double maxSpeed = 0.50;
-    private static double mediumSpeed = 0.20;
-    private static double slowSpeed = 0.05;
-    private static PuppetDriver puppet = new PuppetDriver();
-
     /** How long the launcher needs to reach speed before the first shot. */
     private static final double LAUNCHER_SPIN_UP_MS = 1000;
-    /** How long a feed servo runs to push one piece into the launcher. */
+    /** How long the feed servo runs per piece launched. */
     private static final double FEED_MS = 400;
 
     /** Hardware commands that actions are broken down into. */
     private static final class Op {
 
         enum Kind {
-            LAUNCHER_NECTAR_ON,
-            LAUNCHER_NECTAR_OFF,
-            LAUNCHER_POLLEN_ON,
-            LAUNCHER_POLLEN_OFF,
+            LAUNCH_ON,
+            LAUNCH_OFF,
             INTAKE_ON,
             INTAKE_OFF,
             DELAY,
         }
 
         final Kind kind;
+        /** LAUNCH_ON / LAUNCH_OFF: "pollen" or "nectar". */
+        final String piece;
+        /** LAUNCH_ON: launcher speed, 0 for the launcher's default. DELAY: milliseconds. */
         final double value;
 
         Op(Kind kind, String piece, double value) {
             this.kind = kind;
+            this.piece = piece;
             this.value = value;
         }
 
@@ -76,19 +66,20 @@ public class Autonomous {
     private static boolean intakeRunning = false;
 
     /**
+     * Field heading at the start pose, as given to {@link Coordination#setStart}. The odometer's
+     * axes are the robot's axes at that moment, so this converts field moves into odometer moves.
+     */
+    private static double startHeading = 0;
+
+    /**
      * Program uploaded from the dashboard. Loaded into the queues when an autonomous run starts.
      * Replaced wholesale (never mutated) since it is written from the web server thread.
      */
     private static volatile AutonomousProgram program = AutonomousProgram.EMPTY;
 
     static {
-        _OmniDrivetrain.OVERRIDE_DRIVER(puppet);
-
         Scheduler.addTask(obj -> {
-            if (
-                Environment.Parameters.operatingEnvironment !=
-                Environment.Parameters.OperatingEnvironment.AUTO
-            ) return;
+            if (!isAuto()) return;
             if (!Scheduler.running) return;
 
             if (!opQueue.isEmpty() || opTimer.milliseconds() < opsResumeAt) {
@@ -106,10 +97,9 @@ public class Autonomous {
         });
 
         Scheduler.addTask("init", obj -> {
-            if (
-                Environment.Parameters.operatingEnvironment !=
-                Environment.Parameters.OperatingEnvironment.AUTO
-            ) return;
+            if (!isAuto()) return;
+
+            startHeading = 0;
 
             double[] start = program.start;
 
@@ -121,6 +111,7 @@ public class Autonomous {
                 }
 
                 Coordination.setStart(start[0], start[1], startRotation);
+                startHeading = startRotation;
 
                 Logger.log(
                     "Autonomous: start heading " + startRotation + " rad"
@@ -129,10 +120,10 @@ public class Autonomous {
         });
 
         Scheduler.addTask("pre-run", obj -> {
-            if (
-                Environment.Parameters.operatingEnvironment !=
-                Environment.Parameters.OperatingEnvironment.AUTO
-            ) return;
+            if (!isAuto()) return;
+
+            Drivetrain.overrideDriver(AutonomousActions.puppetDriver);
+            RobotCentricDrivetrain.overrideDriver(AutonomousActions.puppetDriver);
 
             AutonomousProgram current = program;
 
@@ -153,9 +144,17 @@ public class Autonomous {
         });
 
         Scheduler.addTask("exit", obj -> {
+            if (!isAuto()) return;
+
             clearQueues();
-            stop();
         });
+    }
+
+    private static boolean isAuto() {
+        return (
+            Environment.Parameters.operatingEnvironment ==
+            Environment.Parameters.OperatingEnvironment.AUTO
+        );
     }
 
     /**
@@ -184,48 +183,115 @@ public class Autonomous {
         return program;
     }
 
+    /** Drive toward the step's position, then its heading, then queue its actions. */
     public static void moveToPositionTick(Step step) {
-        cacheTarget(step);
+        PuppetDriver puppet = AutonomousActions.puppetDriver;
 
-        // implement drive.
+        if (!isPositionReached(step)) {
+            setIntake(step.intake);
+            puppet.setRotation(0.00);
+            drivePositionToward(step);
+            return;
+        }
 
-        stepQueue.remove(step);
-        lastLoggedRotation = null;
-        setIntake(false);
-        opQueue.addAll(expand(step.actions));
+        if (!isRotationReached(step)) {
+            setIntake(false);
+            puppet.setX(0.00);
+            puppet.setY(0.00);
+            driveRotationToward(step.rotation);
+            return;
+        }
+
         stop();
+        setIntake(false);
+        stepQueue.remove(0);
+        opQueue.addAll(expand(step.actions));
+
+        Logger.log(
+            "Autonomous: reached (" + step.x + ", " + step.y + "), " +
+                stepQueue.size() + " waypoints left"
+        );
     }
 
     /**
-     * Break actions down into hardware commands. The launcher spins up before the first of a run of
-     * consecutive shots and spins down after the last, so back-to-back shots don't wait on spin-up.
+     * {@link AutonomousActions#driveToPosition} works in Coordination-sized units, but along the
+     * odometer's axes (the robot's axes at the start pose) rather than the field's. Rotate the
+     * field error into that frame; this is the inverse of {@code Coordination.updatePosition},
+     * which is its own inverse.
+     */
+    private static void drivePositionToward(Step step) {
+        double fieldΔx = step.x - Coordination.x;
+        double fieldΔy = step.y - Coordination.y;
+
+        double cos = Math.cos(startHeading);
+        double sin = Math.sin(startHeading);
+
+        double right = -fieldΔx * sin + fieldΔy * cos;
+        double forward = fieldΔx * cos + fieldΔy * sin;
+
+        AutonomousActions.driveToPosition(
+            Hardware.odometer.x / Coordination.UNIT + right,
+            Hardware.odometer.y / Coordination.UNIT + forward,
+            step.tolerance
+        );
+    }
+
+    private static void driveRotationToward(double target) {
+        double offset = Coordination.rotation + Hardware.yaw;
+        double targetYaw = normalizeAngle(offset - target);
+
+        AutonomousActions.driveToRotation(
+            targetYaw + Math.PI,
+            ROTATION_TOLERANCE
+        );
+    }
+
+    private static boolean isPositionReached(Step step) {
+        return (
+            Math.abs(step.x - Coordination.x) <= step.tolerance &&
+            Math.abs(step.y - Coordination.y) <= step.tolerance
+        );
+    }
+
+    private static boolean isRotationReached(Step step) {
+        if (step.rotation == null) return true;
+
+        return (
+            Math.abs(normalizeAngle(step.rotation - Coordination.rotation)) <=
+            ROTATION_TOLERANCE
+        );
+    }
+
+    /**
+     * Break actions down into hardware commands.
      */
     private static List<Op> expand(List<Action> actions) {
         ArrayList<Op> ops = new ArrayList<>();
-        boolean spinning = false;
+        String spinning = null;
 
         for (int i = 0; i < actions.size(); i++) {
             Action action = actions.get(i);
 
             switch (action.type) {
                 case SHOOT:
-                    ops.add(new Op(Op.Kind.LAUNCHER_ON, null, action.value));
+                    ops.add(new Op(Op.Kind.LAUNCH_ON, action.piece, action.value));
 
-                    if (!spinning) ops.add(
+                    if (!action.piece.equals(spinning)) ops.add(
                         new Op(Op.Kind.DELAY, null, LAUNCHER_SPIN_UP_MS)
                     );
 
-                    spinning = true;
+                    spinning = action.piece;
 
                     ops.add(new Op(Op.Kind.DELAY, null, FEED_MS * action.count));
 
-                    boolean nextIsShot =
+                    boolean nextIsSameShot =
                         i + 1 < actions.size() &&
-                        actions.get(i + 1).type == Action.Type.SHOOT;
+                        actions.get(i + 1).type == Action.Type.SHOOT &&
+                        actions.get(i + 1).piece.equals(action.piece);
 
-                    if (!nextIsShot) {
-                        ops.add(new Op(Op.Kind.LAUNCHER_OFF));
-                        spinning = false;
+                    if (!nextIsSameShot) {
+                        ops.add(new Op(Op.Kind.LAUNCH_OFF, action.piece, 0));
+                        spinning = null;
                     }
                     break;
                 case INTAKE:
@@ -249,21 +315,21 @@ public class Autonomous {
             Op op = opQueue.poll();
 
             switch (op.kind) {
-                case LAUNCHER_ON:
+                case LAUNCH_ON:
                     Logger.log(
-                        "Autonomous: launcher on at " + op.value + " deg"
+                        "Autonomous: launching " + op.piece +
+                            (op.value > 0 ? " at " + op.value : " at default speed")
                     );
-                    setLaunchers(true, op.value);
-                    AutonomousActions.launchNectar();
+                    setLauncher(op.piece, true, op.value);
                     break;
-                case LAUNCHER_OFF:
-//                    setLaunchers(false, -1);
+                case LAUNCH_OFF:
+                    setLauncher(op.piece, false, 0);
                     break;
                 case INTAKE_ON:
-//                    setIntake(true);
+                    setIntake(true);
                     break;
                 case INTAKE_OFF:
-//                    setIntake(false);
+                    setIntake(false);
                     break;
                 case DELAY:
                     opsResumeAt = opTimer.milliseconds() + op.value;
@@ -272,32 +338,29 @@ public class Autonomous {
         }
     }
 
+    /** @param speed launcher speed, or 0 for the launcher's default */
+    private static void setLauncher(String piece, boolean on, double speed) {
+        boolean pollen = piece.equals("pollen");
+
+        if ((pollen ? AutonomousActions.launcherPollen : AutonomousActions.launcherNectar) == null) return;
+
+        if (pollen) {
+            if (!on) AutonomousActions.stopLaunchingPollen();
+            else if (speed > 0) AutonomousActions.launchPollen(speed);
+            else AutonomousActions.launchPollen();
+        } else {
+            if (!on) AutonomousActions.stopLaunchingNectar();
+            else if (speed > 0) AutonomousActions.launchNectar(speed);
+            else AutonomousActions.launchNectar();
+        }
+    }
+
     private static void setIntake(boolean on) {
         if (on == intakeRunning) return;
         intakeRunning = on;
 
-        Intake.setPower(on ? 1 : 0);
-        if (on) Storage.enableIntake();
-        else Storage.disableIntake();
-    }
-
-    /** @param angle hood angle in degrees, or negative to leave it unchanged */
-    private static void setLaunchers(boolean on, double angle) {
-        for (String name : new String[] { "Launcher0", "Launcher1" }) {
-            if (!Globals.has(name)) continue;
-
-            // use Actions
-        }
-    }
-
-    private static void setFeed(String piece, boolean on) {
-        if (piece.equals("pollen")) {
-            if (on) Storage.enablePollenServo();
-            else Storage.disablePollenServo();
-        } else {
-            if (on) Storage.enableNectarServo();
-            else Storage.disableNectarServo();
-        }
+        if (on) AutonomousActions.enableIntake();
+        else AutonomousActions.disableIntake();
     }
 
     /** Drop everything queued and leave every mechanism off. */
@@ -305,57 +368,32 @@ public class Autonomous {
         opQueue.clear();
         stepQueue.clear();
         opsResumeAt = 0;
-        lastLoggedRotation = null;
 
-//        _Drivetrain.stopRotating();
-//        _OmniDrivetrain.clearFieldVector();
-
-        setFeed("pollen", false);
-        setFeed("nectar", false);
-        setLaunchers(false, -1);
+        setLauncher("pollen", false, 0);
+        setLauncher("nectar", false, 0);
 
         intakeRunning = true;
         setIntake(false);
+
+        stop();
     }
 
     private static void stop() {
-//        _Drivetrain.stopRotating();
-//        _OmniDrivetrain.clearFieldVector();
+        PuppetDriver puppet = AutonomousActions.puppetDriver;
+        if (puppet == null) return;
 
         puppet.setX(0.00);
         puppet.setY(0.00);
+        puppet.setRotation(0.00);
     }
 
-    private static void cacheTarget(Step target) {
-        x = Coordination.x;
-        y = Coordination.y;
-        r = Coordination.rotation;
+    private static double normalizeAngle(double angle) {
+        double twoPi = 2 * Math.PI;
 
-        xf = target.x;
-        yf = target.y;
-        t = target.tolerance;
-        rf = target.rotation;
-    }
+        angle %= twoPi;
+        if (angle > Math.PI) angle -= twoPi;
+        if (angle < -Math.PI) angle += twoPi;
 
-    private static double getΔ(double p2, double p1) {
-        return Math.abs(p2 - p1);
-    }
-
-    private static double calculateSpeedForceX() {
-        return calculateSpeedForce(xf, x);
-    }
-
-    private static double calculateSpeedForceY() {
-        return calculateSpeedForce(yf, y);
-    }
-
-    private static double calculateSpeedForce(double target, double current) {
-        double Δ = getΔ(target, current);
-        double direction = Math.signum(target - current);
-
-        if (Δ <= t) return 0.00;
-        else if (Δ >= 20) return direction * maxSpeed;
-        else if (Δ >= 10) return direction * mediumSpeed;
-        else return direction * slowSpeed;
+        return angle;
     }
 }

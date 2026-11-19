@@ -93,21 +93,22 @@
 					{/each}
 				</span>
 
-				<label class="flex items-center gap-1 text-text-600" title="Hood angle">
+				<label class="flex items-center gap-1 text-text-600" title="Launcher speed (0 = launcher default)">
 					at
 					<input
 						type="number"
 						min="0"
-						max="180"
-						class="{field} w-14"
-						value={action.angle}
+						max="30000"
+						step="100"
+						class="{field} w-20"
+						value={action.speed}
 						onchange={(event) => {
 							const value = event.currentTarget.valueAsNumber;
 							if (action.type === 'shoot' && Number.isFinite(value)) {
-								action.angle = clamp(value, 0, 180);
+								action.speed = clamp(value, 0, 30000);
 							}
 						}}
-					/>°
+					/>
 				</label>
 			{:else if action.type === 'intake'}
 				<span class="text-text-600">for</span>

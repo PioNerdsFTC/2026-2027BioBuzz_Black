@@ -17,6 +17,8 @@ import java.util.List;
 public class AutonomousProgram {
     public static final double MAX_DURATION_MS = 30000;
     public static final int MAX_SHOTS = 8;
+    /** Upper bound for a SHOOT launcher speed, in the units Launcher.enableLauncher(speed) takes. */
+    public static final double MAX_SHOOT_SPEED = 30000;
 
     public static final AutonomousProgram EMPTY =
             new AutonomousProgram(null, null, Collections.emptyList(), Collections.emptyList());
@@ -40,7 +42,7 @@ public class AutonomousProgram {
         /** SHOOT: how many pieces to launch. */
         public final int count;
 
-        /** SHOOT: hood angle in degrees. INTAKE and WAIT: duration in ms. */
+        /** SHOOT: launcher wheel speed, 0 for the launcher's default. INTAKE and WAIT: duration in ms. */
         public final double value;
 
         Action(Type type, String piece, int count, double value) {
@@ -200,10 +202,10 @@ public class AutonomousProgram {
                     int count = action.getInt("count");
                     if (count < 1 || count > MAX_SHOTS) throw new JSONException(where + " shot count is out of range");
 
-                    double angle = action.getDouble("angle");
-                    if (!(angle >= 0 && angle <= 180)) throw new JSONException(where + " hood angle is out of range");
+                    double speed = action.getDouble("speed");
+                    if (!(speed >= 0 && speed <= MAX_SHOOT_SPEED)) throw new JSONException(where + " launcher speed is out of range");
 
-                    actions.add(new Action(Action.Type.SHOOT, piece, count, angle));
+                    actions.add(new Action(Action.Type.SHOOT, piece, count, speed));
                     break;
                 }
                 case "intake":
@@ -234,7 +236,7 @@ public class AutonomousProgram {
 
             switch (action.type) {
                 case SHOOT:
-                    json.put("type", "shoot").put("piece", action.piece).put("count", action.count).put("angle", action.value);
+                    json.put("type", "shoot").put("piece", action.piece).put("count", action.count).put("speed", action.value);
                     break;
                 case INTAKE:
                     json.put("type", "intake").put("duration", action.value);

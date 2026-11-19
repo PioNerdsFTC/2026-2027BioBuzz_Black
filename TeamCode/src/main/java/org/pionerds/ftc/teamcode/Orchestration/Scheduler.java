@@ -7,11 +7,11 @@ import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.Consumer;
 import org.pionerds.ftc.teamcode.Autonomous.Autonomous;
+import org.pionerds.ftc.teamcode.Autonomous.AutonomousActions;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.DriverConfigurations;
 import org.pionerds.ftc.teamcode.Drivetrain.Drivetrain;
 import org.pionerds.ftc.teamcode.Drivetrain.RobotCentricDrivetrain;
-import org.pionerds.ftc.teamcode.Drivetrain._Drivetrain;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Storage.Intake;
@@ -310,6 +310,8 @@ public class Scheduler {
     static Intake intake = new Intake();
     static Storage storage = new Storage(); // Yes, don't worry about it :/
     static StorageInitializer storageInitializer = new StorageInitializer();
+    // After StorageInitializer: its init depends on the launcher globals registered there
+    static AutonomousActions autonomousActions = new AutonomousActions();
 
     static {
         Scheduler.addTask("pre-init", obj -> {
