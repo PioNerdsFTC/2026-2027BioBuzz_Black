@@ -2,6 +2,7 @@ package org.pionerds.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -19,6 +20,8 @@ public class AutonomousActions {
 
     public static ElapsedTime elapsedTime;
 
+    public static PuppetDriver puppetDriver;
+
 
     static{
         Scheduler.addTask("init", object -> {
@@ -26,6 +29,8 @@ public class AutonomousActions {
             launcherPollen = Globals.depend("launcherPollen");
 
             elapsedTime = Scheduler.time;
+
+            puppetDriver = new PuppetDriver();
         });
     }
 
@@ -88,6 +93,26 @@ public class AutonomousActions {
 
     public static boolean delay(){
         return (elapsedTime.milliseconds() - delayStart >= delayTime);
+    }
+
+
+    public static void enableIntake(){
+        Storage.enableIntake();
+    }
+
+    public static void disableIntake(){
+        Storage.disableIntake();
+    }
+
+
+
+    public static boolean driveToPosition(){
+
+    }
+
+
+    public static boolean driveToRotation(){
+
     }
 
 
