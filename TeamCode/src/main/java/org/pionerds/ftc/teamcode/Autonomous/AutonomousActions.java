@@ -43,6 +43,14 @@ public class AutonomousActions {
         Storage.enableNectarServo();
     }
 
+    public static void stopLaunchingNectar(){
+        // Disable the nectar launcher
+        launcherNectar.disableLauncher();
+
+        // Disable the feeding servo for the nectar launcher
+        Storage.disableNectarServo();
+    }
+
     public static void launchPollen() {
         // Enable the nectar launcher
         launcherPollen.enableLauncher();
@@ -51,13 +59,21 @@ public class AutonomousActions {
         Storage.enablePollenServo();
     }
 
-
     public static void launchPollen(double speed){
         // Enable the nectar launcher
         launcherPollen.enableLauncher(speed);
 
         // Enable the feeding servo for the nectar launcher
         Storage.enablePollenServo();
+    }
+
+
+    public static void stopLaunchingPollen(){
+        // Disable the nectar launcher
+        launcherPollen.disableLauncher();
+
+        // Disable the feeding servo for the nectar launcher
+        Storage.disablePollenServo();
     }
 
 
