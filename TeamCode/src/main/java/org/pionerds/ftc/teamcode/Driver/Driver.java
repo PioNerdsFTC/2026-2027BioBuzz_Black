@@ -95,7 +95,7 @@ public class Driver {
     }
 
     public double leftStickY() {
-        return gamepad.left_stick_y * leftStickMagnitude();
+        return -1 * gamepad.left_stick_y * leftStickMagnitude();
     }
 
     public double rightStickX() {

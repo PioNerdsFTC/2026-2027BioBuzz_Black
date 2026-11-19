@@ -10,18 +10,18 @@ public class StorageInitializer {
         Scheduler.addTask("init", Obj -> {
             if (Environment.Capabilities.launchers) {
                 Globals.add(
-                    "Launcher0",
+                    "launcherNectar",
                     new Launcher(
-                        "Launcher0",
+                        "launcherNectar",
                         "bigLauncher",
                         "bigHoodAdjust",
                         false
                     )
                 );
                 Globals.add(
-                    "Launcher1",
+                    "launcherPollen",
                     new Launcher(
-                        "Launcher1",
+                        "launcherPollen",
                         "littleLauncher",
                         "littleHoodAdjust",
                         true

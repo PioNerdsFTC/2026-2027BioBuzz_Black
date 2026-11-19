@@ -81,16 +81,24 @@ public class Launcher {
     /**
      * @param theta hood angle in degrees, 0-180. Servo positions are 0-1.
      */
-    public void setLaunchAngle(double theta) {
+    /*public void setLaunchAngle(double theta) {
         if (hoodServo != null) hoodServo.setPosition(theta / 180);
-    }
+    }*/
+
+    private double overrideLaunchSpeed = 0.00;
 
     public void enableLauncher() {
         isEnabled = true;
     }
 
+    public void enableLauncher(double speed) {
+        isEnabled = true;
+        overrideLaunchSpeed = speed;
+    }
+
     public void disableLauncher() {
         isEnabled = false;
+        overrideLaunchSpeed = 0.00;
     }
 
     public boolean isEnabled() {
@@ -100,26 +108,34 @@ public class Launcher {
     public boolean updateLaunchVelocity() {
         if (isEnabled && launchMotor != null) {
             if (Environment.Capabilities.vision && Environment.Capabilities.aimbotEnabled) {
-                AprilTagClusterDetection clusterDetection = Vision.getClusterTagByName("BLUE SCORING");
-                if (clusterDetection != null && clusterDetection.ftcPose != null) {
+                if(overrideLaunchSpeed == 0.00){
+                    // Does not use override launch speed
+                    AprilTagClusterDetection clusterDetection = Vision.getClusterTagByName("BLUE SCORING");
+                    if (clusterDetection != null && clusterDetection.ftcPose != null) {
 
 
-                    double xi = launcherOffsetFromCamera[0];
-                    double xf = clusterDetection.ftcPose.y * 0.0254;
-                    double yi = launcherOffsetFromCamera[1];
-                    double yf = hiveHeightMeters;
-                    double θ = 68 * Math.PI / 180;
+                        double xi = launcherOffsetFromCamera[0];
+                        double xf = clusterDetection.ftcPose.y * 0.0254;
+                        double yi = launcherOffsetFromCamera[1];
+                        double yf = hiveHeightMeters;
+                        double θ = 68 * Math.PI / 180;
 
-                    Logger.log("xi = " + xi);
-                    Logger.log("xf = " + xf);
-                    Logger.log("yi = " + yi);
-                    Logger.log("fi = " + yf);
-                    Logger.log("theta = " + θ);
+                        Logger.log("xi = " + xi);
+                        Logger.log("xf = " + xf);
+                        Logger.log("yi = " + yi);
+                        Logger.log("fi = " + yf);
+                        Logger.log("theta = " + θ);
 
-                    Logger.warn("LAUNCH VELOCITY SET TO: "+Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
-                    Logger.warn("LAUNCH VELOCITY GET IS: "+ launchMotor.getVelocity());
-                    launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
-                    return true;
+                        Logger.warn("LAUNCH VELOCITY SET TO: " + Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
+                        Logger.warn("LAUNCH VELOCITY GET IS: " + launchMotor.getVelocity());
+                        launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
+                        return true;
+                    } else {
+                        // Uses override launch speed
+                        Logger.log("LAUNCH VELOCITY SET TO: "+overrideLaunchSpeed);
+                        launchMotor.setVelocity(overrideLaunchSpeed);
+                        return true;
+                    }
                 }
             } else if (launchMotor != null) {
                 Logger.log("LAUNCH VELOCITY SET TO: 20000.00");

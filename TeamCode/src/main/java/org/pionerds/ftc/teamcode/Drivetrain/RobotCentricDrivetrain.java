@@ -26,10 +26,10 @@ public class RobotCentricDrivetrain {
         Scheduler.addTask("init", obj -> {
             if(Environment.Capabilities.useFieldCentricDriving) return;
 
-            driveMotors[0] = Hardware.mapping.getMotor("drive0");
-            driveMotors[1] = Hardware.mapping.getMotor("drive1");
-            driveMotors[2] = Hardware.mapping.getMotor("drive2");
-            driveMotors[3] = Hardware.mapping.getMotor("drive3");
+            driveMotors[0] = Hardware.mapping.getMotor("motor0");
+            driveMotors[1] = Hardware.mapping.getMotor("motor1");
+            driveMotors[2] = Hardware.mapping.getMotor("motor2");
+            driveMotors[3] = Hardware.mapping.getMotor("motor3");
 
             driveMotors[0].setDirection(DcMotorSimple.Direction.REVERSE);
             driveMotors[1].setDirection(DcMotorSimple.Direction.FORWARD);
@@ -57,6 +57,8 @@ public class RobotCentricDrivetrain {
 
 
         Scheduler.addTask("exit", obj -> {
+            if(Environment.Capabilities.useFieldCentricDriving) return;
+
             if (tick.get() != null) Scheduler.removeTask(tick.get());
             tick.set(null);
 
