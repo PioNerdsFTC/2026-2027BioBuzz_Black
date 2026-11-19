@@ -9,14 +9,12 @@ import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Action;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Step;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
-import org.pionerds.ftc.teamcode.Drivetrain._Drivetrain;
 import org.pionerds.ftc.teamcode.Drivetrain._OmniDrivetrain;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Storage.Intake;
-import org.pionerds.ftc.teamcode.Storage.Launcher;
 import org.pionerds.ftc.teamcode.Storage.Storage;
 
 public class Autonomous {
@@ -43,29 +41,25 @@ public class Autonomous {
     private static final double LAUNCHER_SPIN_UP_MS = 1000;
     /** How long a feed servo runs to push one piece into the launcher. */
     private static final double FEED_MS = 400;
-    /** Pause between shots so the launcher recovers speed. */
-    private static final double FEED_GAP_MS = 300;
 
     /** Hardware commands that actions are broken down into. */
     private static final class Op {
 
         enum Kind {
-            LAUNCHER_ON,
-            LAUNCHER_OFF,
-            FEED_ON,
-            FEED_OFF,
+            LAUNCHER_NECTAR_ON,
+            LAUNCHER_NECTAR_OFF,
+            LAUNCHER_POLLEN_ON,
+            LAUNCHER_POLLEN_OFF,
             INTAKE_ON,
             INTAKE_OFF,
             DELAY,
         }
 
         final Kind kind;
-        final String piece;
         final double value;
 
         Op(Kind kind, String piece, double value) {
             this.kind = kind;
-            this.piece = piece;
             this.value = value;
         }
 
@@ -118,13 +112,16 @@ public class Autonomous {
             ) return;
 
             double[] start = program.start;
+
             if (start != null) {
                 Double startRotation = program.startRotation;
+
                 if (startRotation == null) {
                     startRotation = Math.atan2(50 - start[1], 50 - start[0]);
                 }
 
                 Coordination.setStart(start[0], start[1], startRotation);
+
                 Logger.log(
                     "Autonomous: start heading " + startRotation + " rad"
                 );
@@ -140,6 +137,7 @@ public class Autonomous {
             AutonomousProgram current = program;
 
             clearQueues();
+
             opQueue.addAll(expand(current.startActions));
             stepQueue.addAll(current.steps);
 
@@ -151,20 +149,6 @@ public class Autonomous {
                 Logger.warn(
                     "Autonomous: no odometry, waypoints will never be reached"
                 );
-            }
-
-            for (Step step : current.steps) {
-                if (step.rotation != null) {
-                    Logger.log(
-                        "Autonomous: waypoint (" +
-                            step.x +
-                            ", " +
-                            step.y +
-                            ") heading " +
-                            step.rotation +
-                            " rad"
-                    );
-                }
             }
         });
 
@@ -203,35 +187,7 @@ public class Autonomous {
     public static void moveToPositionTick(Step step) {
         cacheTarget(step);
 
-        if (!isWithinTolerance()) {
-            _Drivetrain.stopRotating();
-            setIntake(step.intake);
-
-            _OmniDrivetrain.setFieldVector(
-                calculateSpeedForceX(),
-                calculateSpeedForceY()
-            );
-            return;
-        }
-
-        if (!isRotationWithinTolerance()) {
-            if (rf != null && !rf.equals(lastLoggedRotation)) {
-                Logger.log(
-                    "Autonomous: rotating to " + rf + " rad from " + r + " rad"
-                );
-                lastLoggedRotation = rf;
-            }
-
-            setIntake(false);
-
-            _OmniDrivetrain.clearFieldVector();
-
-            puppet.setX(0.00);
-            puppet.setY(0.00);
-
-            _Drivetrain.rotateToward(rf, r, ROTATION_TOLERANCE);
-            return;
-        }
+        // implement drive.
 
         stepQueue.remove(step);
         lastLoggedRotation = null;
@@ -254,21 +210,19 @@ public class Autonomous {
             switch (action.type) {
                 case SHOOT:
                     ops.add(new Op(Op.Kind.LAUNCHER_ON, null, action.value));
+
                     if (!spinning) ops.add(
                         new Op(Op.Kind.DELAY, null, LAUNCHER_SPIN_UP_MS)
                     );
+
                     spinning = true;
 
-                    for (int shot = 0; shot < action.count; shot++) {
-                        ops.add(new Op(Op.Kind.FEED_ON, action.piece, 0));
-                        ops.add(new Op(Op.Kind.DELAY, null, FEED_MS));
-                        ops.add(new Op(Op.Kind.FEED_OFF, action.piece, 0));
-                        ops.add(new Op(Op.Kind.DELAY, null, FEED_GAP_MS));
-                    }
+                    ops.add(new Op(Op.Kind.DELAY, null, FEED_MS * action.count));
 
                     boolean nextIsShot =
                         i + 1 < actions.size() &&
                         actions.get(i + 1).type == Action.Type.SHOOT;
+
                     if (!nextIsShot) {
                         ops.add(new Op(Op.Kind.LAUNCHER_OFF));
                         spinning = false;
@@ -300,22 +254,16 @@ public class Autonomous {
                         "Autonomous: launcher on at " + op.value + " deg"
                     );
                     setLaunchers(true, op.value);
+                    AutonomousActions.launchNectar();
                     break;
                 case LAUNCHER_OFF:
-                    setLaunchers(false, -1);
-                    break;
-                case FEED_ON:
-                    Logger.log("Autonomous: shooting " + op.piece);
-                    setFeed(op.piece, true);
-                    break;
-                case FEED_OFF:
-                    setFeed(op.piece, false);
+//                    setLaunchers(false, -1);
                     break;
                 case INTAKE_ON:
-                    setIntake(true);
+//                    setIntake(true);
                     break;
                 case INTAKE_OFF:
-                    setIntake(false);
+//                    setIntake(false);
                     break;
                 case DELAY:
                     opsResumeAt = opTimer.milliseconds() + op.value;
@@ -338,11 +286,7 @@ public class Autonomous {
         for (String name : new String[] { "Launcher0", "Launcher1" }) {
             if (!Globals.has(name)) continue;
 
-            Launcher launcher = Globals.depend(name);
-            if (angle >= 0) launcher.setLaunchAngle(angle);
-
-            if (on) launcher.enableLauncher();
-            else launcher.disableLauncher();
+            // use Actions
         }
     }
 
@@ -363,8 +307,8 @@ public class Autonomous {
         opsResumeAt = 0;
         lastLoggedRotation = null;
 
-        _Drivetrain.stopRotating();
-        _OmniDrivetrain.clearFieldVector();
+//        _Drivetrain.stopRotating();
+//        _OmniDrivetrain.clearFieldVector();
 
         setFeed("pollen", false);
         setFeed("nectar", false);
@@ -375,8 +319,8 @@ public class Autonomous {
     }
 
     private static void stop() {
-        _Drivetrain.stopRotating();
-        _OmniDrivetrain.clearFieldVector();
+//        _Drivetrain.stopRotating();
+//        _OmniDrivetrain.clearFieldVector();
 
         puppet.setX(0.00);
         puppet.setY(0.00);
@@ -391,18 +335,6 @@ public class Autonomous {
         yf = target.y;
         t = target.tolerance;
         rf = target.rotation;
-    }
-
-    private static boolean isWithinTolerance() {
-        if (Math.abs(xf - x) <= t && Math.abs(yf - y) <= t) return true;
-        return false;
-    }
-
-    private static boolean isRotationWithinTolerance() {
-        if (rf == null) return true;
-        return (
-            Math.abs(_Drivetrain.getRotationError(rf, r)) <= ROTATION_TOLERANCE
-        );
     }
 
     private static double getΔ(double p2, double p1) {

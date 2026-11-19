@@ -74,7 +74,7 @@ public class AutonomousActions {
         Storage.enablePollenServo();
     }
 
-    public static void launchPollen(double speed){
+    public static void launchPollen(double speed) {
         // Enable the nectar launcher
         launcherPollen.enableLauncher(speed);
 
@@ -82,7 +82,7 @@ public class AutonomousActions {
         Storage.enablePollenServo();
     }
 
-    public static void stopLaunchingPollen(){
+    public static void stopLaunchingPollen() {
         // Disable the nectar launcher
         launcherPollen.disableLauncher();
 
@@ -92,15 +92,14 @@ public class AutonomousActions {
 
     private static double delayStart = 0.00;
     private static double delayTime = 0.00;
-    public static void delay(double milliseconds){
+    public static void delay(double milliseconds) {
         delayStart = elapsedTime.milliseconds();
         delayTime = milliseconds;
     }
 
-    public static boolean delay(){
-        return (elapsedTime.milliseconds() - delayStart >= delayTime);
+    public static boolean delay() {
+        return elapsedTime.milliseconds() - delayStart >= delayTime;
     }
-
 
     public static void enableIntake(){
         Storage.enableIntake();
@@ -142,6 +141,4 @@ public class AutonomousActions {
             return ans;
         }
     }
-
-
 }
