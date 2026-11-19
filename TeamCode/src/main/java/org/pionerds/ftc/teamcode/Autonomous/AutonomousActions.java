@@ -1,9 +1,13 @@
 package org.pionerds.ftc.teamcode.Autonomous;
 
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorSparkFunOTOS;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
 import org.pionerds.ftc.teamcode.Environment;
+import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Hardware.Odometer;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Storage.Launcher;
@@ -21,6 +25,7 @@ public class AutonomousActions {
     public static ElapsedTime elapsedTime;
 
     public static PuppetDriver puppetDriver;
+    public static Odometer odometer;
 
 
     static{
@@ -31,6 +36,7 @@ public class AutonomousActions {
             elapsedTime = Scheduler.time;
 
             puppetDriver = new PuppetDriver();
+            odometer = Hardware.odometer;
         });
     }
 
@@ -105,14 +111,36 @@ public class AutonomousActions {
     }
 
 
+    // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
+    public static boolean driveToPosition(double x, double y, double t){
+        double Δx = odometer.x - x;
+        double Δy = odometer.y - y;
 
-    public static boolean driveToPosition(){
+        puppetDriver.setX(smoothenSimulatedJoystick(Δx));
+        puppetDriver.setY(smoothenSimulatedJoystick(Δy));
 
+        return (Δx <= t && Δy <= t);
     }
 
 
-    public static boolean driveToRotation(){
 
+    // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
+    public static boolean driveToRotation(double θ, double t){
+        double Δθ = (Hardware.yaw + 180) - θ;
+
+        puppetDriver.setRotation(smoothenSimulatedJoystick(Δθ));
+
+        return (Δθ <= t);
+    }
+
+    private static double smoothenSimulatedJoystick(double x){
+        double ans = Math.signum(x) * 0.5 * Math.pow(Math.abs(x), 2);
+
+        if(ans > 1.0){
+            return 1.0;
+        } else {
+            return ans;
+        }
     }
 
 
