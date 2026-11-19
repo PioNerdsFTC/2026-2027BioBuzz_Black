@@ -133,10 +133,9 @@ public class AutonomousActions {
     private static double smoothenSimulatedJoystick(double x){
         double ans = Math.signum(x) * 0.5 * Math.pow(Math.abs(x), 2);
 
-        if(ans > 1.0){
-            return 1.0;
-        } else {
-            return ans;
-        }
+        if (ans > 1.0) return 1.0;
+        if (ans < -1.0) return -1.0;
+
+        return ans;
     }
 }
