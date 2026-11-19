@@ -123,7 +123,7 @@ public class AutonomousActions {
 
     // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
     public static boolean driveToRotation(double θ, double t){
-        double Δθ = (Hardware.yaw * 180 / Math.PI + Math.PI) - θ;
+        double Δθ = (Hardware.yaw + Math.PI) - θ;
 
         puppetDriver.setRotation(smoothenSimulatedJoystick(Δθ));
 
