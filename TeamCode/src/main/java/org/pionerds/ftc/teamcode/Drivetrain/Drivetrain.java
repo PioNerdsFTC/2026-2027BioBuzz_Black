@@ -128,7 +128,7 @@ public class Drivetrain {
 
         if(max > MAX_MOTOR_SPEED){
             for(int i = 0; i< driveMotors.length; i++){
-                drivePowers[i] /= max;
+                drivePowers[i] = drivePowers[i] / max * MAX_MOTOR_SPEED ;
             }
         }
     }
