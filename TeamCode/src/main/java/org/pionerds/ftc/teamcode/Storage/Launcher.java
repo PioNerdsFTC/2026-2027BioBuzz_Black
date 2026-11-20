@@ -120,7 +120,7 @@ public class Launcher {
                         double xf = clusterDetection.ftcPose.y * 0.0254;
                         double yi = launcherOffsetFromCamera[1];
                         double yf = hiveHeightMeters;
-                        double θ =  HOOD_DEGREES * Math.PI / 180.0;
+                        double θ = HOOD_DEGREES * Math.PI / 180.0;
 
                         // Logger.log("xi = " + xi);
                         // Logger.log("xf = " + xf);
@@ -132,12 +132,12 @@ public class Launcher {
                         // Logger.warn("LAUNCH VELOCITY GET IS: " + launchMotor.getVelocity());
                         launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
                         return true;
-                    } else {
-                        // Uses override launch speed
-                        // Logger.log("LAUNCH VELOCITY SET TO: "+overrideLaunchSpeed);
-                        launchMotor.setVelocity(overrideLaunchSpeed);
-                        return true;
                     }
+                } else {
+                    // Uses override launch speed
+                    // Logger.log("LAUNCH VELOCITY SET TO: "+overrideLaunchSpeed);
+                    launchMotor.setVelocity(overrideLaunchSpeed);
+                    return true;
                 }
             } else if (launchMotor != null) {
                 // Logger.log("LAUNCH VELOCITY SET TO: 20000.00");

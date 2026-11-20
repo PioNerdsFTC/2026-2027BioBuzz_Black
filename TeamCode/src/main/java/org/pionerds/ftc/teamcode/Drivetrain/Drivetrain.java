@@ -17,6 +17,8 @@ public class Drivetrain {
     private static final DcMotorEx[] driveMotors = {null, null, null, null};
     private static final double[] drivePowers = {0.00, 0.00, 0.00, 0.00};
 
+    private static final double MAX_MOTOR_SPEED = 0.25;
+
     private static Driver driver;
 
     // Initialization
@@ -124,7 +126,7 @@ public class Drivetrain {
             if(Math.abs(drivePowers[i]) > max) max = Math.abs(drivePowers[i]);
         }
 
-        if(max > 1.00){
+        if(max > MAX_MOTOR_SPEED){
             for(int i = 0; i< driveMotors.length; i++){
                 drivePowers[i] /= max;
             }
