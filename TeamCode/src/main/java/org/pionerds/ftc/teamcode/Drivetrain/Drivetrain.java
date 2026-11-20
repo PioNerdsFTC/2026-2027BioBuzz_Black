@@ -89,9 +89,9 @@ public class Drivetrain {
         double newY = Math.sin(headingAngle);
         double magnitude = Math.sqrt(Math.pow(driver.leftStickX(), 2) + Math.pow(driver.leftStickY(), 2));
 
-        axial = Math.signum(newX) * Math.pow(newX, 2) * magnitude;
-        lateral = Math.signum(newY) * Math.pow(newY, 2) * magnitude;
-        yaw = Math.signum(driver.rightStickX()) * Math.pow(driver.rightStickX(), 2);
+        axial = newX * magnitude;
+        lateral = newY * magnitude;
+        yaw = driver.rightStickX();
 
 
 

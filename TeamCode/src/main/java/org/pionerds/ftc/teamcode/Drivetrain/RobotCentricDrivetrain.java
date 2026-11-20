@@ -78,9 +78,9 @@ public class RobotCentricDrivetrain {
     private static double yaw = 0.00;
 
     private static void fetchRequestedMovement() {
-        axial = Math.signum(driver.leftStickY()) * Math.pow(driver.leftStickY(), 2);
-        lateral = Math.signum(driver.leftStickX()) * Math.pow(driver.leftStickX(), 2);
-        yaw = Math.signum(driver.rightStickX()) * Math.pow(driver.rightStickX(), 2);
+        axial = driver.leftStickY();
+        lateral = driver.leftStickX();
+        yaw = driver.rightStickX();
     }
 
 
