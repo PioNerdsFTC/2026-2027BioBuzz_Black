@@ -4,6 +4,7 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.SensorSparkFunOTOS;
+import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
@@ -112,8 +113,8 @@ public class AutonomousActions {
 
     // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
     public static boolean driveToPosition(double x, double y, double t){
-        double Δx = (odometer.x / 365.75 * 100) - x;
-        double Δy = (odometer.y / 365.75 * 100) - y;
+        double Δx = (Coordination.x / 365.75 * 100) - x;
+        double Δy = (Coordination.y / 365.75 * 100) - y;
 
         puppetDriver.setX(smoothenSimulatedJoystick(Δx));
         puppetDriver.setY(smoothenSimulatedJoystick(Δy));
