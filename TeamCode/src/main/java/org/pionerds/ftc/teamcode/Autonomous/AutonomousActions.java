@@ -115,10 +115,10 @@ public class AutonomousActions {
         double Δx = odometer.x - x;
         double Δy = odometer.y - y;
 
-        puppetDriver.setX(smoothenSimulatedJoystick(Δx));
-        puppetDriver.setY(smoothenSimulatedJoystick(Δy));
+        puppetDriver.setX(smoothenSimulatedJoystick(-Δx));
+        puppetDriver.setY(smoothenSimulatedJoystick(-Δy));
 
-        return (Δx <= t && Δy <= t);
+        return (Math.abs(Δx) <= t && Math.abs(Δy) <= t);
     }
 
 
@@ -129,7 +129,7 @@ public class AutonomousActions {
 
         puppetDriver.setRotation(smoothenSimulatedJoystick(Δθ));
 
-        return (Δθ <= t);
+        return (Math.abs(Δθ) <= t);
     }
 
     private static double smoothenSimulatedJoystick(double x){
