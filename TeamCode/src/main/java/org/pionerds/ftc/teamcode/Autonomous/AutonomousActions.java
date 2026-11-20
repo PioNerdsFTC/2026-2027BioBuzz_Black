@@ -4,6 +4,7 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.SensorSparkFunOTOS;
+import org.pionerds.ftc.teamcode.Coordination.Coordination;
 import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
@@ -112,8 +113,8 @@ public class AutonomousActions {
 
     // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
     public static boolean driveToPosition(double x, double y, double t){
-        double Δx = odometer.x - x;
-        double Δy = odometer.y - y;
+        double Δx = (Coordination.x / 365.75 * 100) - x;
+        double Δy = (Coordination.y / 365.75 * 100) - y;
 
         puppetDriver.setX(smoothenSimulatedJoystick(-Δx));
         puppetDriver.setY(smoothenSimulatedJoystick(-Δy));
@@ -121,11 +122,9 @@ public class AutonomousActions {
         return (Math.abs(Δx) <= t && Math.abs(Δy) <= t);
     }
 
-
-
     // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
     public static boolean driveToRotation(double θ, double t){
-        double Δθ = (Hardware.yaw + 180) - θ;
+        double Δθ = (Hardware.yaw + Math.PI) - θ;
 
         puppetDriver.setRotation(smoothenSimulatedJoystick(Δθ));
 
@@ -135,10 +134,9 @@ public class AutonomousActions {
     private static double smoothenSimulatedJoystick(double x){
         double ans = Math.signum(x) * 0.5 * Math.pow(Math.abs(x), 2);
 
-        if(ans > 1.0){
-            return 1.0;
-        } else {
-            return ans;
-        }
+        if (ans > 1.0) return 1.0;
+        if (ans < -1.0) return -1.0;
+
+        return ans;
     }
 }

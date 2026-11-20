@@ -3,7 +3,6 @@ package org.pionerds.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.pionerds.ftc.teamcode.Autonomous.AutonomousActions;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -34,9 +33,6 @@ public class Auto extends LinearOpMode {
 
         while (opModeIsActive() && Scheduler.continueRunning) {
             Scheduler.tickHook();
-
-            AutonomousActions.driveToRotation(100,10);
-
         }
 
         Logger.log("--- Exiting ---");

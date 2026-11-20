@@ -27,9 +27,6 @@ public final class Hardware {
     public static double roll = 0;
 
     static {
-        // Registered here rather than inside "init" so the sensor tick is always ahead of every
-        // consumer (Coordination and the drivetrain) in the scheduler's task list. tick() itself
-        // bails out until the scheduler is running, so it is safe before init.
         Scheduler.addTask((obj) -> Hardware.tick());
 
         Scheduler.addTask("init", (o) -> {

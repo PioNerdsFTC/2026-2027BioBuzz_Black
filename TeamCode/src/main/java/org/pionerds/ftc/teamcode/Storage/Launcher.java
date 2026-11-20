@@ -24,6 +24,8 @@ public class Launcher {
 
     private boolean isEnabled = false;
 
+    private static double HOOD_DEGREES = 68.0;
+
     private double[] launcherOffsetFromCamera = new double[2];
     private double hiveHeightMeters = 1.4605;
 
@@ -118,7 +120,7 @@ public class Launcher {
                         double xf = clusterDetection.ftcPose.y * 0.0254;
                         double yi = launcherOffsetFromCamera[1];
                         double yf = hiveHeightMeters;
-                        double θ = 68 * Math.PI / 180;
+                        double θ =  HOOD_DEGREES * Math.PI / 180.0;
 
                         Logger.log("xi = " + xi);
                         Logger.log("xf = " + xf);

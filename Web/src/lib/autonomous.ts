@@ -5,7 +5,7 @@ import type { IconName } from '$lib/components/Icon.svelte';
  * Mirrors `AutonomousProgram.java`.
  */
 export type Action =
-	| { type: 'shoot'; piece: Piece; count: number; angle: number }
+	| { type: 'shoot'; piece: Piece; count: number; speed: number }
 	| { type: 'intake'; duration: number }
 	| { type: 'wait'; duration: number };
 
@@ -110,7 +110,7 @@ export function defaultAction(type: ActionType, previous?: Action): Action {
 			// Repeat the last shot's settings, since consecutive shots usually match
 			return previous?.type === 'shoot'
 				? { ...previous }
-				: { type, piece: 'pollen', count: 1, angle: 45 };
+				: { type, piece: 'pollen', count: 1, speed: 0 };
 		case 'intake':
 			return { type, duration: 1000 };
 		case 'wait':
@@ -129,7 +129,7 @@ export function emptyProgram(alliance: Alliance = 'red'): Program {
 export function describeAction(action: Action): string {
 	switch (action.type) {
 		case 'shoot':
-			return `Shoot ${action.count} ${action.piece} @ ${action.angle}°`;
+			return `Shoot ${action.count} ${action.piece} @ ${action.speed > 0 ? action.speed : 'default speed'}`;
 		case 'intake':
 			return `Intake ${action.duration / 1000}s`;
 		case 'wait':
@@ -150,7 +150,7 @@ function isAction(value: unknown): value is Action {
 			return (
 				(action.piece === 'pollen' || action.piece === 'nectar') &&
 				isNumber(action.count) &&
-				isNumber(action.angle)
+				isNumber(action.speed)
 			);
 		case 'intake':
 		case 'wait':
@@ -161,7 +161,17 @@ function isAction(value: unknown): value is Action {
 }
 
 function parseActions(value: unknown): Action[] {
-	return Array.isArray(value) ? value.filter(isAction) : [];
+	if (!Array.isArray(value)) return [];
+
+	// Programs saved before shots took a launcher speed carry a hood `angle` instead; fall back
+	// to the launcher's default speed rather than dropping the shot.
+	return value
+		.map((action) =>
+			action?.type === 'shoot' && !isNumber(action.speed) && isNumber(action.angle)
+				? { type: 'shoot', piece: action.piece, count: action.count, speed: 0 }
+				: action
+		)
+		.filter(isAction);
 }
 
 function parseWaypoint(value: unknown): Waypoint | null {

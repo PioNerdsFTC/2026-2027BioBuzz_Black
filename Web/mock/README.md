@@ -53,7 +53,7 @@ Coordination units, 0–100):
 ```json
 {
 	"start": { "x": 6.25, "y": 91.5, "rotation": 0 },
-	"startActions": [{ "type": "shoot", "piece": "pollen", "count": 1, "angle": 45 }],
+	"startActions": [{ "type": "shoot", "piece": "pollen", "count": 1, "speed": 0 }],
 	"waypoints": [
 		{
 			"x": 30,
@@ -64,15 +64,15 @@ Coordination units, 0–100):
 			"actions": [
 				{ "type": "intake", "duration": 1000 },
 				{ "type": "wait", "duration": 1000 },
-				{ "type": "shoot", "piece": "pollen", "count": 3, "angle": 45 }
+				{ "type": "shoot", "piece": "pollen", "count": 3, "speed": 18000 }
 			]
 		}
 	]
 }
 ```
 
-Action types: `shoot` (`piece`: `pollen`, `nectar`; `count` 1–8; hood
-`angle` 0–180°), `intake` (`duration` ms) and `wait` (`duration` ms, at most
+Action types: `shoot` (`piece`: `pollen`, `nectar`; `count` 1–8;
+launcher `speed` 0–30000, 0 for the launcher's default), `intake` (`duration` ms) and `wait` (`duration` ms, at most
 30000). The start and each waypoint may also have an optional `rotation`
 heading in radians; omit it to keep the current heading.
 

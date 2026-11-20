@@ -467,7 +467,7 @@ function programError(body: unknown): string | null {
 				(action?.type === 'shoot' &&
 					['pollen', 'nectar'].includes(action.piece as string) &&
 					inRange(action.count, 1, 8) &&
-					inRange(action.angle, 0, 180)) ||
+					inRange(action.speed, 0, 30000)) ||
 				(action?.type === 'intake' && inRange(action.duration, 0, 30000)) ||
 				(action?.type === 'wait' && inRange(action.duration, 0, 30000));
 
