@@ -41,7 +41,7 @@ public final class Hardware {
 
                 if (Environment.Capabilities.otos) {
                     try {
-                        otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+                        otos = hardwareMap.get(SparkFunOTOS.class, "otos");
                         Hardware.odometer.init(otos);
                     } catch (Exception e) {
                         // A missing OTOS must not take the rest of init (gyro, bulk caching) down

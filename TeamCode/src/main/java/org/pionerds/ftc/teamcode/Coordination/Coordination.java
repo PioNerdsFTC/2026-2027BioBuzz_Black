@@ -2,6 +2,7 @@ package org.pionerds.ftc.teamcode.Coordination;
 
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 /**
@@ -65,7 +66,7 @@ public class Coordination {
                 rotationOffset - Hardware.yaw
             );
 
-            if (Environment.Capabilities.otos) updatePosition();
+            if (Environment.Capabilities.otos) {updatePosition(); Logger.log("Position X: "+x+"\nPosition Y: "+y);}
         });
 
         Scheduler.addTask("exit", obj -> {
