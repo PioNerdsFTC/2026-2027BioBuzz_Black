@@ -43,6 +43,7 @@ public class AutonomousActions {
 
 
     public static void launchNectar() {
+        if(!Environment.Capabilities.launchers) return;
         // Enable the nectar launcher
         launcherNectar.enableLauncher();
 
@@ -52,6 +53,7 @@ public class AutonomousActions {
 
 
     public static void launchNectar(double speed){
+        if(!Environment.Capabilities.launchers) return;
         // Enable the nectar launcher
         launcherNectar.enableLauncher(speed);
 
@@ -60,6 +62,7 @@ public class AutonomousActions {
     }
 
     public static void stopLaunchingNectar(){
+        if(!Environment.Capabilities.launchers) return;
         // Disable the nectar launcher
         launcherNectar.disableLauncher();
 
@@ -68,6 +71,7 @@ public class AutonomousActions {
     }
 
     public static void launchPollen() {
+        if(!Environment.Capabilities.launchers) return;
         // Enable the nectar launcher
         launcherPollen.enableLauncher();
 
@@ -76,6 +80,7 @@ public class AutonomousActions {
     }
 
     public static void launchPollen(double speed) {
+        if(!Environment.Capabilities.launchers) return;
         // Enable the nectar launcher
         launcherPollen.enableLauncher(speed);
 
@@ -84,6 +89,7 @@ public class AutonomousActions {
     }
 
     public static void stopLaunchingPollen() {
+        if(!Environment.Capabilities.launchers) return;
         // Disable the nectar launcher
         launcherPollen.disableLauncher();
 
@@ -116,27 +122,18 @@ public class AutonomousActions {
         double Δx = (Coordination.x) - x;
         double Δy = (Coordination.y) - y;
 
-        puppetDriver.setX(smoothenSimulatedJoystick(-Δx));
-        puppetDriver.setY(smoothenSimulatedJoystick(-Δy));
+        puppetDriver.setX(-Δx);
+        puppetDriver.setY(-Δy);
 
         return (Math.abs(Δx) <= t && Math.abs(Δy) <= t);
     }
 
     // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
-    public static boolean driveToRotation(double θ, double t){
+    public static boolean driveToRotation(double θ, double t) {
         double Δθ = (Hardware.yaw + Math.PI) - θ;
 
-        puppetDriver.setRotation(smoothenSimulatedJoystick(Δθ));
+        puppetDriver.setRotation(Δθ);
 
         return (Math.abs(Δθ) <= t);
-    }
-
-    private static double smoothenSimulatedJoystick(double x){
-        double ans = Math.signum(x) * 0.5 * Math.pow(Math.abs(x), 2);
-
-        if (ans > 1.0) return 1.0;
-        if (ans < -1.0) return -1.0;
-
-        return ans;
     }
 }
