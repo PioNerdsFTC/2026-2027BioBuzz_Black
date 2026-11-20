@@ -66,7 +66,10 @@ public class Coordination {
                 rotationOffset - Hardware.yaw
             );
 
-            if (Environment.Capabilities.otos) {updatePosition(); Logger.log("Position X: "+x+"\nPosition Y: "+y);}
+            if (Environment.Capabilities.otos) {
+                updatePosition();
+                Logger.log("X: " + x + ", Y: " + y + ", R: " +  rotation);
+            }
         });
 
         Scheduler.addTask("exit", obj -> {

@@ -17,7 +17,7 @@ public class Drivetrain {
     private static final DcMotorEx[] driveMotors = {null, null, null, null};
     private static final double[] drivePowers = {0.00, 0.00, 0.00, 0.00};
 
-    private static final double MAX_MOTOR_SPEED = 0.25;
+    private static final double MAX_MOTOR_SPEED = 1;
 
     private static Driver driver;
 
