@@ -90,11 +90,11 @@ public class Driver {
     }
 
     public double leftStickX() {
-        return gamepad.left_stick_x;
+        return Math.signum(gamepad.left_stick_x) * Math.pow(gamepad.left_stick_x,2);
     }
 
     public double leftStickY() {
-        return -1 * gamepad.left_stick_y;
+        return -1 * Math.signum(gamepad.left_stick_y) * Math.pow(gamepad.left_stick_y,2);
     }
 
     public double rightStickX() {
