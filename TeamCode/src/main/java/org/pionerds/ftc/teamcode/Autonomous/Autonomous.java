@@ -220,28 +220,16 @@ public class Autonomous {
      * which is its own inverse.
      */
     private static void drivePositionToward(Step step) {
-        double fieldΔx = step.x - Coordination.x;
-        double fieldΔy = step.y - Coordination.y;
-
-        double cos = Math.cos(startHeading);
-        double sin = Math.sin(startHeading);
-
-        double right = -fieldΔx * sin + fieldΔy * cos;
-        double forward = fieldΔx * cos + fieldΔy * sin;
-
         AutonomousActions.driveToPosition(
-            Hardware.odometer.x / Coordination.UNIT + right,
-            Hardware.odometer.y / Coordination.UNIT + forward,
+            Coordination.x / Coordination.UNIT,
+            Coordination.y / Coordination.UNIT,
             step.tolerance
         );
     }
 
     private static void driveRotationToward(double target) {
-        double offset = Coordination.rotation + Hardware.yaw;
-        double targetYaw = normalizeAngle(offset - target);
-
         AutonomousActions.driveToRotation(
-            targetYaw + Math.PI,
+            target,
             ROTATION_TOLERANCE
         );
     }
