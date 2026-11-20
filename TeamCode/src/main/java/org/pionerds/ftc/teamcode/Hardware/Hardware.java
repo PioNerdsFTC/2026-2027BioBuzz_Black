@@ -53,6 +53,15 @@ public final class Hardware {
 
                 Hardware.gyro.init();
 
+                // Drop the previous run's cached angles: the gyro was just reset, and the
+                // continuous tick has not refreshed these fields yet.
+                Hardware.yaw = 0;
+                Hardware.pitch = 0;
+                Hardware.roll = 0;
+
+                // Same for the odometer, whose tracking was reset above
+                Hardware.odometer.reset();
+
                 List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
                 for (LynxModule hub : allHubs) {
@@ -71,10 +80,19 @@ public final class Hardware {
 
         double[] angles = Hardware.gyro.getAngles();
 
-        Hardware.yaw = angles[0];
+        // The IMU reports yaw in [-pi, pi]; expose it as [0, 2pi) so the wrap happens
+        // in one place and every consumer sees the same range.
+        Hardware.yaw = normalizeYaw(angles[0]);
         Hardware.pitch = angles[1];
         Hardware.roll = angles[2];
 
         if (Environment.Capabilities.otos && otos != null) odometer.tick();
+    }
+
+    private static double normalizeYaw(double radians) {
+        double twoPi = 2 * Math.PI;
+        double angle = radians % twoPi;
+
+        return angle < 0 ? angle + twoPi : angle;
     }
 }

@@ -19,10 +19,12 @@ public class Coordination {
 
     private static double startX = -1;
     private static double startY = -1;
-    /** Field heading at the start pose; the odometer's axes are the robot's axes at that moment. */
-    private static double startHeading = 0;
 
-    /** Maps the gyro's reset heading to the heading programmed for the start of the run. */
+    /**
+     * Field heading the robot had when the gyro and odometer were reset. The odometer's axes are
+     * fixed to the robot's axes at that moment, so this is what turns an odometer displacement
+     * into a field displacement. It is also the offset that maps the gyro's zero onto the field.
+     */
     private static double rotationOffset = 0;
 
     /**
@@ -49,7 +51,6 @@ public class Coordination {
 
             Coordination.rotation = 0;
             rotationOffset = 0;
-            startHeading = 0;
             odomXOrigin = Hardware.odometer.x;
             odomYOrigin = Hardware.odometer.y;
 
@@ -74,7 +75,6 @@ public class Coordination {
             Coordination.y = -1;
             Coordination.rotation = -1;
             rotationOffset = 0;
-            startHeading = 0;
             odomXOrigin = 0;
             odomYOrigin = 0;
         });
@@ -83,23 +83,27 @@ public class Coordination {
     /**
      * Converts the odometer's displacement into field coordinates.
      *
-     * <p>The OTOS resets to the robot's pose, so its readings are in centimetres along the robot's
-     * axes at the start: +x is the robot's right, +y is its front. Rotating that by the start
-     * heading gives a field displacement, which is added to the programmed start position.
+     * <p>The OTOS resets its tracking frame when the gyro resets, so its readings are in
+     * centimetres along the robot's axes at that moment: +x is the robot's right, +y is its
+     * front. The defining field heading of those axes is {@link #rotationOffset}, not the start
+     * heading: the robot may be rotated between init and the start pose. Rotating the
+     * displacement by that heading gives a field displacement, which is added to the start
+     * position.
      */
     private static void updatePosition() {
         double right = (Hardware.odometer.x - odomXOrigin) / UNIT;
         double forward = (Hardware.odometer.y - odomYOrigin) / UNIT;
 
-        double cos = Math.cos(startHeading);
-        double sin = Math.sin(startHeading);
+        double cos = Math.cos(rotationOffset);
+        double sin = Math.sin(rotationOffset);
 
         Coordination.x = startX - right * sin + forward * cos;
         Coordination.y = startY + right * cos + forward * sin;
     }
 
     /**
-     * Override the starting position, e.g. with one programmed from the dashboard. Call after init.
+     * Override the starting position, e.g. with one programmed from the dashboard. Call at the
+     * start pose, after the robot has been placed.
      */
     public static void setStart(double x, double y) {
         setStart(x, y, null);
@@ -107,18 +111,22 @@ public class Coordination {
 
     /**
      * Override the starting position and heading, e.g. with one programmed from the dashboard.
-     * The heading is in radians and is mapped onto the gyro's reset heading.
+     * The heading is in radians and is mapped onto the gyro's reset heading. Call at the start
+     * pose, not during init: this also captures the odometry origin.
      */
     public static void setStart(double x, double y, Double rotation) {
         Coordination.x = x;
         Coordination.y = y;
 
-        rotationOffset = rotation == null ? 0 : rotation + Hardware.yaw;
+        // The gyro zeroed when the odometer reset, so the field heading at that moment is the
+        // start heading plus however far the robot has turned since.
+        rotationOffset = normalizeAngle(
+            rotation == null ? Hardware.yaw : rotation + Hardware.yaw
+        );
         Coordination.rotation = rotation == null ? 0 : rotation;
 
         startX = x;
         startY = y;
-        startHeading = rotation == null ? 0 : rotation;
 
         odomXOrigin = Hardware.odometer.x;
         odomYOrigin = Hardware.odometer.y;
@@ -127,7 +135,8 @@ public class Coordination {
     /**
      * Converts a field-frame vector (e.g. waypoint minus current position) into the robot's own
      * axes using the current heading. Inverse of the rotation in {@link #updatePosition}, but with
-     * the live heading rather than the start heading, since the robot may have turned since.
+     * the live heading rather than the odometer-reset heading, since the robot may have turned
+     * since.
      *
      * @return {forward, right} in the same units as the input
      */

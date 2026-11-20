@@ -23,6 +23,13 @@ public class Odometer {
         otos.resetTracking();
     }
 
+    /** Clears the cached pose so a new run cannot read the previous run's values before the next tick. */
+    public void reset() {
+        x = 0;
+        y = 0;
+        h = 0;
+    }
+
     public void tick() {
         SparkFunOTOS.Pose2D pos = otos.getPosition();
 

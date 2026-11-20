@@ -66,12 +66,6 @@ public class Autonomous {
     private static boolean intakeRunning = false;
 
     /**
-     * Field heading at the start pose, as given to {@link Coordination#setStart}. The odometer's
-     * axes are the robot's axes at that moment, so this converts field moves into odometer moves.
-     */
-    private static double startHeading = 0;
-
-    /**
      * Program uploaded from the dashboard. Loaded into the queues when an autonomous run starts.
      * Replaced wholesale (never mutated) since it is written from the web server thread.
      */
@@ -96,36 +90,31 @@ public class Autonomous {
             moveToPositionTick(stepQueue.get(0));
         });
 
-        Scheduler.addTask("init", obj -> {
+        Scheduler.addTask("pre-run", obj -> {
             if (!isAuto()) return;
 
-            startHeading = 0;
+            AutonomousProgram current = program;
 
-            double[] start = program.start;
+            double[] start = current.start;
 
             if (start != null) {
-                Double startRotation = program.startRotation;
+                Double startRotation = current.startRotation;
 
                 if (startRotation == null) {
                     startRotation = Math.atan2(50 - start[1], 50 - start[0]);
                 }
 
+                // Capture the pose here, not in init: the robot is in its final starting
+                // position now, and the sensors have ticked since they were reset.
                 Coordination.setStart(start[0], start[1], startRotation);
-                startHeading = startRotation;
 
                 Logger.log(
                     "Autonomous: start heading " + startRotation + " rad"
                 );
             }
-        });
-
-        Scheduler.addTask("pre-run", obj -> {
-            if (!isAuto()) return;
 
             Drivetrain.overrideDriver(AutonomousActions.puppetDriver);
             RobotCentricDrivetrain.overrideDriver(AutonomousActions.puppetDriver);
-
-            AutonomousProgram current = program;
 
             clearQueues();
 
