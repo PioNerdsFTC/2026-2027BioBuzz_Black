@@ -113,8 +113,8 @@ public class AutonomousActions {
 
     // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
     public static boolean driveToPosition(double x, double y, double t){
-        double Δx = (Coordination.x / 365.75 * 100) - x;
-        double Δy = (Coordination.y / 365.75 * 100) - y;
+        double Δx = (Coordination.x) - x;
+        double Δy = (Coordination.y) - y;
 
         puppetDriver.setX(smoothenSimulatedJoystick(-Δx));
         puppetDriver.setY(smoothenSimulatedJoystick(-Δy));
