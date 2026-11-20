@@ -123,6 +123,29 @@ public class Coordination {
         odomYOrigin = Hardware.odometer.y;
     }
 
+    /**
+     * Converts a field-frame vector (e.g. waypoint minus current position) into the robot's own
+     * axes using the current heading. Inverse of the rotation in {@link #updatePosition}, but with
+     * the live heading rather than the start heading, since the robot may have turned since.
+     *
+     * @return {forward, right} in the same units as the input
+     */
+    public static double[] fieldToRobot(double dx, double dy) {
+        double cos = Math.cos(rotation);
+        double sin = Math.sin(rotation);
+
+        return new double[] { dx * cos + dy * sin, -dx * sin + dy * cos };
+    }
+
+    /**
+     * Signed shortest turn from the current heading to {@code target}, in (-π, π]. Measured in
+     * the same frame as {@link #rotation}: positive means the field heading must increase, which
+     * is a clockwise turn since {@code rotation = rotationOffset - yaw}.
+     */
+    public static double headingError(double target) {
+        return normalizeAngle(target - rotation);
+    }
+
     private static double normalizeAngle(double angle) {
         double twoPi = 2 * Math.PI;
 

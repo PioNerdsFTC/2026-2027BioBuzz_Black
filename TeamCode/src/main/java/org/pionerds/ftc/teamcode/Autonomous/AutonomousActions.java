@@ -117,20 +117,31 @@ public class AutonomousActions {
     }
 
 
-    // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
     public static boolean driveToPosition(double x, double y, double t){
-        double Δx = (Coordination.x) - x;
-        double Δy = (Coordination.y) - y;
+        double Δx = x - Coordination.x;
+        double Δy = y - Coordination.y;
 
-        puppetDriver.setX(-Δx);
-        puppetDriver.setY(-Δy);
+        double[] robot = Coordination.fieldToRobot(Δx, Δy);
+        double forward = robot[0];
+        double right = robot[1];
+
+        if (Environment.Capabilities.useFieldCentricDriving) {
+            double left = -right;
+            double cos = Math.cos(Hardware.yaw);
+            double sin = Math.sin(Hardware.yaw);
+
+            puppetDriver.setX(forward * cos - left * sin);
+            puppetDriver.setY(forward * sin + left * cos);
+        } else {
+            puppetDriver.setX(right);
+            puppetDriver.setY(forward);
+        }
 
         return (Math.abs(Δx) <= t && Math.abs(Δy) <= t);
     }
 
-    // Returns true when the robot is within the accepted tolerance amount of ticks laterally and axially
     public static boolean driveToRotation(double θ, double t) {
-        double Δθ = Hardware.yaw - θ;
+        double Δθ = Coordination.headingError(θ);
 
         puppetDriver.setRotation(Δθ);
 

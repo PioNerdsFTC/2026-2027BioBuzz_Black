@@ -214,10 +214,8 @@ public class Autonomous {
     }
 
     /**
-     * {@link AutonomousActions#driveToPosition} works in Coordination-sized units, but along the
-     * odometer's axes (the robot's axes at the start pose) rather than the field's. Rotate the
-     * field error into that frame; this is the inverse of {@code Coordination.updatePosition},
-     * which is its own inverse.
+     * Waypoints are in field units; {@link AutonomousActions#driveToPosition} converts the field
+     * error into the drivetrain's frame via {@link Coordination#fieldToRobot}.
      */
     private static void drivePositionToward(Step step) {
         AutonomousActions.driveToPosition(
