@@ -221,8 +221,8 @@ public class Autonomous {
      */
     private static void drivePositionToward(Step step) {
         AutonomousActions.driveToPosition(
-            Coordination.x / Coordination.UNIT,
-            Coordination.y / Coordination.UNIT,
+            step.x / Coordination.UNIT,
+            step.y / Coordination.UNIT,
             step.tolerance
         );
     }
