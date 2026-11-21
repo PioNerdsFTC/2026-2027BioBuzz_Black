@@ -24,7 +24,7 @@ public class RobotCentricDrivetrain {
         AtomicReference<UUID> tick = new AtomicReference<>();
 
         Scheduler.addTask("init", obj -> {
-            if(!Environment.Capabilities.useFieldCentricDriving || (Environment.Parameters.emergencyAuto && Environment.Parameters.operatingEnvironment.equals(Environment.Parameters.OperatingEnvironment.AUTO))) {
+            if (!Environment.Capabilities.useFieldCentricDriving || (Environment.Parameters.emergencyAuto && Environment.Parameters.operatingEnvironment.equals(Environment.Parameters.OperatingEnvironment.AUTO))) {
 
                 driveMotors[0] = Hardware.mapping.getMotor("motor0");
                 driveMotors[1] = Hardware.mapping.getMotor("motor1");
@@ -47,11 +47,11 @@ public class RobotCentricDrivetrain {
                         ? Globals.depend("driver1") : null;
 
 
-                Scheduler.addTask(obj2 -> {
+                tick.set(Scheduler.addTask(obj2 -> {
                     if (!Scheduler.running || driver == null) return;
                     fetchRequestedMovement();
                     tickDrivetrain();
-                });
+                }));
             } else {
                 return;
             }

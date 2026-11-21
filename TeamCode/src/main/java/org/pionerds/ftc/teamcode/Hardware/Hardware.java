@@ -36,7 +36,13 @@ public final class Hardware {
                 Hardware.mapping.init(hardwareMap);
 
                 if (Environment.Capabilities.vision) {
-                    webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
+                    try {
+                        webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
+                    } catch(Exception e) {
+                        webcam = null;
+                        Environment.Capabilities.vision = false;
+                        Logger.warn("Webcam is not available, Vision will be disabled");
+                    }
                 }
 
                 if (Environment.Capabilities.otos) {
@@ -44,7 +50,6 @@ public final class Hardware {
                         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
                         Hardware.odometer.init(otos);
                     } catch (Exception e) {
-                        // A missing OTOS must not take the rest of init (gyro, bulk caching) down
                         otos = null;
                         Environment.Capabilities.otos = false;
                         Logger.warn("OTOS not available, odometry disabled");

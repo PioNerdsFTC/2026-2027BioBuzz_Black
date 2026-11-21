@@ -7,12 +7,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagClusterDetection;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Logging.Logger;
-import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Vision.Vision;
 
@@ -107,48 +105,57 @@ public class Launcher {
         return isEnabled;
     }
 
-    public boolean updateLaunchVelocity() {
-        if (isEnabled && launchMotor != null) {
-            if (Environment.Capabilities.vision && Environment.Capabilities.aimbotEnabled) {
-                if(overrideLaunchSpeed == 0.00){
-                    // Does not use override launch speed
-                    AprilTagClusterDetection clusterDetection = Vision.getClusterTagByName("BLUE SCORING");
-                    if (clusterDetection != null && clusterDetection.ftcPose != null) {
+    public void updateLaunchVelocity() {
+        if (launchMotor == null) {
+            return;
+        }
 
-
-                        double xi = launcherOffsetFromCamera[0];
-                        double xf = clusterDetection.ftcPose.y * 0.0254;
-                        double yi = launcherOffsetFromCamera[1];
-                        double yf = hiveHeightMeters;
-                        double θ = HOOD_DEGREES * Math.PI / 180.0;
-
-                        // Logger.log("xi = " + xi);
-                        // Logger.log("xf = " + xf);
-                        // Logger.log("yi = " + yi);
-                        // Logger.log("fi = " + yf);
-                        // Logger.log("theta = " + θ);
-
-                        // Logger.warn("LAUNCH VELOCITY SET TO: " + Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
-                        // Logger.warn("LAUNCH VELOCITY GET IS: " + launchMotor.getVelocity());
-                        launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
-                        return true;
-                    }
-                } else {
-                    // Uses override launch speed
-                    // Logger.log("LAUNCH VELOCITY SET TO: "+overrideLaunchSpeed);
-                    launchMotor.setVelocity(overrideLaunchSpeed);
-                    return true;
-                }
-            } else if (launchMotor != null) {
-                // Logger.log("LAUNCH VELOCITY SET TO: 20000.00");
-                launchMotor.setVelocity(20000.00);
-                return true;
-            }
-        } else if (launchMotor != null) {
+        if (!isEnabled) {
             // Logger.log("LAUNCH VELOCITY SET TO: 0.00");
             launchMotor.setVelocity(0.00);
-            return true;
+            return;
         }
-        return false;
+
+        if (Environment.Capabilities.vision || Environment.Capabilities.aimbotEnabled) {
+            if (overrideLaunchSpeed != 0.00) {
+                // Logger.log("LAUNCH VELOCITY SET TO: "+overrideLaunchSpeed);
+                launchMotor.setVelocity(overrideLaunchSpeed);
+                return;
+            }
+
+            AprilTagClusterDetection clusterDetection;
+
+            if (Environment.Parameters.alliance == Environment.Parameters.Side.BLUE) {
+                clusterDetection = Vision.getClusterTagByName("BLUE SCORING");
+            } else {
+                clusterDetection = Vision.getClusterTagByName("RED SCORING");
+            }
+
+            if (clusterDetection == null || clusterDetection.ftcPose == null) {
+                Logger.warn("Launcher: Cannot see AprilTags");
+                return;
+            }
+
+            double xi = launcherOffsetFromCamera[0];
+            double xf = clusterDetection.ftcPose.y * 0.0254;
+            double yi = launcherOffsetFromCamera[1];
+            double yf = hiveHeightMeters;
+            double θ = HOOD_DEGREES * Math.PI / 180.0;
+
+            // Logger.log("xi = " + xi);
+            // Logger.log("xf = " + xf);
+            // Logger.log("yi = " + yi);
+            // Logger.log("fi = " + yf);
+            // Logger.log("theta = " + θ);
+
+            // Logger.warn("LAUNCH VELOCITY SET TO: " + Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
+            // Logger.warn("LAUNCH VELOCITY GET IS: " + launchMotor.getVelocity());
+
+            try {
+                launchMotor.setVelocity(Aimbot.getAngularVelocity(xi, xf, yi, yf, θ));
+            } catch(Exception e) {
+                // Ignore. Aimbot will throw sometimes ~~
+            }
+        }
     }
 }

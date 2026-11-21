@@ -19,7 +19,7 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 /**
  * Runs the dashboard's {@link AutonomousProgram}: drives to each waypoint, then runs its actions.
- * Hardware is driven through {@link AutonomousActions}; this class only sequences and times it.
+ * Actions are in {@link AutonomousActions}. This class is the orchestrator of AutonomousActions & AutonomousPrograms
  */
 public class Autonomous {
 
@@ -81,11 +81,26 @@ public class Autonomous {
      */
     private static volatile AutonomousProgram program = AutonomousProgram.EMPTY;
 
+    /**
+     * Master flag for whether Auto will run or not. If true, or set to true in operation, Auto will stop executing anything.
+     */
+    private static boolean disabled = false;
+
     static {
         Scheduler.addTask(obj -> {
-            if (Environment.Parameters.emergencyAuto) return;
-            if (!isAuto()) return;
-            if (!Scheduler.running) return;
+            if (
+                disabled ||
+                Environment.Parameters.emergencyAuto ||
+                !isAuto() ||
+                !Scheduler.running
+            ) {
+                return;
+            }
+
+            if (Environment.Capabilities.otos) {
+                Logger.error("!!! OTOS suddenly not available. Stopping Auto !!!");
+                disabled = true;
+            }
 
             if (!opQueue.isEmpty() || opTimer.milliseconds() < opsResumeAt) {
                 stop();
@@ -102,8 +117,16 @@ public class Autonomous {
         });
 
         Scheduler.addTask("pre-run", obj -> {
-            if (Environment.Parameters.emergencyAuto) return;
-            if (!isAuto()) return;
+            if (Environment.Parameters.emergencyAuto || !isAuto()) {
+                disabled = true;
+                return;
+            }
+
+            if (!Environment.Capabilities.otos) {
+                Logger.error("Autonomous will not run due to the Odometer not being available");
+                disabled = true;
+                return;
+            }
 
             AutonomousProgram current = program;
 
@@ -134,12 +157,6 @@ public class Autonomous {
             Logger.log(
                 "Autonomous: loaded " + current.steps.size() + " waypoints"
             );
-
-            if (!Environment.Capabilities.otos && !current.steps.isEmpty()) {
-                Logger.warn(
-                    "Autonomous: no odometry, waypoints will never be reached"
-                );
-            }
         });
 
         Scheduler.addTask("exit", obj -> {
@@ -224,7 +241,7 @@ public class Autonomous {
 
     /**
      * Waypoints arrive from the dashboard in Coordination units (0-100), but the drive loop works
-     * in centimetres, matching the odometer. Convert both the target and its tolerance here, then
+     * in centimeters, matching the odometer. Convert both the target and its tolerance here, then
      * let {@link AutonomousActions#driveToPosition} convert the field error into the drivetrain's
      * frame via {@link Coordination#fieldToRobot}.
      */
@@ -238,81 +255,10 @@ public class Autonomous {
         double deltaYCm = targetYCm - currentYCm;
         double distanceCm = Math.hypot(deltaXCm, deltaYCm);
 
-        logMovement(
-            currentXCm,
-            currentYCm,
-            targetXCm,
-            targetYCm,
-            deltaXCm,
-            deltaYCm,
-            distanceCm
-        );
-
         AutonomousActions.driveToPosition(
             targetXCm,
             targetYCm,
             Coordination.unitsToCm(step.tolerance)
-        );
-    }
-
-    /**
-     * Logs where the robot is, the target, the remaining delta, and whether the distance to the
-     * target decreased since the previous log. Logging is throttled so it does not flood telemetry.
-     */
-    private static void logMovement(
-        double currentXCm,
-        double currentYCm,
-        double targetXCm,
-        double targetYCm,
-        double deltaXCm,
-        double deltaYCm,
-        double distanceCm
-    ) {
-        // A new waypoint starts a new progress comparison and logs its first sample immediately
-        boolean newTarget =
-            targetXCm != lastLogTargetXCm || targetYCm != lastLogTargetYCm;
-
-        if (newTarget) {
-            lastLogTargetXCm = targetXCm;
-            lastLogTargetYCm = targetYCm;
-            lastLogDistanceCm = Double.NaN;
-            movementLogTimer.reset();
-        }
-
-        if (!newTarget && movementLogTimer.milliseconds() < MOVEMENT_LOG_INTERVAL_MS) return;
-
-        String progress;
-
-        if (Double.isNaN(lastLogDistanceCm)) {
-            progress = "first sample";
-        } else {
-            double changeCm = lastLogDistanceCm - distanceCm;
-
-            progress = String.format(
-                Locale.US,
-                "progressing %s (%+.2f cm)",
-                changeCm >= 0 ? "yes" : "no",
-                changeCm
-            );
-        }
-
-        lastLogDistanceCm = distanceCm;
-        movementLogTimer.reset();
-
-        Logger.log(
-            String.format(
-                Locale.US,
-                "Autonomous: at (%.2f, %.2f) cm, target (%.2f, %.2f) cm, " +
-                    "delta (%.2f, %.2f) cm, distance %.2f cm, %s",
-                currentXCm,
-                currentYCm,
-                targetXCm,
-                targetYCm,
-                deltaXCm,
-                deltaYCm,
-                distanceCm,
-                progress
-            )
         );
     }
 

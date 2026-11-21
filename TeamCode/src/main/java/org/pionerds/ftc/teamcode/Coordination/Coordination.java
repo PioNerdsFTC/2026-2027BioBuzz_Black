@@ -56,6 +56,9 @@ public class Coordination {
     private static double odomXOrigin = 0;
     private static double odomYOrigin = 0;
 
+    /** Here to reduce how many logging calls are made. */
+    private static int logIteration = 0;
+
     static {
         Scheduler.addTask("init", obj -> {
             // TODO: implement robot starting positions
@@ -91,7 +94,15 @@ public class Coordination {
 
             if (Environment.Capabilities.otos) {
                 updatePosition();
-                Logger.log("X: " + x + ", Y: " + y + ", R: " +  rotation);
+
+                if (Environment.Parameters.competing) return;
+
+                logIteration++;
+
+                if (logIteration >= 20) {
+                    Logger.log("X: " + x + ", Y: " + y + ", R: " +  rotation);
+                    logIteration = 0;
+                }
             }
         });
 

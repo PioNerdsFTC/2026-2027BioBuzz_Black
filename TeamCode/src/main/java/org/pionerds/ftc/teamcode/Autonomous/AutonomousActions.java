@@ -9,6 +9,7 @@ import org.pionerds.ftc.teamcode.Driver.PuppetDriver;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
 import org.pionerds.ftc.teamcode.Hardware.Odometer;
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 import org.pionerds.ftc.teamcode.Storage.Launcher;
@@ -28,12 +29,17 @@ public class AutonomousActions {
     public static PuppetDriver puppetDriver;
     public static Odometer odometer;
 
-
     static {
         Scheduler.addTask("init", object -> {
             if (Environment.Parameters.emergencyAuto) return;
-            launcherNectar = Globals.depend("launcherNectar");
-            launcherPollen = Globals.depend("launcherPollen");
+
+            try {
+                launcherNectar = Globals.depend("launcherNectar");
+                launcherPollen = Globals.depend("launcherPollen");
+            } catch(Exception e) {
+                Logger.error("Launchers not available to Auto; scoring utterly disabled");
+                Environment.Capabilities.launchers = false;
+            }
 
             elapsedTime = Scheduler.time;
 
