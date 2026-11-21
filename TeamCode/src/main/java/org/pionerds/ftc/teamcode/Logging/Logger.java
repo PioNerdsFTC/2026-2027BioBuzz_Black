@@ -43,13 +43,15 @@ public class Logger {
 
         Scheduler.addTask(1000, obj -> {
             saveLogs();
-        })
+        });
     }
 
     static {
-        Scheduler.addTask(1000, obj -> {
-            saveLogs();
-        });
+        if (Environment.Parameters.competing) {
+            Scheduler.addTask(1000, obj -> {
+                saveLogs();
+            });
+        }
     }
 
     public enum LogType {
