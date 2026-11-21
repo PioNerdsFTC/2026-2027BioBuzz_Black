@@ -1,11 +1,17 @@
 package org.pionerds.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.ReadWriteFile;
+
+import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.json.JSONException;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Action;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Step;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
@@ -75,11 +81,10 @@ public class Autonomous {
     private static double opsResumeAt = 0;
     private static boolean intakeRunning = false;
 
-    /**
-     * Program uploaded from the dashboard. Loaded into the queues when an autonomous run starts.
-     * Replaced wholesale (never mutated) since it is written from the web server thread.
-     */
     private static volatile AutonomousProgram program = AutonomousProgram.EMPTY;
+
+
+    private static final File file = AppUtil.getInstance().getSettingsFile("auto-program");
 
     /**
      * Master flag for whether Auto will run or not. If true, or set to true in operation, Auto will stop executing anything.
@@ -129,6 +134,16 @@ public class Autonomous {
             }
 
             AutonomousProgram current = program;
+
+            if (program.equals(AutonomousProgram.EMPTY)) {
+                String res = ReadWriteFile.readFile(file);
+
+                try {
+                    current = AutonomousProgram.fromJson(res);
+                } catch (JSONException e) {
+                    Logger.warn("Autonomous: invalid autonomous program saved to disk ???");
+                }
+            }
 
             double[] start = current.start;
 
@@ -193,6 +208,8 @@ public class Autonomous {
 
     public static void setProgram(AutonomousProgram program) {
         Autonomous.program = program;
+
+        ReadWriteFile.writeFile(file, program.toJson());
 
         double[] start = program.start;
         if (start == null) return;
