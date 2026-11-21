@@ -166,6 +166,16 @@ public class Autonomous {
 
     public static void setProgram(AutonomousProgram program) {
         Autonomous.program = program;
+
+        double[] start = program.start;
+        if (start == null) return;
+
+        Double rotation = program.startRotation;
+        if (rotation == null) {
+            rotation = Math.atan2(50 - start[1], 50 - start[0]);
+        }
+
+        Coordination.setStart(start[0], start[1], rotation);
     }
 
     public static AutonomousProgram getProgram() {

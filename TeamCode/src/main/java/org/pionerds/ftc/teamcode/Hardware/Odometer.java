@@ -35,8 +35,8 @@ public class Odometer {
     public void tick() {
         SparkFunOTOS.Pose2D pos = otos.getPosition();
 
-        x = pos.x;
-        y = pos.y;
+        x = pos.y;
+        y = -pos.x;
         h = pos.h;
     }
 }
