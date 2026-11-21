@@ -1,10 +1,19 @@
 package org.pionerds.ftc.teamcode.Logging;
 
 import android.util.Log;
+
+import com.qualcomm.robotcore.util.ReadWriteFile;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
@@ -16,6 +25,32 @@ public class Logger {
 
     private static final String TAG = "PioNerds-Runtime";
     private static Telemetry telemetry;
+
+
+    private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy/dd/MM-HH:mm:ss", Locale.US);
+    private static String formattedDate = formatter.format(new Date());
+    private static File file = AppUtil.getInstance().getSettingsFile(formattedDate);
+
+    private static void saveLogs() {
+        String formattedLogs = "";
+
+        for (int i = 0; i < logs.size(); i++) {
+            LogType currentLevel = level.get(i);
+            formattedLogs += formatter.format(new Date()) + " " + currentLevel.toString().toUpperCase() + ": " + logs.get(i);
+        }
+
+        ReadWriteFile.writeFile(file, formattedLogs);
+
+        Scheduler.addTask(1000, obj -> {
+            saveLogs();
+        })
+    }
+
+    static {
+        Scheduler.addTask(1000, obj -> {
+            saveLogs();
+        });
+    }
 
     public enum LogType {
         DEBUG,
