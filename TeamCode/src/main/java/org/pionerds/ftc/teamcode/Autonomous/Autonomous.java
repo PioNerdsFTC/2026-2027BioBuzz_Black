@@ -5,6 +5,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Action;
 import org.pionerds.ftc.teamcode.Autonomous.AutonomousProgram.Step;
 import org.pionerds.ftc.teamcode.Coordination.Coordination;
@@ -29,6 +30,15 @@ public class Autonomous {
     private static final double LAUNCHER_SPIN_UP_MS = 1000;
     /** How long the feed servo runs per piece launched. */
     private static final double FEED_MS = 400;
+
+    /** How often to log movement progress while driving to a waypoint. */
+    private static final double MOVEMENT_LOG_INTERVAL_MS = 250;
+
+    private static final ElapsedTime movementLogTimer = new ElapsedTime();
+
+    private static double lastLogTargetXCm = Double.NaN;
+    private static double lastLogTargetYCm = Double.NaN;
+    private static double lastLogDistanceCm = Double.NaN;
 
     /** Hardware commands that actions are broken down into. */
     private static final class Op {
@@ -219,10 +229,90 @@ public class Autonomous {
      * frame via {@link Coordination#fieldToRobot}.
      */
     private static void drivePositionToward(Step step) {
+        double targetXCm = Coordination.unitsToCm(step.x);
+        double targetYCm = Coordination.unitsToCm(step.y);
+        double currentXCm = Coordination.xCm();
+        double currentYCm = Coordination.yCm();
+
+        double deltaXCm = targetXCm - currentXCm;
+        double deltaYCm = targetYCm - currentYCm;
+        double distanceCm = Math.hypot(deltaXCm, deltaYCm);
+
+        logMovement(
+            currentXCm,
+            currentYCm,
+            targetXCm,
+            targetYCm,
+            deltaXCm,
+            deltaYCm,
+            distanceCm
+        );
+
         AutonomousActions.driveToPosition(
-            Coordination.unitsToCm(step.x),
-            Coordination.unitsToCm(step.y),
+            targetXCm,
+            targetYCm,
             Coordination.unitsToCm(step.tolerance)
+        );
+    }
+
+    /**
+     * Logs where the robot is, the target, the remaining delta, and whether the distance to the
+     * target decreased since the previous log. Logging is throttled so it does not flood telemetry.
+     */
+    private static void logMovement(
+        double currentXCm,
+        double currentYCm,
+        double targetXCm,
+        double targetYCm,
+        double deltaXCm,
+        double deltaYCm,
+        double distanceCm
+    ) {
+        // A new waypoint starts a new progress comparison and logs its first sample immediately
+        boolean newTarget =
+            targetXCm != lastLogTargetXCm || targetYCm != lastLogTargetYCm;
+
+        if (newTarget) {
+            lastLogTargetXCm = targetXCm;
+            lastLogTargetYCm = targetYCm;
+            lastLogDistanceCm = Double.NaN;
+            movementLogTimer.reset();
+        }
+
+        if (!newTarget && movementLogTimer.milliseconds() < MOVEMENT_LOG_INTERVAL_MS) return;
+
+        String progress;
+
+        if (Double.isNaN(lastLogDistanceCm)) {
+            progress = "first sample";
+        } else {
+            double changeCm = lastLogDistanceCm - distanceCm;
+
+            progress = String.format(
+                Locale.US,
+                "progressing %s (%+.2f cm)",
+                changeCm >= 0 ? "yes" : "no",
+                changeCm
+            );
+        }
+
+        lastLogDistanceCm = distanceCm;
+        movementLogTimer.reset();
+
+        Logger.log(
+            String.format(
+                Locale.US,
+                "Autonomous: at (%.2f, %.2f) cm, target (%.2f, %.2f) cm, " +
+                    "delta (%.2f, %.2f) cm, distance %.2f cm, %s",
+                currentXCm,
+                currentYCm,
+                targetXCm,
+                targetYCm,
+                deltaXCm,
+                deltaYCm,
+                distanceCm,
+                progress
+            )
         );
     }
 
@@ -360,6 +450,8 @@ public class Autonomous {
         stepQueue.clear();
         opsResumeAt = 0;
 
+        resetMovementLog();
+
         setLauncher("pollen", false, 0);
         setLauncher("nectar", false, 0);
 
@@ -367,6 +459,13 @@ public class Autonomous {
         setIntake(false);
 
         stop();
+    }
+
+    private static void resetMovementLog() {
+        lastLogTargetXCm = Double.NaN;
+        lastLogTargetYCm = Double.NaN;
+        lastLogDistanceCm = Double.NaN;
+        movementLogTimer.reset();
     }
 
     private static void stop() {
