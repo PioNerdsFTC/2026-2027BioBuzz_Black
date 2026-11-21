@@ -73,6 +73,7 @@ public class Autonomous {
 
     static {
         Scheduler.addTask(obj -> {
+            if (Environment.Parameters.emergencyAuto) return;
             if (!isAuto()) return;
             if (!Scheduler.running) return;
 
@@ -91,6 +92,7 @@ public class Autonomous {
         });
 
         Scheduler.addTask("pre-run", obj -> {
+            if (Environment.Parameters.emergencyAuto) return;
             if (!isAuto()) return;
 
             AutonomousProgram current = program;
@@ -104,8 +106,6 @@ public class Autonomous {
                     startRotation = Math.atan2(50 - start[1], 50 - start[0]);
                 }
 
-                // Capture the pose here, not in init: the robot is in its final starting
-                // position now, and the sensors have ticked since they were reset.
                 Coordination.setStart(start[0], start[1], startRotation);
 
                 Logger.log(

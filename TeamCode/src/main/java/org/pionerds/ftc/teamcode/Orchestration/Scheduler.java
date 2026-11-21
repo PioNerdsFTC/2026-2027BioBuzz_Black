@@ -240,9 +240,7 @@ public class Scheduler {
         double now = time.milliseconds();
 
         Iterator<Task<?>> iterator = tasks.iterator();
-
         iterateDepth++;
-        x++;
 
         try {
             while (iterator.hasNext()) {
@@ -258,11 +256,8 @@ public class Scheduler {
                 }
 
                 if (task.type == ExecutionType.TIMED && task.timestamp <= now) {
-                    try {
-                        task.consumer.accept(null);
-                    } catch (Exception e) {
-                        Logger.error(Log.getStackTraceString(e));
-                    }
+                    try { task.consumer.accept(null); }
+                    catch (Exception e) { Logger.error(Log.getStackTraceString(e)); }
                     iterator.remove();
                 }
             }
@@ -270,14 +265,6 @@ public class Scheduler {
             iterateDepth--;
 
             if (iterateDepth == 0) flushQueues();
-
-            if (x == 500) {
-                Log.d(
-                    "SCHEDULER",
-                    "Took " + (time.milliseconds() - now) + " ms"
-                );
-                x = 0;
-            }
         }
     }
 

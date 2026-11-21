@@ -34,5 +34,10 @@ public class Environment {
         // Runtime parameters
 
         public static Side alliance = Side.BLUE;
+
+
+
+        // Disables normal auto, enabled in the AutoBackup class.
+        public static boolean emergencyAuto = false;
     }
 }

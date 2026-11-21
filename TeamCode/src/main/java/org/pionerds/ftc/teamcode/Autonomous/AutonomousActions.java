@@ -29,8 +29,9 @@ public class AutonomousActions {
     public static Odometer odometer;
 
 
-    static{
+    static {
         Scheduler.addTask("init", object -> {
+            if (Environment.Parameters.emergencyAuto) return;
             launcherNectar = Globals.depend("launcherNectar");
             launcherPollen = Globals.depend("launcherPollen");
 
