@@ -10,12 +10,34 @@ import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
  */
 public class Coordination {
 
+    /** Field width and depth in centimetres. */
+    public static final double FIELD_CM = 365.75;
+
+    /** Centimetres per Coordination unit, i.e. the size of 1% of the field. */
+    public static final double UNIT = FIELD_CM / 100;
+
+    /** The dashboard works in Coordination units (0-100); the odometer reports centimetres. */
+    public static double unitsToCm(double units) {
+        return units * UNIT;
+    }
+
+    public static double cmToUnits(double cm) {
+        return cm / UNIT;
+    }
+
     public static double x = -1;
     public static double y = -1;
 
     public static double rotation = 0;
 
-    public static double UNIT = ((double) 1 / 100) * 365.75;
+    /** Current field position in centimetres. */
+    public static double xCm() {
+        return unitsToCm(x);
+    }
+
+    public static double yCm() {
+        return unitsToCm(y);
+    }
 
     private static double startX = -1;
     private static double startY = -1;
@@ -94,8 +116,9 @@ public class Coordination {
      * position.
      */
     private static void updatePosition() {
-        double right = (Hardware.odometer.x - odomXOrigin) / UNIT;
-        double forward = (Hardware.odometer.y - odomYOrigin) / UNIT;
+        // The OTOS reports centimetres; convert them into the dashboard's 0-100 units.
+        double right = cmToUnits(Hardware.odometer.x - odomXOrigin);
+        double forward = cmToUnits(Hardware.odometer.y - odomYOrigin);
 
         double cos = Math.cos(rotationOffset);
         double sin = Math.sin(rotationOffset);

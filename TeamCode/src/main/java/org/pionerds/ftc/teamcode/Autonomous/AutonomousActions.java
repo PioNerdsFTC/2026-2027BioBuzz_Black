@@ -117,9 +117,14 @@ public class AutonomousActions {
     }
 
 
+    /**
+     * @param x target field x in centimetres
+     * @param y target field y in centimetres
+     * @param t tolerance in centimetres
+     */
     public static boolean driveToPosition(double x, double y, double t){
-        double Δx = x - Coordination.x;
-        double Δy = y - Coordination.y;
+        double Δx = x - Coordination.xCm();
+        double Δy = y - Coordination.yCm();
 
         double[] robot = Coordination.fieldToRobot(Δx, Δy);
         double forward = robot[0];

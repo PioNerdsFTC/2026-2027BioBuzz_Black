@@ -203,14 +203,16 @@ public class Autonomous {
     }
 
     /**
-     * Waypoints are in field units; {@link AutonomousActions#driveToPosition} converts the field
-     * error into the drivetrain's frame via {@link Coordination#fieldToRobot}.
+     * Waypoints arrive from the dashboard in Coordination units (0-100), but the drive loop works
+     * in centimetres, matching the odometer. Convert both the target and its tolerance here, then
+     * let {@link AutonomousActions#driveToPosition} convert the field error into the drivetrain's
+     * frame via {@link Coordination#fieldToRobot}.
      */
     private static void drivePositionToward(Step step) {
         AutonomousActions.driveToPosition(
-            step.x,
-            step.y,
-            step.tolerance
+            Coordination.unitsToCm(step.x),
+            Coordination.unitsToCm(step.y),
+            Coordination.unitsToCm(step.tolerance)
         );
     }
 
@@ -222,9 +224,13 @@ public class Autonomous {
     }
 
     private static boolean isPositionReached(Step step) {
+        double tolerance = Coordination.unitsToCm(step.tolerance);
+
         return (
-            Math.abs(step.x - Coordination.x) <= step.tolerance &&
-            Math.abs(step.y - Coordination.y) <= step.tolerance
+            Math.abs(Coordination.unitsToCm(step.x) - Coordination.xCm()) <=
+                tolerance &&
+            Math.abs(Coordination.unitsToCm(step.y) - Coordination.yCm()) <=
+                tolerance
         );
     }
 
