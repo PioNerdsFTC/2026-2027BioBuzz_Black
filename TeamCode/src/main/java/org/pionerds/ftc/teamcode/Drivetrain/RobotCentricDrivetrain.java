@@ -24,52 +24,54 @@ public class RobotCentricDrivetrain {
         AtomicReference<UUID> tick = new AtomicReference<>();
 
         Scheduler.addTask("init", obj -> {
-            if(Environment.Capabilities.useFieldCentricDriving) return;
+            if(!Environment.Capabilities.useFieldCentricDriving || (Environment.Parameters.emergencyAuto && Environment.Parameters.operatingEnvironment.equals(Environment.Parameters.OperatingEnvironment.AUTO))) {
 
-            driveMotors[0] = Hardware.mapping.getMotor("motor0");
-            driveMotors[1] = Hardware.mapping.getMotor("motor1");
-            driveMotors[2] = Hardware.mapping.getMotor("motor2");
-            driveMotors[3] = Hardware.mapping.getMotor("motor3");
+                driveMotors[0] = Hardware.mapping.getMotor("motor0");
+                driveMotors[1] = Hardware.mapping.getMotor("motor1");
+                driveMotors[2] = Hardware.mapping.getMotor("motor2");
+                driveMotors[3] = Hardware.mapping.getMotor("motor3");
 
-            driveMotors[0].setDirection(DcMotorSimple.Direction.REVERSE);
-            driveMotors[1].setDirection(DcMotorSimple.Direction.FORWARD);
-            driveMotors[2].setDirection(DcMotorSimple.Direction.FORWARD);
-            driveMotors[3].setDirection(DcMotorSimple.Direction.FORWARD);
+                driveMotors[0].setDirection(DcMotorSimple.Direction.REVERSE);
+                driveMotors[1].setDirection(DcMotorSimple.Direction.FORWARD);
+                driveMotors[2].setDirection(DcMotorSimple.Direction.FORWARD);
+                driveMotors[3].setDirection(DcMotorSimple.Direction.FORWARD);
 
-            for(DcMotorEx motor : driveMotors){
-                motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                for (DcMotorEx motor : driveMotors) {
+                    motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                }
+
+
+                // driver1 only exists in tele, otherwise fall back to auto puppet
+                driver = Globals.has("driver1")
+                        ? Globals.depend("driver1") : null;
+
+
+                Scheduler.addTask(obj2 -> {
+                    if (!Scheduler.running || driver == null) return;
+                    fetchRequestedMovement();
+                    tickDrivetrain();
+                });
+            } else {
+                return;
             }
-
-
-            // driver1 only exists in tele, otherwise fall back to auto puppet
-            driver = Globals.has("driver1")
-                    ? Globals.depend("driver1") : null;
-
-
-            Scheduler.addTask(obj2 -> {
-                if(!Scheduler.running || driver == null) return;
-                fetchRequestedMovement();
-                tickDrivetrain();
-            });
-
         });
 
 
         Scheduler.addTask("exit", obj -> {
-            if(Environment.Capabilities.useFieldCentricDriving) return;
+            if(!Environment.Capabilities.useFieldCentricDriving || (Environment.Parameters.emergencyAuto && Environment.Parameters.operatingEnvironment.equals(Environment.Parameters.OperatingEnvironment.AUTO))) {
 
-            if (tick.get() != null) Scheduler.removeTask(tick.get());
-            tick.set(null);
+                if (tick.get() != null) Scheduler.removeTask(tick.get());
+                tick.set(null);
 
-            drivePowers[0] = 0.00;
-            drivePowers[1] = 0.00;
-            drivePowers[2] = 0.00;
-            drivePowers[3] = 0.00;
+                drivePowers[0] = 0.00;
+                drivePowers[1] = 0.00;
+                drivePowers[2] = 0.00;
+                drivePowers[3] = 0.00;
 
-            updateMotors();
+                updateMotors();
+            }
         });
-
 
     }
 
