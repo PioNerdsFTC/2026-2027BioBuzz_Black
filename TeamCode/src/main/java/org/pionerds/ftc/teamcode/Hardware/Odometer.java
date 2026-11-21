@@ -20,6 +20,8 @@ public class Odometer {
         otos.setLinearUnit(DistanceUnit.CM);
         otos.setAngularUnit(AngleUnit.RADIANS);
 
+//        otos.setOffset(new SparkFunOTOS.Pose2D());
+
         otos.resetTracking();
     }
 
@@ -33,8 +35,8 @@ public class Odometer {
     public void tick() {
         SparkFunOTOS.Pose2D pos = otos.getPosition();
 
-        x = pos.y;
-        y = -pos.x;
+        x = pos.x;
+        y = pos.y;
         h = pos.h;
     }
 }

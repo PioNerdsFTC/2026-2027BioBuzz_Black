@@ -133,6 +133,7 @@ public class Launcher {
 
             if (clusterDetection == null || clusterDetection.ftcPose == null) {
                 Logger.warn("Launcher: Cannot see AprilTags");
+                launchMotor.setVelocity(0);
                 return;
             }
 

@@ -102,7 +102,7 @@ public class Autonomous {
                 return;
             }
 
-            if (Environment.Capabilities.otos) {
+            if (!Environment.Capabilities.otos) {
                 Logger.error("!!! OTOS suddenly not available. Stopping Auto !!!");
                 disabled = true;
             }
@@ -121,6 +121,12 @@ public class Autonomous {
             moveToPositionTick(stepQueue.get(0));
         });
 
+        // Occurs when otos lost, then reaquired.
+        Scheduler.addTask("hardware:enable:otos", obj -> {
+            disabled = !selfTest();
+        });
+
+
         Scheduler.addTask("pre-run", obj -> {
             if (Environment.Parameters.emergencyAuto || !isAuto()) {
                 disabled = true;
@@ -133,17 +139,17 @@ public class Autonomous {
                 return;
             }
 
-            AutonomousProgram current = program;
-
             if (program.equals(AutonomousProgram.EMPTY)) {
                 String res = ReadWriteFile.readFile(file);
 
                 try {
-                    current = AutonomousProgram.fromJson(res);
+                    program = AutonomousProgram.fromJson(res);
                 } catch (JSONException e) {
                     Logger.warn("Autonomous: invalid autonomous program saved to disk ???");
                 }
             }
+
+            AutonomousProgram current = program;
 
             double[] start = current.start;
 
@@ -177,8 +183,18 @@ public class Autonomous {
         Scheduler.addTask("exit", obj -> {
             if (!isAuto()) return;
 
+            disabled = false;
+
             clearQueues();
         });
+    }
+
+    private static boolean selfTest() {
+        if (
+                Environment.Capabilities.otos &&
+                Environment.Capabilities.drivetrain
+        )  return true;
+        return false;
     }
 
     private static boolean isAuto() {
