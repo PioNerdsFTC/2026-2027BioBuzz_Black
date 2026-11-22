@@ -22,6 +22,7 @@ public class Odometer {
         if (otos.selfTest()) {
             Environment.Capabilities.otos = true;
             offline = false;
+            init(otos);
             return;
         }
 
@@ -56,6 +57,7 @@ public class Odometer {
         check: if (!Environment.Capabilities.otos && !offline) {
             if (otos.selfTest()) {
                 Environment.Capabilities.otos = true;
+                init(otos);
                 break check;
             }
 
