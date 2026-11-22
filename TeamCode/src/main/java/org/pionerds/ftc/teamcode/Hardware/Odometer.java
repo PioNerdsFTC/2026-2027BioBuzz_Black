@@ -45,7 +45,7 @@ public class Odometer {
 
         otos.resetTracking();
 
-        otos.selfTest();
+        verifyOtos();
     }
 
     /** Clears the cached pose so a new run cannot read the previous run's values before the next tick. */
