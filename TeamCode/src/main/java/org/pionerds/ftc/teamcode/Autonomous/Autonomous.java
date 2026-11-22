@@ -181,9 +181,9 @@ public class Autonomous {
         });
 
         Scheduler.addTask("exit", obj -> {
-            if (!isAuto()) return;
-
             disabled = false;
+
+            if (!isAuto()) return;
 
             clearQueues();
         });

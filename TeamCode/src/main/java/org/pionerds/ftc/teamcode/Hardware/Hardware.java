@@ -83,11 +83,6 @@ public final class Hardware {
     public static void tick() {
         if (!Scheduler.running) return;
 
-        if (!Environment.Capabilities.otos && mapping.getOtos("otos") != null && otos.selfTest()) {
-            Environment.Capabilities.otos = true;
-            Scheduler.trigger("hardware:enable:otos", null);
-        }
-
         double[] angles = Hardware.gyro.getAngles();
 
         // The IMU reports yaw in [-pi, pi]; expose it as [0, 2pi) so the wrap happens

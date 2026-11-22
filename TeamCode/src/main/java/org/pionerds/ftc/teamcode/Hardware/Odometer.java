@@ -1,8 +1,12 @@
 package org.pionerds.ftc.teamcode.Hardware;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.sun.tools.doclint.Env;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.pionerds.ftc.teamcode.Environment;
+import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 public class Odometer {
 
@@ -11,6 +15,20 @@ public class Odometer {
     public double x = 0;
     public double y = 0;
     public double h = 0;
+
+    public boolean offline = false;
+
+    private void verifyOtos() {
+        if (otos.selfTest()) {
+            Environment.Capabilities.otos = true;
+            offline = false;
+            return;
+        }
+
+        Scheduler.addTask(200, obj -> {
+            verifyOtos();
+        });
+    }
 
     public void init(SparkFunOTOS otos) {
         this.otos = otos;
@@ -33,6 +51,20 @@ public class Odometer {
     }
 
     public void tick() {
+        if (otos == null) return;
+
+        check: if (!Environment.Capabilities.otos && !offline) {
+            if (otos.selfTest()) {
+                Environment.Capabilities.otos = true;
+                break check;
+            }
+
+            offline = true;
+
+            Scheduler.addTask(500, obj -> otos.selfTest());
+            return;
+        }
+
         SparkFunOTOS.Pose2D pos = otos.getPosition();
 
         x = pos.x;
