@@ -164,6 +164,20 @@ public class Core {
                 );
             }
 
+            // Setting a program also resets Coordination's start pose, which would make the
+            // robot's position jump mid-match. Only accept new programs between OpModes.
+            if (
+                Environment.Parameters.operatingEnvironment !=
+                    Environment.Parameters.OperatingEnvironment.NONE &&
+                Scheduler.running
+            ) {
+                return NanoHTTPD.newFixedLengthResponse(
+                    NanoHTTPD.Response.Status.CONFLICT,
+                    NanoHTTPD.MIME_PLAINTEXT,
+                    "An OpMode is running; stop it before uploading a path"
+                );
+            }
+
             Map<String, String> body = new HashMap<>();
             session.parseBody(body);
 
