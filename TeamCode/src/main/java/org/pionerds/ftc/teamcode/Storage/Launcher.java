@@ -55,8 +55,16 @@ public class Launcher {
         final boolean[] launcherToggled = {false};
 
         UUID toggleLauncher = Scheduler.addTask("toggle-launcher:down", obj -> {
-            if (launcherToggled[0]) disableLauncher();
-            else enableLauncher();
+            if (launcherToggled[0]){
+                disableLauncher();
+            }
+            else {
+                //if(this.name.equals("launcherNectar")){
+                //    enableLauncher(1250);
+                //} else {
+                    enableLauncher(1175);
+                //}
+            }
 
             launcherToggled[0] = !launcherToggled[0];
         });

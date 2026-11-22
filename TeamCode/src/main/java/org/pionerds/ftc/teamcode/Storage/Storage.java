@@ -23,6 +23,9 @@ public class Storage {
 
         Scheduler.addTask("init", obj -> {
             intake0 = Hardware.mapping.getMotor("intake0");
+            if (intake0 != null) intake0.setDirection(
+                    DcMotorSimple.Direction.REVERSE
+            );
             intake1 = Hardware.mapping.getMotor("intake1");
             if (intake1 != null) intake1.setDirection(
                 DcMotorSimple.Direction.REVERSE
