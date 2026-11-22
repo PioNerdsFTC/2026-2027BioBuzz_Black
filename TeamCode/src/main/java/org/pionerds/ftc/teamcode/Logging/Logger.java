@@ -36,7 +36,7 @@ public class Logger {
 
         for (int i = 0; i < logs.size(); i++) {
             LogType currentLevel = level.get(i);
-            formattedLogs += formatter.format(new Date()) + " " + currentLevel.toString().toUpperCase() + ": " + logs.get(i);
+            formattedLogs += formatter.format(new Date() + " " + currentLevel.toString().toUpperCase() + ": " + logs.get(i));
         }
 
         ReadWriteFile.writeFile(file, formattedLogs);
