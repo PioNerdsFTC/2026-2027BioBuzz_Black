@@ -27,9 +27,9 @@ public class Logger {
     private static Telemetry telemetry;
 
 
-    private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy/dd/MM-HH:mm:ss", Locale.US);
-    private static String formattedDate = formatter.format(new Date());
-    private static File file = AppUtil.getInstance().getSettingsFile(formattedDate);
+    private static SimpleDateFormat formatter;
+    private static String fileName;
+    private static File file;
 
     private static void saveLogs() {
         String formattedLogs = "";
@@ -41,17 +41,27 @@ public class Logger {
 
         ReadWriteFile.writeFile(file, formattedLogs);
 
-        Scheduler.addTask(1000, obj -> {
-            saveLogs();
-        });
+        Scheduler.addTask(1000, obj -> saveLogs());
     }
 
     static {
-        if (Environment.Parameters.competing) {
-            Scheduler.addTask(1000, obj -> {
+        UUID preInit = Scheduler.addTask("pre-init", obj -> {
+            formatter = new SimpleDateFormat("yyyy:MM:dd-HH:mm:ss", Locale.US);
+            fileName = formatter.format(new Date() + "-" + Environment.Parameters.operatingEnvironment.toString().toLowerCase());
+            file  = AppUtil.getInstance().getSettingsFile(fileName);
+        });
+
+        Scheduler.addTask("init", obj -> {
+            if (!Environment.Parameters.competing) return;
+
+            Scheduler.addTask(1000, obj2 -> {
                 saveLogs();
             });
-        }
+        });
+
+        Scheduler.addTask("exit", obj -> {
+            Scheduler.removeTask(preInit);
+        });
     }
 
     public enum LogType {
