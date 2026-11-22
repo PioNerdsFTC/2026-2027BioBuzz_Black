@@ -52,7 +52,7 @@ public class AutoBackup extends LinearOpMode {
             // Drive forward
             puppetDriver.setX(0.00);
             puppetDriver.setY(0.50);
-            driveFor(1000);
+            driveFor(400);
 
             // Stop driving forward
             puppetDriver.setX(0.00);
@@ -60,19 +60,106 @@ public class AutoBackup extends LinearOpMode {
             driveFor(1000);
 
             // Spin Launchers Up
-            launcherPollen.enableLauncher(1175);
+            launcherPollen.enableLauncher(1020);
             driveFor(1000);
 
             // Move pollen up
             Storage.enablePollenServo();
             Storage.enableIntake();
-            driveFor(4000);
+            driveFor(1000);
+
+            // Pause launching
+            Storage.disablePollenServo();
+            Storage.disableIntake();
+            driveFor(1000);
+
+            // Move pollen up
+            Storage.enablePollenServo();
+            Storage.enableIntake();
+            driveFor(1000);
+
+            // Pause launching
+            Storage.disablePollenServo();
+            Storage.disableIntake();
+            driveFor(1000);
+
+            // Move pollen up
+            Storage.enablePollenServo();
+            Storage.enableIntake();
+            driveFor(1000);
+
+            // Pause launching
+            Storage.disablePollenServo();
+            Storage.disableIntake();
+            driveFor(1000);
+
+            // Move pollen up
+            Storage.enablePollenServo();
+            Storage.enableIntake();
+            driveFor(1000);
+
+            // Pause launching
+            Storage.disablePollenServo();
+            Storage.disableIntake();
+            driveFor(1000);
+
+            // Move pollen up
+            Storage.enablePollenServo();
+            Storage.enableIntake();
+            driveFor(1000);
+
+            // Pause launching
+            Storage.disablePollenServo();
+            Storage.disableIntake();
+            driveFor(1000);
+
+            // Move pollen up
+            Storage.enablePollenServo();
+            Storage.enableIntake();
+            driveFor(1000);
+
+            // Pause launching
+            Storage.disablePollenServo();
+            Storage.disableIntake();
+            driveFor(1000);
+
+            // Move pollen up
+            Storage.enablePollenServo();
+            Storage.enableIntake();
+            driveFor(1000);
+
+            // Pause launching
+            Storage.disablePollenServo();
+            Storage.disableIntake();
+            driveFor(1000);
 
             // Shut things off
             launcherPollen.disableLauncher();
             Storage.disableNectarServo();
 
+            driveFor(600);
 
+            puppetDriver.setX(-0.5);
+            puppetDriver.setY(0.00);
+            driveFor(2250);
+
+            puppetDriver.setX(0.00);
+            puppetDriver.setY(0.00);
+            driveFor(500);
+
+            puppetDriver.setX(0.00);
+            puppetDriver.setY(0.00);
+            puppetDriver.setRotation(-0.15);
+            driveFor(100);
+
+            puppetDriver.setX(0.00);
+            puppetDriver.setY(0.5);
+            puppetDriver.setRotation(0.00);
+            driveFor(3000);
+
+            puppetDriver.setX(0.00);
+            puppetDriver.setY(0.00);
+            driveFor(1000);
 
             // Stop
             stopDrivetrain(puppetDriver);

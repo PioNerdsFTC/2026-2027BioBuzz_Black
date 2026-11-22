@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import java.util.ArrayList;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
 public class Storage {
@@ -69,10 +70,12 @@ public class Storage {
 
         Scheduler.addTask("pollen-down:down", obj -> {
             enablePollenServoReverse();
+            ((Launcher) Globals.depend("launcherPollen")).enableLauncher(-20000);
         });
 
         Scheduler.addTask("pollen-down:up", obj -> {
             disablePollenServo();
+            ((Launcher) Globals.depend("launcherPollen")).disableLauncher();
         });
 
         Scheduler.addTask("toggle-nectar:down", obj -> {

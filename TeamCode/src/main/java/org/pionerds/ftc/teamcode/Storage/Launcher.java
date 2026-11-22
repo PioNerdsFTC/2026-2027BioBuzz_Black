@@ -36,6 +36,7 @@ public class Launcher {
             String launchServoName,
             boolean reverseDirection
     ) {
+        this.name = name;
         launchMotor = Hardware.mapping.getMotor(motorName);
         if (launchMotor != null && reverseDirection) launchMotor.setDirection(
                 DcMotorSimple.Direction.REVERSE
@@ -59,11 +60,11 @@ public class Launcher {
                 disableLauncher();
             }
             else {
-                //if(this.name.equals("launcherNectar")){
-                //    enableLauncher(1250);
-                //} else {
-                    enableLauncher(1175);
-                //}
+                if(this.name.equals("launcherNectar")){
+                    //enableLauncher(0);
+                } else {
+                    enableLauncher(1020);
+                }
             }
 
             launcherToggled[0] = !launcherToggled[0];
