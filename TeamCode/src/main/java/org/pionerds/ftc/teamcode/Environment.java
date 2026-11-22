@@ -4,7 +4,7 @@ public class Environment {
 
     public static class Capabilities {
 
-        public static boolean vision = true;
+        public static boolean vision = false;
         public static boolean drivetrain = true;
         public static boolean useFieldCentricDriving = true;
         public static boolean otos = true;

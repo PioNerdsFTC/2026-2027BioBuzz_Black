@@ -18,14 +18,17 @@ public class StorageInitializer {
                         false
                     )
                 );
-                Globals.add(
+
+                Launcher launcherPollen = new Launcher(
                     "launcherPollen",
-                    new Launcher(
-                        "launcherPollen",
-                        "littleLauncher",
-                        "littleHoodAdjust",
-                        true
-                    )
+                    "littleLauncher",
+                    "littleHoodAdjust",
+                    true
+                );
+                Globals.add("launcherPollen", launcherPollen);
+                launcherPollen.registerVelocityControls(
+                    "increase-pollen-speed:down",
+                    "decrease-pollen-speed:down"
                 );
             }
         });

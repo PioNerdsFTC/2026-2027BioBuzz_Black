@@ -24,6 +24,9 @@ public class Launcher {
 
     private static double HOOD_DEGREES = 68.0;
 
+    private static final double LAUNCH_VELOCITY_STEP = 50.0;
+    private static final double MAX_LAUNCH_VELOCITY = 3000.0;
+
     private double[] launcherOffsetFromCamera = new double[2];
     private double hiveHeightMeters = 1.4605;
 
@@ -86,6 +89,7 @@ public class Launcher {
     }*/
 
     private double overrideLaunchSpeed = 0.00;
+    private boolean hasOverrideLaunchSpeed = false;
 
     public void enableLauncher() {
         isEnabled = true;
@@ -94,15 +98,67 @@ public class Launcher {
     public void enableLauncher(double speed) {
         isEnabled = true;
         overrideLaunchSpeed = speed;
+        hasOverrideLaunchSpeed = true;
     }
 
     public void disableLauncher() {
         isEnabled = false;
         overrideLaunchSpeed = 0.00;
+        hasOverrideLaunchSpeed = false;
     }
 
     public boolean isEnabled() {
         return isEnabled;
+    }
+
+    /**
+     * Register "pressed" events that nudge the launcher velocity up and down.
+     * Each press changes the target velocity by {@link #LAUNCH_VELOCITY_STEP}.
+     */
+    public void registerVelocityControls(
+            String increaseEvent,
+            String decreaseEvent
+    ) {
+        UUID increase = Scheduler.addTask(increaseEvent, obj ->
+                increaseLaunchVelocity()
+        );
+        UUID decrease = Scheduler.addTask(decreaseEvent, obj ->
+                decreaseLaunchVelocity()
+        );
+
+        AtomicReference<UUID> exit = new AtomicReference<>();
+
+        exit.set(
+                Scheduler.addTask("exit", obj -> {
+                    Scheduler.removeTask(increase);
+                    Scheduler.removeTask(decrease);
+                    Scheduler.removeTask(exit.get());
+                })
+        );
+    }
+
+    public void increaseLaunchVelocity() {
+        setOverrideLaunchSpeed(overrideLaunchSpeed + LAUNCH_VELOCITY_STEP);
+    }
+
+    public void decreaseLaunchVelocity() {
+        setOverrideLaunchSpeed(overrideLaunchSpeed - LAUNCH_VELOCITY_STEP);
+    }
+
+    public double getLaunchVelocity() {
+        return overrideLaunchSpeed;
+    }
+
+    private void setOverrideLaunchSpeed(double speed) {
+        overrideLaunchSpeed = Math.max(
+                0.00,
+                Math.min(speed, MAX_LAUNCH_VELOCITY)
+        );
+        hasOverrideLaunchSpeed = true;
+
+        Logger.log(
+                name + " velocity set to: " + overrideLaunchSpeed
+        );
     }
 
     public void updateLaunchVelocity() {
@@ -117,7 +173,7 @@ public class Launcher {
         }
 
         if (Environment.Capabilities.vision || Environment.Capabilities.aimbotEnabled) {
-            if (overrideLaunchSpeed != 0.00) {
+            if (hasOverrideLaunchSpeed) {
                 // Logger.log("LAUNCH VELOCITY SET TO: "+overrideLaunchSpeed);
                 launchMotor.setVelocity(overrideLaunchSpeed);
                 return;

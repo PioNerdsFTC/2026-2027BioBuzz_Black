@@ -23,24 +23,35 @@ public class DriverConfigurations {
             }
 
             driver1 = new Driver(Globals.depend("gamepad1"))
-                .addControl(DriverInput.X, DriverAction.TOGGLE_INTAKE, true)
+                .addControl(DriverInput.X, DriverAction.TOGGLE_INTAKE, true);
                 //.addControl(DriverInput.A, DriverAction.TRIGGER_INTAKE, true)
 
-                .addControl(
-                    DriverInput.Y,
-                    DriverAction.TRIGGER_EJECTION_INTAKE,
-                    true
-                )
-                .addControl(
-                    DriverInput.RIGHT_BUMPER,
-                    DriverAction.TOGGLE_LAUNCHER,
-                    true
-                );
+
 
             //                    .addControl(DriverInput.LEFT_BUMPER, DriverAction.TURN_LEFT, true)
             //                    .addControl(DriverInput.RIGHT_BUMPER, DriverAction.TURN_RIGHT, true);
 
-            driver2 = new Driver(Globals.depend("gamepad2"));
+            driver2 = new Driver(Globals.depend("gamepad2"))
+                    .addControl(
+                            DriverInput.Y,
+                            DriverAction.TRIGGER_EJECTION_INTAKE,
+                            true
+                    )
+                    .addControl(
+                            DriverInput.RIGHT_BUMPER,
+                            DriverAction.TOGGLE_LAUNCHER,
+                            true
+                    )
+                    .addControl(
+                            DriverInput.DPAD_UP,
+                            DriverAction.INCREASE_POLLEN_SPEED,
+                            true
+                    )
+                    .addControl(
+                            DriverInput.DPAD_DOWN,
+                            DriverAction.DECREASE_POLLEN_SPEED,
+                            true
+                    );
 
             Globals.add("driver1", driver1);
             Globals.add("driver2", driver2);
