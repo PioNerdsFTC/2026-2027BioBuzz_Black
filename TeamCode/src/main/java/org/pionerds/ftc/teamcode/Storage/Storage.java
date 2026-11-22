@@ -16,6 +16,8 @@ public class Storage {
     private static CRServo servoPollen1;
     private static CRServo servoNectar0;
     private static CRServo servoNectar1;
+    private static CRServo servoLid0;
+    private static CRServo servoLid1;
 
     static {
         final boolean[] toggledIntake = { false };
@@ -46,6 +48,16 @@ public class Storage {
             servoNectar1 = Hardware.mapping.getContinuousServo(
                 "bigLaunchFeed1",
                 DcMotorSimple.Direction.REVERSE
+            );
+
+            servoLid0 = Hardware.mapping.getContinuousServo(
+                    "lid0",
+                    DcMotorSimple.Direction.REVERSE
+            );
+
+            servoLid1 = Hardware.mapping.getContinuousServo(
+                    "lid0",
+                    DcMotorSimple.Direction.FORWARD
             );
 
             toggledIntake[0] = false;
