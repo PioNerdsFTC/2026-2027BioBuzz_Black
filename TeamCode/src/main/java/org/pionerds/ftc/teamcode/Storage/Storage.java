@@ -50,10 +50,10 @@ public class Storage {
                 DcMotorSimple.Direction.REVERSE
             );
 
-            servoLid0 = Hardware.mapping.getContinuousServo(
-                    "lid0",
-                    DcMotorSimple.Direction.REVERSE
-            );
+//            servoLid0 = Hardware.mapping.getContinuousServo(
+//                    "lid0",
+//                    DcMotorSimple.Direction.REVERSE
+//            );
 
             servoLid1 = Hardware.mapping.getContinuousServo(
                     "lid1",
@@ -90,13 +90,20 @@ public class Storage {
             ((Launcher) Globals.depend("launcherPollen")).disableLauncher();
         });
 
-        Scheduler.addTask("lid:down", obj -> {
-            enablePollenServoReverse();
-            ((Launcher) Globals.depend("launcherPollen")).enableLauncher(-20000);
+        Scheduler.addTask("lid-up:down", obj -> {
+            servoLid1.setPower(1.00);
         });
 
-        Scheduler.addTask("lid:up", obj -> {
+        Scheduler.addTask("lid-up:up", obj -> {
+            servoLid1.setPower(0.00);
+        });
 
+        Scheduler.addTask("lid-down:down", obj -> {
+            servoLid1.setPower(-1.00);
+        });
+
+        Scheduler.addTask("lid-down:up", obj -> {
+            servoLid1.setPower(0.00);
         });
 
         Scheduler.addTask("toggle-nectar:down", obj -> {

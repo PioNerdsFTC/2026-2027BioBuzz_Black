@@ -22,7 +22,10 @@ public class DriverConfigurations {
                 return;
             }
 
-            driver1 = new Driver(Globals.depend("gamepad1"));
+            driver1 = new Driver(Globals.depend("gamepad1"))
+                    .addControl(DriverInput.DPAD_UP,DriverAction.LID_UP,true)
+                    .addControl(DriverInput.DPAD_DOWN, DriverAction.LID_DOWN, true)
+            ;
 
                 //.addControl(DriverInput.A, DriverAction.TRIGGER_INTAKE, true)
 
