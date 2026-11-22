@@ -19,6 +19,10 @@ public class Odometer {
     public boolean offline = false;
 
     private void verifyOtos() {
+        Scheduler.addTask(200, obj -> {
+            verifyOtos();
+        });
+
         if (otos.selfTest()) {
             Environment.Capabilities.otos = true;
             offline = false;
@@ -26,9 +30,8 @@ public class Odometer {
             return;
         }
 
-        Scheduler.addTask(200, obj -> {
-            verifyOtos();
-        });
+        Environment.Capabilities.otos = false;
+        offline = true;
     }
 
     public void init(SparkFunOTOS otos) {
@@ -42,6 +45,8 @@ public class Odometer {
 //        otos.setOffset(new SparkFunOTOS.Pose2D());
 
         otos.resetTracking();
+
+        otos.selfTest();
     }
 
     /** Clears the cached pose so a new run cannot read the previous run's values before the next tick. */
@@ -53,19 +58,6 @@ public class Odometer {
 
     public void tick() {
         if (otos == null) return;
-
-        check: if (!Environment.Capabilities.otos && !offline) {
-            if (otos.selfTest()) {
-                Environment.Capabilities.otos = true;
-                init(otos);
-                break check;
-            }
-
-            offline = true;
-
-            Scheduler.addTask(500, obj -> otos.selfTest());
-            return;
-        }
 
         SparkFunOTOS.Pose2D pos = otos.getPosition();
 
