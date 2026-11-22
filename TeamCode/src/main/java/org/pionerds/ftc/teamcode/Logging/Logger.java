@@ -36,7 +36,7 @@ public class Logger {
 
         for (int i = 0; i < logs.size(); i++) {
             LogType currentLevel = level.get(i);
-            formattedLogs += formatter.format(new Date() + " " + currentLevel.toString().toUpperCase() + ": " + logs.get(i));
+            formattedLogs += formatter.format(new Date()) + " " + currentLevel.toString().toUpperCase() + ": " + logs.get(i) + "\n";
         }
 
         ReadWriteFile.writeFile(file, formattedLogs);
@@ -47,7 +47,7 @@ public class Logger {
     static {
         UUID preInit = Scheduler.addTask("pre-init", obj -> {
             formatter = new SimpleDateFormat("yyyy:MM:dd-HH:mm:ss", Locale.US);
-            fileName = formatter.format(new Date() + "-" + Environment.Parameters.operatingEnvironment.toString().toLowerCase());
+            fileName = formatter.format(new Date()) + "-" + Environment.Parameters.operatingEnvironment.toString().toLowerCase();
             file  = AppUtil.getInstance().getSettingsFile(fileName);
         });
 
@@ -57,10 +57,6 @@ public class Logger {
             Scheduler.addTask(1000, obj2 -> {
                 saveLogs();
             });
-        });
-
-        Scheduler.addTask("exit", obj -> {
-            Scheduler.removeTask(preInit);
         });
     }
 
