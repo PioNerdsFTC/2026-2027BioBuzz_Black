@@ -12,6 +12,8 @@ public enum DriverAction {
     TURN_LEFT,
     TRIGGER_INTAKE,
     TRIGGER_EJECTION_INTAKE,
+    POLLEN_UP,
+    POLLEN_DOWN,
     TURN_RIGHT;
 
     public String toString() {

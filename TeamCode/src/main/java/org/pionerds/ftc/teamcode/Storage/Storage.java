@@ -59,11 +59,20 @@ public class Storage {
             toggledIntake[0] = !toggledIntake[0];
         });
 
-        Scheduler.addTask("toggle-pollen:down", obj -> {
-            if (toggledPollenServo[0]) disablePollenServo();
-            else enablePollenServo();
+        Scheduler.addTask("pollen-up:down", obj -> {
+            enablePollenServo();
+        });
 
-            toggledPollenServo[0] = !toggledPollenServo[0];
+        Scheduler.addTask("pollen-up:up", obj -> {
+            disablePollenServo();
+        });
+
+        Scheduler.addTask("pollen-down:down", obj -> {
+            enablePollenServoReverse();
+        });
+
+        Scheduler.addTask("pollen-down:up", obj -> {
+            disablePollenServo();
         });
 
         Scheduler.addTask("toggle-nectar:down", obj -> {
@@ -89,6 +98,11 @@ public class Storage {
     public static void enablePollenServo() {
         if (servoPollen0 != null) servoPollen0.setPower(1.0);
         if (servoPollen1 != null) servoPollen1.setPower(1.0);
+    }
+
+    public static void enablePollenServoReverse() {
+        if (servoPollen0 != null) servoPollen0.setPower(-1.0);
+        if (servoPollen1 != null) servoPollen1.setPower(-1.0);
     }
 
     public static void disablePollenServo() {

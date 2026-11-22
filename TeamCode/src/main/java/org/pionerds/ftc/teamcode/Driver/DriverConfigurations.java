@@ -39,8 +39,13 @@ public class DriverConfigurations {
                             true
                     )
                     .addControl(
-                            DriverInput.RIGHT_BUMPER,
-                            DriverAction.TRIGGER_POLLEN_LAUNCHER,
+                            DriverInput.DPAD_UP,
+                            DriverAction.POLLEN_UP,
+                            true
+                    )
+                    .addControl(
+                            DriverInput.DPAD_DOWN,
+                            DriverAction.POLLEN_DOWN,
                             true
                     )
                     .addControl(
