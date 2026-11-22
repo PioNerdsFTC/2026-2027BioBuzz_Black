@@ -242,18 +242,37 @@ public class Autonomous {
         return program;
     }
 
+    private enum Phase { NONE, TRANSLATE, ROTATE }
+
+    /** Step and phase the PID controllers are currently tracking; a change resets them. */
+    private static Step activeStep = null;
+    private static Phase activePhase = Phase.NONE;
+    /** Heading held while translating: whatever the robot faced when the step began. */
+    private static double holdHeading = 0;
+
+    private static void enterPhase(Step step, Phase phase) {
+        if (step == activeStep && phase == activePhase) return;
+
+        if (step != activeStep) holdHeading = Coordination.rotation;
+
+        activeStep = step;
+        activePhase = phase;
+        AutonomousActions.resetMotion();
+    }
+
     /** Drive toward the step's position, then its heading, then queue its actions. */
     public static void moveToPositionTick(Step step) {
         PuppetDriver puppet = AutonomousActions.puppetDriver;
 
         if (!isPositionReached(step)) {
+            enterPhase(step, Phase.TRANSLATE);
             setIntake(step.intake);
-            puppet.setRotation(0.00);
             drivePositionToward(step);
             return;
         }
 
         if (!isRotationReached(step)) {
+            enterPhase(step, Phase.ROTATE);
             setIntake(false);
             puppet.setX(0.00);
             puppet.setY(0.00);
@@ -262,6 +281,7 @@ public class Autonomous {
         }
 
         stop();
+        enterPhase(null, Phase.NONE);
         setIntake(false);
         stepQueue.remove(0);
         opQueue.addAll(expand(step.actions));
@@ -291,7 +311,8 @@ public class Autonomous {
         AutonomousActions.driveToPosition(
             targetXCm,
             targetYCm,
-            Coordination.unitsToCm(step.tolerance)
+            Coordination.unitsToCm(step.tolerance),
+            holdHeading
         );
     }
 
@@ -430,6 +451,10 @@ public class Autonomous {
         opsResumeAt = 0;
 
         resetMovementLog();
+
+        activeStep = null;
+        activePhase = Phase.NONE;
+        if (AutonomousActions.puppetDriver != null) AutonomousActions.resetMotion();
 
         setLauncher("pollen", false, 0);
         setLauncher("nectar", false, 0);
