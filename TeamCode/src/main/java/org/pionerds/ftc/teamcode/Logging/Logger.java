@@ -32,20 +32,20 @@ public class Logger {
     private static File file;
 
     private static void saveLogs() {
-        String formattedLogs = "";
+        StringBuilder formattedLogs = new StringBuilder();
 
         for (int i = 0; i < logs.size(); i++) {
             LogType currentLevel = level.get(i);
-            formattedLogs += formatter.format(new Date()) + " " + currentLevel.toString().toUpperCase() + ": " + logs.get(i) + "\n";
+            formattedLogs.append(formatter.format(new Date())).append(" ").append(currentLevel.toString().toUpperCase()).append(": ").append(logs.get(i)).append("\n");
         }
 
-        ReadWriteFile.writeFile(file, formattedLogs);
+        ReadWriteFile.writeFile(file, formattedLogs.toString());
 
         Scheduler.addTask(1000, obj -> saveLogs());
     }
 
     static {
-        UUID preInit = Scheduler.addTask("pre-init", obj -> {
+        Scheduler.addTask("pre-init", obj -> {
             formatter = new SimpleDateFormat("yyyy:MM:dd-HH:mm:ss", Locale.US);
             fileName = formatter.format(new Date()) + "-" + Environment.Parameters.operatingEnvironment.toString().toLowerCase();
             file  = AppUtil.getInstance().getSettingsFile(fileName);
@@ -54,9 +54,13 @@ public class Logger {
         Scheduler.addTask("init", obj -> {
             if (!Environment.Parameters.competing) return;
 
-            Scheduler.addTask(1000, obj2 -> {
+            Scheduler.addTask(2000, obj2 -> {
                 saveLogs();
             });
+        });
+
+        Scheduler.addTask("exit", obj -> {
+            Logger.clear();
         });
     }
 
