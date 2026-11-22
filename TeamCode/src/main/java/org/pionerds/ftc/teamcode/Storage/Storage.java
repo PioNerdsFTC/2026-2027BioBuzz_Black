@@ -29,7 +29,7 @@ public class Storage {
             );
             servoPollen0 = Hardware.mapping.getContinuousServo(
                 "littleLaunchFeed0",
-                DcMotorSimple.Direction.FORWARD
+                DcMotorSimple.Direction.REVERSE
             );
             servoPollen1 = Hardware.mapping.getContinuousServo(
                 "littleLaunchFeed1",

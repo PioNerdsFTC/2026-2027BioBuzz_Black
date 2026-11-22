@@ -128,8 +128,8 @@ public class Coordination {
      */
     private static void updatePosition() {
         // The OTOS reports centimetres; convert them into the dashboard's 0-100 units.
-        double right = cmToUnits(Hardware.odometer.x - odomXOrigin);
-        double forward = cmToUnits(Hardware.odometer.y - odomYOrigin);
+        double forward = cmToUnits(Hardware.odometer.x - odomXOrigin);
+        double right = -cmToUnits(Hardware.odometer.y - odomYOrigin);
 
         double cos = Math.cos(rotationOffset);
         double sin = Math.sin(rotationOffset);
