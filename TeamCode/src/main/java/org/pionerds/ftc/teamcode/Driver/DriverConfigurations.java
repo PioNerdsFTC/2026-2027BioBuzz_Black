@@ -24,7 +24,8 @@ public class DriverConfigurations {
 
             driver1 = new Driver(Globals.depend("gamepad1"))
                 .addControl(DriverInput.X, DriverAction.TOGGLE_INTAKE, true)
-                .addControl(DriverInput.A, DriverAction.TRIGGER_INTAKE, true)
+                //.addControl(DriverInput.A, DriverAction.TRIGGER_INTAKE, true)
+
                 .addControl(
                     DriverInput.Y,
                     DriverAction.TRIGGER_EJECTION_INTAKE,

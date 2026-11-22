@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
@@ -90,11 +92,11 @@ public class Driver {
     }
 
     public double leftStickX() {
-        return Math.signum(gamepad.left_stick_x) * Math.pow(gamepad.left_stick_x,2);
+        return Math.signum(gamepad.left_stick_x) * (Environment.Capabilities.isOppositeDriveTele ? -1 : 1) * Math.pow(gamepad.left_stick_x,2);
     }
 
     public double leftStickY() {
-        return -1 * Math.signum(gamepad.left_stick_y) * Math.pow(gamepad.left_stick_y,2);
+        return -1 * Math.signum(gamepad.left_stick_y) * (Environment.Capabilities.isOppositeDriveTele ? -1 : 1) * Math.pow(gamepad.left_stick_y,2);
     }
 
     public double rightStickX() {

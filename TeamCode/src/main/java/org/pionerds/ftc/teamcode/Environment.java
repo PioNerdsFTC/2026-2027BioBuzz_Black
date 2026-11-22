@@ -10,6 +10,7 @@ public class Environment {
         public static boolean otos = true;
         public static boolean launchers = true;
         public static boolean aimbotEnabled = true;
+        public static boolean isOppositeDriveTele = true;
     }
 
     public static class Parameters {
