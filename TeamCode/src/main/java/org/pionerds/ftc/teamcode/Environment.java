@@ -7,7 +7,7 @@ public class Environment {
         public static boolean vision = false;
         public static boolean drivetrain = true;
         public static boolean useFieldCentricDriving = true;
-        public static boolean otos = true;
+        public static boolean otos = false;
         public static boolean launchers = true;
         public static boolean aimbotEnabled = true;
         public static boolean isOppositeDriveTele = true;
