@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.pionerds.ftc.teamcode.Driver.Driver;
 import org.pionerds.ftc.teamcode.Environment;
 import org.pionerds.ftc.teamcode.Hardware.Hardware;
+import org.pionerds.ftc.teamcode.Logging.Logger;
 import org.pionerds.ftc.teamcode.Orchestration.Globals;
 import org.pionerds.ftc.teamcode.Orchestration.Scheduler;
 
@@ -24,7 +25,9 @@ public class RobotCentricDrivetrain {
         AtomicReference<UUID> tick = new AtomicReference<>();
 
         Scheduler.addTask("init", obj -> {
+            Logger.log("ran init on robot centric.");
             if (!Environment.Capabilities.useFieldCentricDriving || (Environment.Parameters.emergencyAuto && Environment.Parameters.operatingEnvironment.equals(Environment.Parameters.OperatingEnvironment.AUTO))) {
+                Logger.log("running robot centric.");
 
                 driveMotors[0] = Hardware.mapping.getMotor("motor0");
                 driveMotors[1] = Hardware.mapping.getMotor("motor1");

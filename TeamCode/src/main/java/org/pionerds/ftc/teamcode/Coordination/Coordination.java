@@ -51,7 +51,7 @@ public class Coordination {
 
     /**
      * Odometer reading at the start pose. The OTOS reports centimetres in the robot's axes as they
-     * were when tracking was reset (x to the right, y forward), not field coordinates.
+     * were when tracking was reset (x forward, y to the left), not field coordinates.
      */
     private static double odomXOrigin = 0;
     private static double odomYOrigin = 0;
@@ -120,16 +120,17 @@ public class Coordination {
      * Converts the odometer's displacement into field coordinates.
      *
      * <p>The OTOS resets its tracking frame when the gyro resets, so its readings are in
-     * centimetres along the robot's axes at that moment: +x is the robot's right, +y is its
-     * front. The defining field heading of those axes is {@link #rotationOffset}, not the start
+     * centimetres along the robot's axes at that moment: +x is the robot's front, +y is its
+     * left. The defining field heading of those axes is {@link #rotationOffset}, not the start
      * heading: the robot may be rotated between init and the start pose. Rotating the
      * displacement by that heading gives a field displacement, which is added to the start
      * position.
      */
     private static void updatePosition() {
         // The OTOS reports centimetres; convert them into the dashboard's 0-100 units.
-        double right = cmToUnits(Hardware.odometer.x - odomXOrigin);
-        double forward = cmToUnits(Hardware.odometer.y - odomYOrigin);
+        // SparkFun OTOS axes: +x is the robot's front, +y is its LEFT (not x-right / y-forward).
+        double forward = cmToUnits(Hardware.odometer.x - odomXOrigin);
+        double right = -cmToUnits(Hardware.odometer.y - odomYOrigin);
 
         double cos = Math.cos(rotationOffset);
         double sin = Math.sin(rotationOffset);
